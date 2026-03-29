@@ -1,5 +1,5 @@
 <?php
-// âš ï¸ ARCHIVO LEGACY
+// ⚠️ ARCHIVO LEGACY
 // Este archivo ya no debe usarse directamente.
 // Se mantiene por compatibilidad.
 // Usar /visitas.php?action=crear|editar|eliminar
@@ -16,8 +16,10 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/db.php';
-require_once BASE_PATH . '/app/Modules/Visitas/EliminarVisita.php';
+require_once BASE_PATH . '/app/Modules/Visitas/eliminar_visita_handler.php';
 requierePermiso('perm_planificador');
+
+$ui_version = 'bs3';
 
 $conn = db();
 
@@ -54,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar']) && $_POS
     <meta charset="UTF-8">
     <title>Eliminar Visita</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
+    <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
     <style>
         body { padding-top: 80px; }
         .confirm-card { max-width: 720px; margin: 0 auto; }
@@ -68,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar']) && $_POS
             <h2 class="panel-title">Eliminar visita</h2>
         </div>
         <div class="panel-body">
-            <p>¿Seguro que quieres eliminar esta visita? Se eliminarán también los pedidos asociados.</p>
+            <p>�Seguro que quieres eliminar esta visita? Se eliminar�n tambi�n los pedidos asociados.</p>
             <form action="eliminar_visita.php" method="POST" class="confirm-actions">
                 <input type="hidden" name="id_visita" value="<?php echo htmlspecialchars((string)$idVisita, ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="confirmar" value="1">

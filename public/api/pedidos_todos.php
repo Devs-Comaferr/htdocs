@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap/init.php';
-require_once BASE_PATH . '/app/Modules/Pedidos/api/PedidosTodosController.php';
+require_once BASE_PATH . '/app/Modules/Pedidos/api/pedidos_todos_controller.php';
 
 $controller = new PedidosTodosController();
 $controller->handle();

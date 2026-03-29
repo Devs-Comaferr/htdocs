@@ -16,6 +16,8 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 
+$ui_version = 'bs3';
+
 $conn = db();
 
 $pageTitle = "Editar Evento No Laborable";
@@ -120,8 +122,7 @@ $descripcion_db = trim($row['descripcion']);
     <meta charset="UTF-8">
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap 3 CSS -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
+    <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
 </head>
 <body>
 <div class="container" style="max-width:500px; margin-top:30px;">

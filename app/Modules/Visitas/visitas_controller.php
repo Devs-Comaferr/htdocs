@@ -5,8 +5,8 @@ class VisitasController
     public function handle()
     {
         require_once BASE_PATH . '/bootstrap/auth.php';
-        require_once BASE_PATH . '/app/Modules/Visitas/RegistrarVisita.php';
-        require_once BASE_PATH . '/app/Modules/Visitas/EliminarVisita.php';
+        require_once BASE_PATH . '/app/Modules/Visitas/registrar_visita_handler.php';
+        require_once BASE_PATH . '/app/Modules/Visitas/eliminar_visita_handler.php';
 
         $action = (string)($_POST['action'] ?? $_GET['action'] ?? '');
         $params = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
@@ -18,7 +18,7 @@ class VisitasController
                 exit;
 
             case 'editar':
-                require_once BASE_PATH . '/app/Modules/Visitas/EditarVisita.php';
+                require_once BASE_PATH . '/app/Modules/Visitas/editar_visita_handler.php';
                 exit;
 
             case 'eliminar':

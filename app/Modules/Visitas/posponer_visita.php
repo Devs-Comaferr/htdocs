@@ -1,5 +1,5 @@
 <?php
-// âš ï¸ ARCHIVO LEGACY
+// ⚠️ ARCHIVO LEGACY
 // Este archivo ya no debe usarse directamente.
 // Se mantiene por compatibilidad.
 // Usar /visitas.php?action=crear|editar|eliminar

@@ -10,6 +10,9 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
+
 // Verificar si el usuario ha iniciado sesión
 
 
@@ -127,10 +130,8 @@ $numero_pedidos = count($pedidos);
 <head>
   <meta charset="UTF-8">
   <title>Pgina de Ejemplo</title>
-  <!-- Bootstrap CSS -->
-  <link href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
-  <!-- FontAwesome CSS -->
-  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/fontawesome/css/all.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
   <style>
     body { 
       font-family: Arial, sans-serif; 
@@ -285,9 +286,6 @@ url += "&pedido=" + encodeURIComponent(pedido);
     </div>
   <?php endif; ?>
   
-  <!-- Bootstrap JS Bundle -->
-  <script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
   <script>
     // Si existen pedidos pendientes, se muestra el modal al cargar la pgina
     <?php if (!empty($pedidos)): ?>

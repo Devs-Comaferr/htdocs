@@ -11,7 +11,7 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 // zonas.php
-require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
 require_once BASE_PATH . '/app/Support/functions.php';
 $pageTitle = 'Gestión de Zonas';
 include BASE_PATH . '/resources/views/layouts/header.php';
@@ -26,10 +26,6 @@ $zonas = obtenerZonasVisitaService();
     <meta charset="UTF-8">
     <title>Gestión de Zonas</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap 3.3.7 -->
-        <!-- Font Awesome para los conos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
     <style>
         /* Estilos mejorados para dispositivos tctiles */
         body {

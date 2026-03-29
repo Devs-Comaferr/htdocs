@@ -3,6 +3,8 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/db.php';
 
+$ui_version = 'bs3';
+
 $conn = db();
 
 if (!isset($_GET['fecha']) || empty($_GET['fecha'])) {
@@ -38,7 +40,7 @@ if (!$result) {
     <meta charset="UTF-8">
     <title>Visitas del Dia <?php echo htmlspecialchars($fecha); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
+    <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
     <style>
         body {
             padding-top: 20px;

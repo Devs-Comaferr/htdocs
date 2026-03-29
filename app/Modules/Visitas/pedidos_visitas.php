@@ -12,13 +12,13 @@ $ui_version = 'bs5';
 $ui_requires_jquery = false;
 
 
-// Obtener el cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³digo del vendedor
+// Obtener el código del vendedor
 $codigo_vendedor = 0;
 if (isset($_SESSION['codigo'])) {
   $codigo_vendedor = intval($_SESSION['codigo']);
 }
 
-// Definir la fecha mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nima
+// Definir la fecha mínima
 $fecha_minima = '2025-01-01';
 
 // Construir la consulta modificada para incluir tiempo_promedio_visita
@@ -73,8 +73,8 @@ while ($row = odbc_fetch_array($res_pedidos)) {
     $tiempo_promedio_min = floatval($row['tiempo_promedio_visita']) * 60;
   }
 
-  // AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±adir al array de pedidos con tiempo_promedio_min
-  // Dado que PHP 5.2.3 no soporta array_merge con arrays asociativos de la misma manera, realizamos una combinaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n manual
+  // Añadir al array de pedidos con tiempo_promedio_min
+  // Dado que PHP 5.2.3 no soporta array_merge con arrays asociativos de la misma manera, realizamos una combinación manual
   $row['tiempo_promedio_min'] = $tiempo_promedio_min;
   $pedidos[] = $row;
   $cod_ventas[] = $row['cod_venta'];
@@ -82,7 +82,7 @@ while ($row = odbc_fetch_array($res_pedidos)) {
 
 odbc_free_result($res_pedidos);
 
-// Si hay pedidos, obtener el conteo de lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­neas
+// Si hay pedidos, obtener el conteo de líneas
 $numero_lineas_map = array();
 
 if (!empty($cod_ventas)) {
@@ -107,7 +107,7 @@ if (!empty($cod_ventas)) {
   // Ejecutar la segunda consulta
   $res_lineas = odbc_exec($conn, $sql_lineas);
   if (!$res_lineas) {
-    error_log("Error al ejecutar la consulta de lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­neas: " . odbc_errormsg($conn));
+    error_log("Error al ejecutar la consulta de líneas: " . odbc_errormsg($conn));
     echo 'Error interno';
     return;
   }
@@ -121,7 +121,7 @@ if (!empty($cod_ventas)) {
 }
 
 
-// Funciones para formatear fecha/hora al estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ndar HTML (YYYY-MM-DD y HH:MM)
+// Funciones para formatear fecha/hora al estándar HTML (YYYY-MM-DD y HH:MM)
 function formatoFecha($fechaSql)
 {
   return date('Y-m-d', strtotime($fechaSql));
@@ -139,8 +139,6 @@ function formatoHora($horaSql)
   <title><?php echo htmlspecialchars($pageTitle); ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
-    <!-- Font Awesome 4.7 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
 
   <style>
     /* Tu CSS aqu */
@@ -285,7 +283,7 @@ function formatoHora($horaSql)
 <body>
   <div class="container">
 
-    <!-- Mostrar mensajes de ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©xito o error -->
+    <!-- Mostrar mensajes de éxito o error -->
     <?php
     $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
     if ($msg == 'web_ok') {
@@ -293,19 +291,19 @@ function formatoHora($horaSql)
     } elseif ($msg == 'visita_ok') {
       echo '<div class="alert alert-success">Visita registrada exitosamente.</div>';
     } elseif ($msg == 'tel_ok') {
-      echo '<div class="alert alert-success">TelÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©fono registrado exitosamente.</div>';
+      echo '<div class="alert alert-success">Teléfono registrado exitosamente.</div>';
     } elseif ($msg == 'whatsapp_ok') {
       echo '<div class="alert alert-success">WhatsApp registrado exitosamente.</div>';
     } elseif ($msg == 'email_ok') {
       echo '<div class="alert alert-success">Email registrado exitosamente.</div>';
     } elseif ($msg == 'error') {
-      echo '<div class="alert alert-danger">OcurriÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³ un error al registrar.</div>';
+      echo '<div class="alert alert-danger">Ocurrió un error al registrar.</div>';
     } elseif ($msg == 'error_ampliacion') {
-      echo '<div class="alert alert-danger">No existe una visita previa en los ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºltimos 5 dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as para realizar una ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n.</div>';
+      echo '<div class="alert alert-danger">No existe una visita previa en los últimos 5 días para realizar una ampliación.</div>';
     } elseif ($msg == 'error_formato_fecha') {
-      echo '<div class="alert alert-danger">Formato de fecha invÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido.</div>';
+      echo '<div class="alert alert-danger">Formato de fecha inválido.</div>';
     } elseif ($msg == 'error_formato_hora') {
-      echo '<div class="alert alert-danger">Formato de hora invÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido.</div>';
+      echo '<div class="alert alert-danger">Formato de hora inválido.</div>';
     } elseif ($msg == 'error_min_tiempo') {
       echo '<div class="alert alert-danger">La diferencia entre la hora de inicio y la hora de fin debe ser de al menos 15 minutos y no exceder las 5 horas.</div>';
     }
@@ -327,7 +325,7 @@ function formatoHora($horaSql)
             $fechaInput = formatoFecha($pedido['fecha_venta']);
             $horaVenta  = formatoHora($pedido['hora_venta']);
 
-            // Obtener el nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºmero de lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­neas desde el mapa, o 0 si no existe
+            // Obtener el número de líneas desde el mapa, o 0 si no existe
             $numero_lineas = isset($numero_lineas_map[$pedido['cod_venta']]) ? $numero_lineas_map[$pedido['cod_venta']] : 0;
           ?>
             <div class="pedido-item"
@@ -364,7 +362,7 @@ function formatoHora($horaSql)
                    <?php echo number_format($pedido['importe'], 2, ',', '.') . " "; ?>
                 </div>
                 <div>
-                   <?php echo intval($numero_lineas) . " lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­neas"; ?>
+                   <?php echo intval($numero_lineas) . " líneas"; ?>
                 </div>
               </div>
               <?php if (!empty($pedido['observacion_interna'])) { ?>
@@ -383,7 +381,7 @@ function formatoHora($horaSql)
 
               <div class="pedido-buttons">
                 <?php if (!empty($pedido['cod_pedido_web'])) { ?>
-                  <!-- BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Web -->
+                  <!-- Botón Web -->
                   <button class="btn btn-circle btn-web"
                     data-bs-toggle="modal"
                     data-bs-target="#webModal"
@@ -395,7 +393,7 @@ function formatoHora($horaSql)
                     <i class="fa fa-globe"></i>
                   </button>
                 <?php } else { ?>
-                  <!-- BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Visita -->
+                  <!-- Botón Visita -->
                   <button class="btn btn-circle btn-visita"
                     data-bs-toggle="modal"
                     data-bs-target="#visitaModal"
@@ -407,7 +405,7 @@ function formatoHora($horaSql)
                     data-tiempo-promedio="<?php echo intval($pedido['tiempo_promedio_min']); ?>">
                     <i class="fa fa-calendar-check-o"></i>
                   </button>
-                  <!-- BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n TelÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©fono -->
+                  <!-- Botón Teléfono -->
                   <button class="btn btn-circle btn-telefono"
                     data-bs-toggle="modal"
                     data-bs-target="#telefonoModal"
@@ -418,7 +416,7 @@ function formatoHora($horaSql)
                     data-hora_visita="<?php echo $horaVenta; ?>">
                     <i class="fa fa-phone"></i>
                   </button>
-                  <!-- BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n WhatsApp -->
+                  <!-- Botón WhatsApp -->
                   <button class="btn btn-circle btn-whatsapp"
                     data-bs-toggle="modal"
                     data-bs-target="#whatsappModal"
@@ -429,7 +427,7 @@ function formatoHora($horaSql)
                     data-hora_visita="<?php echo $horaVenta; ?>">
                     <i class="fa fa-whatsapp"></i>
                   </button>
-                  <!-- BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Email -->
+                  <!-- Botón Email -->
                   <button class="btn btn-circle btn-email"
                     data-bs-toggle="modal"
                     data-bs-target="#emailModal"
@@ -453,7 +451,7 @@ function formatoHora($horaSql)
     </div>
   </div>
 
-  <!-- Modales aquÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ -->
+  <!-- Modales aquí -->
 
   <div class="modal fade" id="pedidoDetalleModal" tabindex="-1" role="dialog" aria-labelledby="pedidoDetalleModalLabel">
     <div class="modal-dialog modal-lg" role="document">
@@ -497,7 +495,7 @@ function formatoHora($horaSql)
               <input type="time" class="form-control" name="hora_inicio_visita" id="v_hora_inicio_visita" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Hora de FinalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de la Visita</label>
+              <label class="form-label">Hora de Finalización de la Visita</label>
               <input type="time" class="form-control" name="hora_fin_visita" id="v_hora_fin_visita" required>
             </div>
             <div class="mb-3">
@@ -505,16 +503,16 @@ function formatoHora($horaSql)
               <textarea class="form-control" name="observaciones" rows="3"></textarea>
             </div>
 
-            <!-- Checkbox ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n (deshabilitado por defecto, habilitado por AJAX) -->
+            <!-- Checkbox ampliación (deshabilitado por defecto, habilitado por AJAX) -->
             <div class="form-check">
               <label class="form-label">
                 <input type="checkbox" name="ampliacion" id="v_ampliacion" value="1">
-                Es ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de una visita previa en 5 dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as?
+                Es ampliación de una visita previa en 5 días?
               </label>
             </div>
           </div>
           <div class="modal-footer">
-            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n -->
+            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliación -->
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             <button type="submit" class="btn btn-primary">Registrar Visita</button>
           </div>
@@ -523,14 +521,14 @@ function formatoHora($horaSql)
     </div>
   </div>
 
-  <!-- Modal TelÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©fono -->
+  <!-- Modal Teléfono -->
   <div class="modal fade" id="telefonoModal" tabindex="-1" role="dialog" aria-labelledby="telefonoModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <form action="<?= BASE_URL ?>/registrar_telefono.php" method="POST">
           <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            <h5 class="modal-title" id="telefonoModalLabel">Registrar Llamada TelefÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³nica</h5>
+            <h5 class="modal-title" id="telefonoModalLabel">Registrar Llamada Telefónica</h5>
           </div>
           <div class="modal-body">
             <input type="hidden" name="cod_venta" id="t_cod_venta">
@@ -548,7 +546,7 @@ function formatoHora($horaSql)
               <input type="time" class="form-control" name="hora_inicio_visita" id="t_hora_inicio_visita" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Hora de FinalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de la Llamada</label>
+              <label class="form-label">Hora de Finalización de la Llamada</label>
               <input type="time" class="form-control" name="hora_fin_visita" id="t_hora_fin_visita" required>
             </div>
             <div class="mb-3">
@@ -556,18 +554,18 @@ function formatoHora($horaSql)
               <textarea class="form-control" name="observaciones" rows="3"></textarea>
             </div>
 
-            <!-- Checkbox ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n (deshabilitado por defecto, habilitado por AJAX) -->
+            <!-- Checkbox ampliación (deshabilitado por defecto, habilitado por AJAX) -->
             <div class="form-check">
               <label class="form-label">
                 <input type="checkbox" name="ampliacion" id="t_ampliacion" value="1">
-                Es ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de una visita previa en 5 dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as?
+                Es ampliación de una visita previa en 5 días?
               </label>
             </div>
           </div>
           <div class="modal-footer">
-            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n -->
+            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliación -->
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            <button type="submit" class="btn btn-warning">Registrar TelÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©fono</button>
+            <button type="submit" class="btn btn-warning">Registrar Teléfono</button>
           </div>
         </form>
       </div>
@@ -599,7 +597,7 @@ function formatoHora($horaSql)
               <input type="time" class="form-control" name="hora_inicio_visita" id="w_hora_inicio_visita" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Hora de FinalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del Pedido WhatsApp</label>
+              <label class="form-label">Hora de Finalización del Pedido WhatsApp</label>
               <input type="time" class="form-control" name="hora_fin_visita" id="w_hora_fin_visita" required>
             </div>
             <div class="mb-3">
@@ -607,16 +605,16 @@ function formatoHora($horaSql)
               <textarea class="form-control" name="observaciones" rows="3"></textarea>
             </div>
 
-            <!-- Checkbox ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n (deshabilitado por defecto, habilitado por AJAX) -->
+            <!-- Checkbox ampliación (deshabilitado por defecto, habilitado por AJAX) -->
             <div class="form-check">
               <label class="form-label">
                 <input type="checkbox" name="ampliacion" id="w_ampliacion" value="1">
-                Es ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de una visita previa en 5 dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as?
+                Es ampliación de una visita previa en 5 días?
               </label>
             </div>
           </div>
           <div class="modal-footer">
-            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n -->
+            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliación -->
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             <button type="submit" class="btn btn-success">Registrar WhatsApp</button>
           </div>
@@ -650,7 +648,7 @@ function formatoHora($horaSql)
               <input type="time" class="form-control" name="hora_inicio_visita" id="e_hora_inicio_visita" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Hora de FinalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del Pedido Email</label>
+              <label class="form-label">Hora de Finalización del Pedido Email</label>
               <input type="time" class="form-control" name="hora_fin_visita" id="e_hora_fin_visita" required>
             </div>
             <div class="mb-3">
@@ -658,16 +656,16 @@ function formatoHora($horaSql)
               <textarea class="form-control" name="observaciones" rows="3"></textarea>
             </div>
 
-            <!-- Checkbox ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n (deshabilitado por defecto, habilitado por AJAX) -->
+            <!-- Checkbox ampliación (deshabilitado por defecto, habilitado por AJAX) -->
             <div class="form-check">
               <label class="form-label">
                 <input type="checkbox" name="ampliacion" id="e_ampliacion" value="1">
-                Es ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de una visita previa en 5 dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as?
+                Es ampliación de una visita previa en 5 días?
               </label>
             </div>
           </div>
           <div class="modal-footer">
-            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n -->
+            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliación -->
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             <button type="submit" class="btn btn-info">Registrar Email</button>
           </div>
@@ -701,7 +699,7 @@ function formatoHora($horaSql)
               <input type="time" class="form-control" name="hora_inicio_visita" id="w_hora_inicio_visita_web" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Hora de FinalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del Pedido Web</label>
+              <label class="form-label">Hora de Finalización del Pedido Web</label>
               <input type="time" class="form-control" name="hora_fin_visita" id="w_hora_fin_visita_web" required>
             </div>
             <div class="mb-3">
@@ -710,7 +708,7 @@ function formatoHora($horaSql)
             </div>
           </div>
           <div class="modal-footer">
-            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n -->
+            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliación -->
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             <button type="submit" class="btn btn-primary">Registrar Web</button>
           </div>
@@ -898,7 +896,7 @@ function formatoHora($horaSql)
               if (previousId) {
                 previousId.value = resp.substring(4);
               }
-              appendAmpliacionMensaje(modal, 'alert-success info-message', 'Hay visitas previas en los ÃƒÆ’Ã‚Âºltimos 5 dÃƒÆ’Ã‚Â­as.');
+              appendAmpliacionMensaje(modal, 'alert-success info-message', 'Hay visitas previas en los ?ltimos 5 d?as.');
               return;
             }
 
@@ -910,7 +908,7 @@ function formatoHora($horaSql)
               if (previousId) {
                 previousId.value = '';
               }
-              appendAmpliacionMensaje(modal, 'alert-info info-message', 'No hay visitas previas en los ÃƒÆ’Ã‚Âºltimos 5 dÃƒÆ’Ã‚Â­as.');
+              appendAmpliacionMensaje(modal, 'alert-info info-message', 'No hay visitas previas en los ?ltimos 5 d?as.');
               return;
             }
 

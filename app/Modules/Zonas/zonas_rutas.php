@@ -11,7 +11,7 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
-require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
 require_once BASE_PATH . '/app/Support/functions.php';
 $pageTitle = "Gestionar Rutas de la Zona";
 include BASE_PATH . '/resources/views/layouts/header.php';

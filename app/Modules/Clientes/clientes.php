@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
-// Verificar sesiÃƒÂ³n
+// Verificar sesión
 
 
 // Encabezado UTF-8
@@ -14,8 +14,8 @@ $pageTitle = "Clientes";
 $ui_version = 'bs5';
 $ui_requires_jquery = false;
 
-// Incluir conexiÃƒÂ³n y funciones
-require_once BASE_PATH . '/app/Support/functions.php'; // AquÃƒÂ­ debe existir toUTF8($data)
+// Incluir conexión y funciones
+require_once BASE_PATH . '/app/Support/functions.php'; // Aquí debe existir toUTF8($data)
 
 require_once BASE_PATH . '/app/Support/db.php';
 
@@ -34,9 +34,9 @@ if (
     $codigo_vendedor = null;
 }
 
-// AquÃƒÂ­ definimos una funciÃƒÂ³n para convertir el tÃƒÂ©rmino buscado a CP1252:
+// Aquí definimos una función para convertir el término buscado a CP1252:
 function toCP1252(string $data): string {
-    // Convierte desde UTF-8 (lo que envÃƒÂ­a el navegador) a Windows-1252
+    // Convierte desde UTF-8 (lo que envía el navegador) a Windows-1252
     return mb_convert_encoding($data, 'Windows-1252', 'UTF-8');
 }
 
@@ -332,7 +332,7 @@ if (is_null($codigo_vendedor)) {
 }
 define('FILTRO_SIN_VENDEDOR', '__sin_vendedor__');
 
-// Convertir a CP1252 las cadenas que podrÃƒÂ­as comparar con LIKE
+// Convertir a CP1252 las cadenas que podrías comparar con LIKE
 $cod_cliente      = toCP1252($cod_cliente_utf8);
 $nombre_comercial = toCP1252($nombre_comercial_utf8);
 $provincia        = toCP1252($provincia_utf8);
@@ -481,7 +481,7 @@ if (is_null($codigo_vendedor)) {
    3) Consulta principal (Clientes) en CP1252
    ============================================================================= */
 
-// CondiciÃƒÂ³n + subfiltro
+// Condición + subfiltro
 $escapeSqlValue = static function (string $value): string {
     return "'" . str_replace("'", "''", $value) . "'";
 };
@@ -499,7 +499,7 @@ if (is_null($codigo_vendedor) && $filtro_vendedor !== '') {
     }
 }
 
-// Filtro por comisionista (si es AgustÃƒÂ­n Castro con cÃƒÂ³digo ''30'')
+// Filtro por comisionista (si es Agustín Castro con código ''30'')
 if (!is_null($codigo_vendedor) && $codigo_vendedor === '30') {
     $joinFiltroComisionista = ' AND vent.cod_comisionista = ' . (int)$codigo_vendedor;
 }
@@ -583,7 +583,7 @@ if (!$resCli) {
     exit('ODBC ERROR: ' . odbc_errormsg($conn));
 }
 
-// Recoger filas (aÃƒÂºn en CP1252)
+// Recoger filas (aún en CP1252)
 $clientes = [];
 while ($resCli && ($fila = odbc_fetch_array($resCli))) {
     $clientes[] = $fila;  // Lo convertiremos luego al mostrar
@@ -591,7 +591,7 @@ while ($resCli && ($fila = odbc_fetch_array($resCli))) {
 $numRegistros = count($clientes);
 
 /* =============================================================================
-   4) PaginaciÃƒÂ³n
+   4) Paginación
    ============================================================================= */
 $limit = 100;
 $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1;
@@ -664,7 +664,7 @@ if ($mostrarUltimaVisita && !empty($clientesPaginados)) {
             }
         }
 
-        // Secciones existentes por cliente (la secciÃƒÂ³n 0 tambiÃƒÂ©n es vÃƒÂ¡lida).
+        // Secciones existentes por cliente (la sección 0 también es válida).
         $sqlSeccionesCliente = "
             SELECT
                 sc.cod_cliente,
@@ -743,7 +743,7 @@ if ($mostrarUltimaVisita && !empty($clientesPaginados)) {
             }
         }
 
-        // Frecuencia de visita por cliente/secciÃƒÂ³n desde asignaciÃƒÂ³n de zonas.
+        // Frecuencia de visita por cliente/sección desde asignación de zonas.
         $sqlFrecuencias = "
             SELECT
                 azc.cod_cliente,
@@ -838,7 +838,7 @@ if ($mostrarUltimaVisita && !empty($clientesPaginados)) {
             }
         }
 
-        // Si un cliente no tiene secciones en tabla, tratarlo como secciÃƒÂ³n 0.
+        // Si un cliente no tiene secciones en tabla, tratarlo como sección 0.
         foreach ($codigosCliente as $codCliNum) {
             $codCliKey = (string)$codCliNum;
             if (!isset($seccionesPorCliente[$codCliKey]) || empty($seccionesPorCliente[$codCliKey])) {
@@ -869,7 +869,7 @@ $query_string = http_build_query($params);
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <!-- Para mÃƒÂ³viles y tablets -->
+  <!-- Para móviles y tablets -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title><?php echo htmlspecialchars($pageTitle); ?></title>
@@ -910,10 +910,10 @@ $query_string = http_build_query($params);
         margin-top: 60px;
       }
     }
-    /* En mÃƒÂ³vil, si quieres header NO fijo, quita estas lÃƒÂ­neas
+    /* En móvil, si quieres header NO fijo, quita estas líneas
        o cambia la media query. 
        Actual: Header es NO fijo, se deja normal. 
-       Si lo quieres fijo en mÃƒÂ³vil, hazlo y deja margin-top. */
+       Si lo quieres fijo en móvil, hazlo y deja margin-top. */
 
     /* ============= Formulario de filtros ============= */
     .filter-form {
@@ -960,7 +960,7 @@ $query_string = http_build_query($params);
       background-color: #cc0000;
     }
 
-    /* ============= Tabla y paginaciÃƒÂ³n ============= */
+    /* ============= Tabla y paginación ============= */
     .table-container {
       width: 100%;
       overflow-x: auto;
@@ -1062,7 +1062,7 @@ $query_string = http_build_query($params);
       table {
         font-size: 15px;
       }
-      /* Si quieres header fijo tambiÃƒÂ©n en mÃƒÂ³vil, pon position:fixed y margin-top */
+      /* Si quieres header fijo también en móvil, pon position:fixed y margin-top */
       /* header, .header { ... } .page-content { margin-top: ... } */
     }
   </style>
@@ -1216,7 +1216,7 @@ $query_string = http_build_query($params);
                   $claveSeccion = normalizarClaveSeccionVisita($codSecListado);
                   $nombreSecLabel = trim((string)($nombresSeccionCliente[$claveSeccion] ?? ''));
                   if ($nombreSecLabel === '') {
-                      $nombreSecLabel = ($claveSeccion === 'NULL') ? 'Sin secciÃƒÂ³n' : ('SecciÃƒÂ³n ' . (string)$claveSeccion);
+                      $nombreSecLabel = ($claveSeccion === 'NULL') ? 'Sin sección' : ('Sección ' . (string)$claveSeccion);
                   }
                   $seccionesClienteVisita[$claveSeccion] = $nombreSecLabel;
               }
@@ -1282,12 +1282,12 @@ $query_string = http_build_query($params);
                    . htmlspecialchars(toUTF8($provCP1252))
                    . '</a></td>';
 
-              // PoblaciÃƒÂ³n
+              // Población
               echo '<td><a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '">'
                    . htmlspecialchars(toUTF8($pobCP1252))
                    . '</a></td>';
 
-              // ÃƒÅ¡ltima visita (una por secciÃƒÂ³n, incluyendo secciÃƒÂ³n 0)
+              // Última visita (una por sección, incluyendo sección 0)
               if ($mostrarUltimaVisita) {
                   echo '<td>';
                   if (count($seccionesClienteVisita) > 1) {
@@ -1302,7 +1302,7 @@ $query_string = http_build_query($params);
                           return (int)$a <=> (int)$b;
                       });
 
-                      // Si ninguna secciÃƒÂ³n tiene visita, no desglosar por secciÃƒÂ³n.
+                      // Si ninguna sección tiene visita, no desglosar por sección.
                       $hayAlgunaVisita = false;
                       foreach ($clavesSeccion as $codSecListadoTmp) {
                           if (isset($visitasPorSeccion[$codSecListadoTmp])) {
@@ -1328,10 +1328,10 @@ $query_string = http_build_query($params);
                               }
                               $nombreSecLabel = $seccionesClienteVisita[$codSecListado] ?? '';
                               if ($nombreSecLabel === '') {
-                                  $nombreSecLabel = ($codSecListado === 0) ? 'Sin secciÃƒÂ³n' : ('SecciÃƒÂ³n ' . (string)$codSecListado);
+                                  $nombreSecLabel = ($codSecListado === 0) ? 'Sin sección' : ('Sección ' . (string)$codSecListado);
                               }
                               if ($codSecListado === 'NULL') {
-                                  $nombreSecLabel = 'Sin secciÃƒÂ³n';
+                                  $nombreSecLabel = 'Sin sección';
                               }
                               $labelSec = $nombreSecLabel . ': ' . $fechaSec;
                               echo '<a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '" style="' . $estiloSec . '">'
@@ -1366,7 +1366,7 @@ $query_string = http_build_query($params);
                    . htmlspecialchars($ultimaFecha)
                    . '</a></td>';
 
-              // Columna aÃƒÂ±o actual (triÃƒÂ¡ngulo vs. expected)
+              // Columna año actual (triángulo vs. expected)
               echo '<td class="year-column">';
               $start = strtotime($currentYear.'-01-01');
               $end   = strtotime($currentYear.'-12-31');
@@ -1389,7 +1389,7 @@ $query_string = http_build_query($params);
               echo iconoMedalla($posAct); 
               echo '</td>';
 
-              // AÃƒÂ±o pasado vs hace 2
+              // Año pasado vs hace 2
               echo '<td class="year-column">';
               $triangleY1 = '';
               if ($importeY2 > 0) {
@@ -1405,7 +1405,7 @@ $query_string = http_build_query($params);
               echo iconoMedalla($posY1);
               echo '</td>';
 
-              // Hace 2 aÃƒÂ±os
+              // Hace 2 años
               echo '<td class="year-column">';
               echo number_format($importeY2, 2, ',', '.') . '  ';
               echo iconoMedalla($posY2);

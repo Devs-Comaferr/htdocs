@@ -16,8 +16,13 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
 // procesar_crear_zona.php
-require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
 header('Content-Type: text/html; charset=UTF-8');
+
+$ui_version = 'bs3';
+ob_start();
+include BASE_PATH . '/resources/views/layouts/header.php';
+$globalHeaderHead = ob_get_clean();
 
 // Verificar que se ha enviado el formulario
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -34,8 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <title>Error al Crear Zona</title>
             <meta charset='UTF-8'>
             <meta name='viewport' content='width=device-width, initial-scale=1'>
-            <!-- Bootstrap 3.3.7 -->
-            <link rel='stylesheet' href='<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css'>
+            {$globalHeaderHead}
             <style>
                 body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
                 .message { display: inline-block; padding: 20px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 5px; }
@@ -59,8 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <title>Zona Creada</title>
             <meta charset='UTF-8'>
             <meta name='viewport' content='width=device-width, initial-scale=1'>
-            <!-- Bootstrap 3.3.7 -->
-            <link rel='stylesheet' href='<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css'>
+            {$globalHeaderHead}
             <style>
                 body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
                 .message { display: inline-block; padding: 20px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 5px; }
@@ -80,8 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <title>Error al Crear Zona</title>
             <meta charset='UTF-8'>
             <meta name='viewport' content='width=device-width, initial-scale=1'>
-            <!-- Bootstrap 3.3.7 -->
-            <link rel='stylesheet' href='<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css'>
+            {$globalHeaderHead}
             <style>
                 body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
                 .message { display: inline-block; padding: 20px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 5px; }
@@ -102,8 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <title>Método Inválido</title>
         <meta charset='UTF-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
-        <!-- Bootstrap 3.3.7 -->
-        <link rel='stylesheet' href='<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css'>
+        {$globalHeaderHead}
         <style>
             body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
             .message { display: inline-block; padding: 20px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 5px; }

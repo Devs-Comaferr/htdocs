@@ -16,7 +16,7 @@ if (!defined('MOBILE_APPBAR_RENDERED')) {
     define('MOBILE_APPBAR_RENDERED', true);
 }
 
-// Asume que la sesiÃƒÆ’Ã‚Â³n ya estÃƒÆ’Ã‚Â¡ iniciada y que $pageTitle existe (y si es index, $fechaConsulta).
+// Asume que la sesión ya está iniciada y que $pageTitle existe (y si es index, $fechaConsulta).
 $isIndex = (basename($_SERVER['PHP_SELF']) === 'index.php');
 
 $conn = $conn ?? (function_exists('db') ? db() : null);

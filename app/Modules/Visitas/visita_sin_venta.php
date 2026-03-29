@@ -17,6 +17,8 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 // visita_sin_venta.php
 
+$ui_version = 'bs3';
+
 
 $conn = db();
 
@@ -84,10 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <title>Visita sin Venta</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap 3.3.7 -->
-  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
-  <!-- Font Awesome 4.7 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+  <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
 </head>
 <body>
 <div class="container">
@@ -145,8 +144,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <!-- jQuery + Bootstrap JS -->
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 
 <!-- Scripts para Autocompletado y Validación -->
 <script>

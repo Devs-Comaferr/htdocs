@@ -12,6 +12,8 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 require_once BASE_PATH . '/app/Support/functions.php';
 
+$ui_version = 'bs3';
+
 $conn = db();
 
 
@@ -49,8 +51,7 @@ $factor = 480 / 720;
     <meta charset="UTF-8">
     <title>Vista de Da - <?php echo date('d/m/Y', strtotime($fecha)); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS compatible con PHP 5.2.3 -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
+    <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
     <style>
       body { 
           background-color: #f4f4f4; 
@@ -134,7 +135,6 @@ $factor = 480 / 720;
           display: inline-block;
       }
     </style>
-    <script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
     <script>
       $(document).ready(function(){
           // Enviar el formulario automticamente al cambiar la fecha

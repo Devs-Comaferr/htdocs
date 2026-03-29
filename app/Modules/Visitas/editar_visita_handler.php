@@ -17,6 +17,8 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 require_once BASE_PATH . '/app/Support/functions.php';
 
+$ui_version = 'bs3';
+
 $conn = db();
 
 function editarVisitaModernPrepareExecute($conn, string $sql, array $params = [])
@@ -250,12 +252,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <title>Editar Visita</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
+    <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
     <style>
       body { padding-top: 80px; }
       .boton-derecha { float: right; margin-left: 10px; }
     </style>
-    <script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
     <script>
     $(document).ready(function(){
         $("#hora_inicio_visita").change(function(){

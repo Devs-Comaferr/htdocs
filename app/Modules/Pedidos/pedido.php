@@ -482,7 +482,7 @@ if ($numero_pedido) {
     <?php if (!empty($lineas) && isset($lineas[0]['Historico']) && $lineas[0]['Historico'] === 'N'): ?>
       <div class="button-group">
       <?php if (!$existeHistorico): ?>
-  <a href="pasarHistorico.php?pedido=<?php echo urlencode($numero_pedido); ?>&cod_cliente=<?php echo urlencode($cod_cliente); ?><?php echo isset($cod_seccion) ? '&cod_seccion=' . urlencode($cod_seccion) : ''; ?>" class="btn btn-pasar" aria-label="Pasar a Histórico">
+  <a href="pasar_historico.php?pedido=<?php echo urlencode($numero_pedido); ?>&cod_cliente=<?php echo urlencode($cod_cliente); ?><?php echo isset($cod_seccion) ? '&cod_seccion=' . urlencode($cod_seccion) : ''; ?>" class="btn btn-pasar" aria-label="Pasar a Histórico">
     <i class="fa-solid fa-xmark" style="font-size: 40px;"></i>
     <span>Histórico</span>
   </a>

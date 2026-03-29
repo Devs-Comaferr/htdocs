@@ -4,5 +4,5 @@ if (!defined('BASE_PATH')) {
     exit;
 }
 
-require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
 
