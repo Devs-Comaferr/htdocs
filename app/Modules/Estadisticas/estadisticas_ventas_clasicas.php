@@ -11,7 +11,7 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_estadisticas');
 
-// Guardar "showComisiones" en sesiÃƒÂ³n si se envÃƒÂ­a por GET
+// Guardar "showComisiones" en sesión si se envía por GET
 if (isset($_GET['showComisiones'])) {
     $_SESSION['showComisiones'] = $_GET['showComisiones'];
 }
@@ -19,7 +19,7 @@ $showComisiones = isset($_SESSION['showComisiones']) ? $_SESSION['showComisiones
 
 
 
-// Abrir la conexiÃƒÂ³n ODBC (se incluye solo una vez para todo el script)
+// Abrir la conexión ODBC (se incluye solo una vez para todo el script)
 
 $pageTitle = "Estadisticas de " . $_SESSION['nombre'];
 require_once BASE_PATH . '/app/Support/functions.php';
@@ -55,7 +55,7 @@ function convertRowToUtf8($row) {
 }
 
 /**
- * Calcula el nÃƒÂºmero de meses (con fracciÃƒÂ³n) entre dos fechas (sin usar DateTime::diff()).
+ * Calcula el número de meses (con fracción) entre dos fechas (sin usar DateTime::diff()).
  */
 if (!function_exists('calcularMeses')) {
     function calcularMeses($start_date, $end_date) {
@@ -103,7 +103,7 @@ if (!function_exists('calcularComision')) {
     }
 }
 
-// ParÃƒÂ¡metros de fecha (por defecto, inicio del aÃƒÂ±o en curso)
+// Parámetros de fecha (por defecto, inicio del año en curso)
 $defaultStart = date('Y') . "-01-01";
 $start_date_iso = isset($_GET['start_date']) ? $_GET['start_date'] : $defaultStart;
 $end_date_iso   = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
@@ -111,7 +111,7 @@ $end_date_iso   = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
 $start_date_full = $start_date_iso . " 00:00:00";
 $end_date_full   = $end_date_iso . " 23:59:59";
 
-// Seleccionar comisionista segÃƒÂºn la sesiÃƒÂ³n o el parÃƒÂ¡metro GET
+// Seleccionar comisionista según la sesión o el parámetro GET
 if (isset($_SESSION['codigo'])) {
     $selected_comercial = $_SESSION['codigo'];
 } else {
@@ -498,6 +498,6 @@ if (isset($_SESSION['codigo'])) {
 </body>
 </html>
 <?php
-// Cerrar la conexiÃƒÂ³n al final del script
+// Cerrar la conexión al final del script
 ?>
 

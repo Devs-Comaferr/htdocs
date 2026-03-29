@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require_once BASE_PATH . '/app/Support/header.php';
 ?>
-<!-- Font Awesome local (instalado vÃ­a Composer/npm-asset) -->
+<!-- Font Awesome local (instalado vía Composer/npm-asset) -->
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/fontawesome/css/all.min.css">
 <link rel="icon" href="<?= BASE_URL ?>/imagenes/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= BASE_URL ?>/imagenes/favicon-32.png">
@@ -114,7 +114,7 @@ require_once BASE_PATH . '/app/Support/header.php';
     display: none;
   }
 
-  /* MÃ³vil: en index-header, ocultar el pageTitle */
+  /* Móvil: en index-header, ocultar el pageTitle */
   @media (max-width: 1024px) {
     html, body {
       overflow-x: hidden;
@@ -248,11 +248,11 @@ require_once BASE_PATH . '/app/Support/header.php';
     </a>
   <?php endif; ?>
   <?php if ($puedeVerEstadisticasBar): ?>
-    <a href="<?= BASE_URL ?>/estadisticas.php" class="app-btn app-estadisticas" title="Estad�sticas">
+    <a href="<?= BASE_URL ?>/estadisticas.php" class="app-btn app-estadisticas" title="Estadísticas">
       <i class="fa fa-bar-chart"></i>
     </a>
   <?php endif; ?>
-  <a href="<?= BASE_URL ?>/altaClientes/alta_cliente.php" class="app-btn app-nuevo" title="A�adir cliente">
+  <a href="<?= BASE_URL ?>/altaClientes/alta_cliente.php" class="app-btn app-nuevo" title="Añadir cliente">
     <i class="fa fa-user-plus"></i>
   </a>
 </div>

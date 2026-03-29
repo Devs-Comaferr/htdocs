@@ -17,7 +17,7 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 // Iniciar el buffer de salida para controlar la salida
 ob_start();
 
-// Deshabilitar la visualizaciÃƒÂ³n de errores en producciÃƒÂ³n
+// Deshabilitar la visualización de errores en producción
 ini_set('display_errors', 0);
 ini_set('display_startup_errors', 0);
 error_reporting(0);
@@ -33,13 +33,13 @@ $conn = db();
 // Ruta al archivo de log
 $log_file = 'logs/check_visita_previa.log';
 
-// FunciÃƒÂ³n para registrar mensajes en el log
+// Función para registrar mensajes en el log
 function log_message($message, $log_file) {
     $timestamp = date('Y-m-d H:i:s');
     file_put_contents($log_file, "$timestamp - $message\n", FILE_APPEND);
 }
 
-// FunciÃƒÂ³n de validaciÃƒÂ³n de fecha (compatible con PHP 5.2.3)
+// Función de validación de fecha (compatible con PHP 5.2.3)
 function is_valid_date($date) {
     $parts = explode('-', $date);
     if (count($parts) != 3) {
@@ -53,8 +53,8 @@ function is_valid_date($date) {
 
 // Verificar que la solicitud sea POST
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-    log_message("Error: Solicitud invÃƒÂ¡lida.", $log_file);
-    echo "error:Solicitud invÃƒÂ¡lida.";
+    log_message("Error: Solicitud inválida.", $log_file);
+    echo "error:Solicitud inválida.";
     ob_end_clean(); // Limpiar el buffer
     exit();
 }
@@ -64,7 +64,7 @@ $cod_cliente = isset($_POST['cod_cliente']) ? intval($_POST['cod_cliente']) : 0;
 $fecha_visita = isset($_POST['fecha_visita']) ? $_POST['fecha_visita'] : '';
 $cod_seccion = isset($_POST['cod_seccion']) ? $_POST['cod_seccion'] : null;
 
-// Convertir cod_seccion a NULL si estÃƒÂ¡ vacÃƒÂ­o
+// Convertir cod_seccion a NULL si está vacío
 if ($cod_seccion === '' || strtoupper($cod_seccion) === 'NULL') {
     $cod_seccion = null;
 }
@@ -81,17 +81,17 @@ if ($cod_cliente <= 0 || empty($fecha_visita)) {
 
 // Validar formato de fecha (YYYY-MM-DD)
 if (!is_valid_date($fecha_visita)) {
-    log_message("Error: Formato de fecha invÃƒÂ¡lido.", $log_file);
-    echo "error:Formato de fecha invÃƒÂ¡lido.";
+    log_message("Error: Formato de fecha inválido.", $log_file);
+    echo "error:Formato de fecha inválido.";
     ob_end_clean();
     exit();
 }
 
-// Calcular la fecha lÃƒÂ­mite (5 dÃƒÂ­as antes de fecha_visita)
+// Calcular la fecha límite (5 días antes de fecha_visita)
 $fecha_limite = date('Y-m-d', strtotime($fecha_visita . ' -5 days'));
-log_message("Fecha lÃƒÂ­mite calculada: $fecha_limite", $log_file);
+log_message("Fecha límite calculada: $fecha_limite", $log_file);
 
-// Consulta para verificar si existe una visita previa en los ÃƒÂºltimos 5 dÃƒÂ­as
+// Consulta para verificar si existe una visita previa en los últimos 5 días
 $sql = "
 SELECT TOP 1 id_visita
 FROM [integral].[dbo].[cmf_visitas_comerciales]
@@ -104,9 +104,9 @@ WHERE cod_cliente = ?
 ORDER BY fecha_visita DESC
 ";
 
-// Loguear la consulta y los parÃƒÂ¡metros
+// Loguear la consulta y los parámetros
 log_message("Consulta SQL: $sql", $log_file);
-log_message("ParÃƒÂ¡metros: cod_cliente=$cod_cliente, fecha_limite=$fecha_limite, fecha_visita=$fecha_visita, cod_seccion=" . ($cod_seccion === null ? 'NULL' : $cod_seccion), $log_file);
+log_message("Parámetros: cod_cliente=$cod_cliente, fecha_limite=$fecha_limite, fecha_visita=$fecha_visita, cod_seccion=" . ($cod_seccion === null ? 'NULL' : $cod_seccion), $log_file);
 
 // Preparar la consulta
 $stmt = odbc_prepare($conn, $sql);
@@ -122,11 +122,11 @@ $params = array(
     $cod_cliente,
     $fecha_limite,
     $fecha_visita,
-    ($cod_seccion === null ? null : $cod_seccion), // NULL explÃƒÂ­cito
-    ($cod_seccion === null ? null : $cod_seccion)  // NULL explÃƒÂ­cito
+    ($cod_seccion === null ? null : $cod_seccion), // NULL explícito
+    ($cod_seccion === null ? null : $cod_seccion)  // NULL explícito
 );
 
-// Ejecutar la consulta con los parÃƒÂ¡metros
+// Ejecutar la consulta con los parámetros
 $exec = odbc_execute($stmt, $params);
 if (!$exec) {
     log_message("Error: No se pudo ejecutar la consulta. Error: " . odbc_errormsg($conn), $log_file);
@@ -142,7 +142,7 @@ if ($row = odbc_fetch_array($stmt)) {
     $id_visita = intval($row['id_visita']);
     log_message("Visita encontrada: id_visita=$id_visita", $log_file);
 } else {
-    log_message("No se encontrÃƒÂ³ visita previa.", $log_file);
+    log_message("No se encontró visita previa.", $log_file);
 }
 
 odbc_free_result($stmt);

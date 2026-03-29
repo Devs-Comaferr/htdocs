@@ -10,12 +10,12 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
-// Verificar si el usuario ha iniciado sesiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n
+// Verificar si el usuario ha iniciado sesión
 
 
-require_once BASE_PATH . '/app/Support/functions.php'; // Se asume que incluye la funciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n toUTF8
+require_once BASE_PATH . '/app/Support/functions.php'; // Se asume que incluye la función toUTF8
 
-// Obtener el cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³digo de vendedor asociado al usuario actual
+// Obtener el código de vendedor asociado al usuario actual
 $conn = db();
 if (isset($_SESSION['codigo']) && $_SESSION['codigo'] !== '') {
     $cod_vendedor = (string)$_SESSION['codigo'];
@@ -27,7 +27,7 @@ $sql_cod_vendedor = "
 ";
 $result_vendedor = odbc_exec($conn, $sql_cod_vendedor);
 if (!$result_vendedor || !odbc_fetch_row($result_vendedor)) {
-    error_log("Error: No se pudo determinar el cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³digo de vendedor.");
+    error_log("Error: No se pudo determinar el código de vendedor.");
     echo 'Error interno';
     return;
 }
@@ -40,7 +40,7 @@ $condicionFecha = "CONVERT(date, hvc.fecha_venta) < CONVERT(date, DATEADD(day, -
 // Filtro de cliente (si se desea)
 $cliente_filtro = isset($_GET['cliente']) ? mb_convert_encoding($_GET['cliente'], 'Windows-1252', 'UTF-8') : '';
 
-// Se harÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ una consulta sin paginaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n para traer TODOS los pedidos pendientes
+// Se hará una consulta sin paginación para traer TODOS los pedidos pendientes
 $whereConditions = array();
 $whereConditions[] = "hvl.tipo_venta = 1";
 $whereConditions[] = "hvc.tipo_venta = 1";
@@ -146,7 +146,7 @@ $numero_pedidos = count($pedidos);
     }
   </style>
   <script type="text/javascript">
-    // FunciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n para redirigir al hacer clic en una fila
+    // Función para redirigir al hacer clic en una fila
 url += "&pedido=" + encodeURIComponent(pedido);
       window.location.href = url;
     }
@@ -158,7 +158,7 @@ url += "&pedido=" + encodeURIComponent(pedido);
     <p>Este es el fondo de la pgina. Aqu puedes tener cualquier contenido.</p>
   </div>
   
-  <!-- Modal: Tabla sin paginaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n con pedidos abiertos -->
+  <!-- Modal: Tabla sin paginación con pedidos abiertos -->
   <?php if (!empty($pedidos)): ?>
     <div class="modal fade" id="pedidosAbiertosModal" tabindex="-1" aria-labelledby="pedidosAbiertosModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl">
@@ -177,10 +177,10 @@ url += "&pedido=" + encodeURIComponent(pedido);
                     <th></th>
                     <th>Pedido</th>
                     <th>Fecha</th>
-                    <th>CÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³digo Cliente</th>
+                    <th>Código Cliente</th>
                     <th>Nombre Cliente</th>
                     <th>Importe Pedido</th>
-                    <th>LÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­neas Pdtes.</th>
+                    <th>Líneas Pdtes.</th>
                     <th>Importe Pdte.</th>
                     <th>Importe Disponible</th>
                     <th>Importe Pdte. Recibir</th>
@@ -189,7 +189,7 @@ url += "&pedido=" + encodeURIComponent(pedido);
                 <tbody>
                   <?php foreach ($pedidos as $pedido): ?>
                     <?php
-                      // Recalcular importes para visualizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n
+                      // Recalcular importes para visualización
                       $pedidoId = addslashes($pedido['Pedido']);
                       $importeDisponibleTotal = 0;
                       $importePdteRecibirTotal = 0;

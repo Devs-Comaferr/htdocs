@@ -94,12 +94,12 @@ if ($result) {
 
 <div class="detail-container">
   <?php if (empty($rows)) { ?>
-    <p>No se encontraron detalles para el albar·n/ticket.</p>
+    <p>No se encontraron detalles para el albar√°n/ticket.</p>
   <?php } else { ?>
     <table class="detail-table">
       <tr>
-        <th>CÛd. ArtÌculo</th>
-        <th>DescripciÛn</th>
+        <th>C√≥d. Art√≠culo</th>
+        <th>Descripci√≥n</th>
         <th>Cantidad</th>
         <th>Precio</th>
         <?php if ($showDto1) { echo "<th>Dto1</th>"; } ?>

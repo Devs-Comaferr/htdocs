@@ -12,10 +12,10 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
-// Verificar si el usuario ha iniciado sesiÃƒÂ³n
+// Verificar si el usuario ha iniciado sesión
 
 
-// Verificar parÃƒÂ¡metros GET
+// Verificar parámetros GET
 $ajaxAccion = (string)($_GET['ajax'] ?? '');
 $esAjaxLineas = in_array($ajaxAccion, array('lineas_visita', 'lineas_pedido'), true);
 
@@ -46,7 +46,7 @@ $conn = db();
 // Conexion auxiliar para consultas anidadas en el bucle de visitas.
 $conn_aux = openOdbcConnection();
 $conn_aux2 = openOdbcConnection();
-$pageTitle = "Detalles de la SecciÃƒÂ³n";
+$pageTitle = "Detalles de la Sección";
 
 // Endpoint AJAX interno: lineas de visita/pedido para carga diferida en modales.
 function cargarResumenPedido($connLocal, string $codPedido, string $origen = ''): array {
@@ -216,7 +216,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'lineas_visita') {
     $lineaIds = array();
     $hay = false;
     echo '<div class="modal-table-container"><table class="modal-table"><thead><tr>';
-    echo '<th>ArtÃƒÂ­culo</th><th>DescripciÃƒÂ³n</th><th>Cantidad</th><th>Cantidad Servida</th><th>Precio (EUR)</th><th>Dto1 (%)</th><th>Dto2 (%)</th><th>Importe (EUR)</th><th>Fecha de Entrega</th>';
+    echo '<th>Artículo</th><th>Descripción</th><th>Cantidad</th><th>Cantidad Servida</th><th>Precio (EUR)</th><th>Dto1 (%)</th><th>Dto2 (%)</th><th>Importe (EUR)</th><th>Fecha de Entrega</th>';
     echo '</tr></thead><tbody>';
     while ($linea = odbc_fetch_array($result_lineas_visita)) {
         $uniqueId = (string)($linea['cod_articulo'] ?? '') . '-' . (string)($linea['descripcion'] ?? '') . '-' . (string)($linea['cantidad'] ?? '');
@@ -354,7 +354,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'lineas_pedido') {
     $lineaIds = array();
     $hay = false;
     echo '<div class="modal-table-container"><table class="modal-table"><thead><tr>';
-    echo '<th>ArtÃƒÂ­culo</th><th>DescripciÃƒÂ³n</th><th>Cantidad</th><th>Cantidad Servida</th><th>Precio (EUR)</th><th>Dto1 (%)</th><th>Dto2 (%)</th><th>Importe (EUR)</th><th>Fecha de Entrega</th>';
+    echo '<th>Artículo</th><th>Descripción</th><th>Cantidad</th><th>Cantidad Servida</th><th>Precio (EUR)</th><th>Dto1 (%)</th><th>Dto2 (%)</th><th>Importe (EUR)</th><th>Fecha de Entrega</th>';
     echo '</tr></thead><tbody>';
     foreach ($lineasPedidoRows as $linea) {
         $uniqueId = (string)($linea['cod_articulo'] ?? '') . '-' . (string)($linea['descripcion'] ?? '') . '-' . (string)($linea['cantidad'] ?? '');
@@ -395,7 +395,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'lineas_pedido') {
     exit;
 }
 
-// 1. OBTENER EL NOMBRE DE LA SECCIÃƒâ€œN
+// 1. OBTENER EL NOMBRE DE LA SECCIÓN
 $sql_seccion = "
     SELECT nombre
     FROM [integral].[dbo].[secciones_cliente]
@@ -404,14 +404,14 @@ $sql_seccion = "
 ";
 $result_seccion = odbc_exec($conn, $sql_seccion);
 if (!$result_seccion) {
-    error_log("Error al consultar la secciÃƒÂ³n: " . odbc_errormsg($conn));
+    error_log("Error al consultar la sección: " . odbc_errormsg($conn));
     echo 'Error interno';
     return;
 }
 $seccion_data = odbc_fetch_array($result_seccion);
-$nombre_seccion = $seccion_data ? $seccion_data['nombre'] : "SecciÃƒÂ³n desconocida";
+$nombre_seccion = $seccion_data ? $seccion_data['nombre'] : "Sección desconocida";
 
-// 2. CONSULTA DE DATOS BÃƒÂSICOS (CLIENTE + SECCIÃƒâ€œN)
+// 2. CONSULTA DE DATOS BÁSICOS (CLIENTE + SECCIÓN)
 $sql = "
 SELECT 
     c.cod_cliente, 
@@ -434,7 +434,7 @@ WHERE c.cod_cliente = '" . addslashes($cod_cliente) . "'
 ";
 $result = odbc_exec($conn, $sql);
 if (!$result) {
-    error_log("Error al ejecutar la consulta de datos de la secciÃƒÂ³n: " . odbc_errormsg($conn));
+    error_log("Error al ejecutar la consulta de datos de la sección: " . odbc_errormsg($conn));
     echo 'Error interno';
     return;
 }
@@ -444,13 +444,13 @@ $data = odbc_fetch_array($result);
 $pageTitle = ($data ? $data['nombre_comercial'] ?? '' : 'Cliente desconocido') . " - " . $nombre_seccion;
 
 // -----------------------------------------------------------------------------
-// FUNCIONES (colores, dÃƒÂ­a de la semana, iconos de origen, etc.)
+// FUNCIONES (colores, día de la semana, iconos de origen, etc.)
 // -----------------------------------------------------------------------------
 // Funciones comunes cargadas desde funciones.php:
 // obtenerDiaSemana, determinarColorVisita, determinarColorPedido, iconoDeOrigen
 
 // -----------------------------------------------------------------------------
-// CONSULTA A cmf_asignacion_zonas_clientes PARA MOSTRAR HORARIO Y DEMÃƒÂS
+// CONSULTA A cmf_asignacion_zonas_clientes PARA MOSTRAR HORARIO Y DEMÁS
 // -----------------------------------------------------------------------------
 $sql_asignacion = "
 SELECT * 
@@ -1239,7 +1239,7 @@ include_once BASE_PATH . '/resources/views/layouts/header.php';
 
         // Preferencia Horaria
         $pref = strtolower($asignacion['preferencia_horaria'] ?? '');
-        $estiloManana = ($pref == 'm' || $pref == 'maÃƒÂ±ana') ? "background-color: #ffc107; padding:2px 4px;" : "";
+        $estiloManana = ($pref == 'm' || $pref == 'mañana') ? "background-color: #ffc107; padding:2px 4px;" : "";
         $estiloTarde  = ($pref == 't' || $pref == 'tarde')   ? "background-color: #007bff; color:#fff; padding:2px 4px;" : "";
 
         // Tiempo Promedio
@@ -1649,7 +1649,7 @@ const colorFamilias = {
     '1': '#000000', '99': '#424242', '2': '#B6C002'
 };
 
-// FunciÃƒÂ³n para abrir un modal
+// Función para abrir un modal
 function cargarContenidoAjax(url, containerId) {
     var container = document.getElementById(containerId);
     if (!container) {
@@ -1701,8 +1701,8 @@ function cargarDatosModal(id) {
     }
 }
 
-// FunciÃƒÂ³n para cerrar un modal
-// Cerrar modal si se hace clic fuera de ÃƒÂ©l
+// Función para cerrar un modal
+// Cerrar modal si se hace clic fuera de él
 window.onclick = function(event) {
     var modals = document.getElementsByClassName('modal');
     for(var i=0; i<modals.length; i++) {
@@ -1834,7 +1834,7 @@ function mostrarDetalleBarra(periodoTxt, items) {
     titulo.textContent = 'Detalle ' + periodoTxt + ' (Pedidos vs Albaranes)';
 
     if (!Array.isArray(items) || items.length === 0) {
-                        contenido.innerHTML = '<p>No hay detalle por artÃƒÂ­culos para este periodo.</p>';
+                        contenido.innerHTML = '<p>No hay detalle por artículos para este periodo.</p>';
         abrirModal('modal-detalle-barras');
         return;
     }
@@ -1886,7 +1886,7 @@ function mostrarDetalleBarra(periodoTxt, items) {
         '<span class="leyenda-item"><span class="leyenda-color" style="background:#e8f1ff;"></span>Importe: Albaran &gt; Pedido (misma cantidad)</span>' +
         '</div>' +
         '<div class="modal-table-container"><table class="modal-table"><thead><tr>' +
-        '<th>ArtÃƒÂ­culo</th><th>DescripciÃƒÂ³n</th><th>Cant. Pedido</th><th>Importe Pedido</th><th>Cant. AlbarÃƒÂ¡n</th><th>Importe AlbarÃƒÂ¡n</th>' +
+        '<th>Artículo</th><th>Descripción</th><th>Cant. Pedido</th><th>Importe Pedido</th><th>Cant. Albarán</th><th>Importe Albarán</th>' +
         '</tr></thead><tbody>' + filas +
         '<tr><td colspan="2"><strong>Totales</strong></td>' +
         '<td><strong>' + totalCantPedido.toFixed(2) + '</strong></td>' +
@@ -2135,7 +2135,7 @@ function dibujarGraficoArticulos() {
             responsive: true,
             plugins: {
                 legend: { display: false },
-                        title: { display: true, text: 'ArtÃƒÂ­culos (Top 10)' },
+                        title: { display: true, text: 'Artículos (Top 10)' },
                 datalabels: {
                     formatter: function(value, context) {
                         var idx = context.dataIndex;
@@ -2174,7 +2174,7 @@ window.onload = function() {
     dibujarGraficoArticulos();
 }
 
-// FunciÃƒÂ³n para recalcular el promedio (igual que en cliente_detalles.php)
+// Función para recalcular el promedio (igual que en cliente_detalles.php)
 function calcularPromedioVisita(cod_cliente, cod_seccion) {
     var xhr = null;
     if (window.XMLHttpRequest) {
@@ -2200,10 +2200,10 @@ function calcularPromedioVisita(cod_cliente, cod_seccion) {
     xhr.send(null);
 }
 
-// AÃƒÂ±adimos las funciones para quitarPedido y actualizarOrigen (AJAX)
+// Añadimos las funciones para quitarPedido y actualizarOrigen (AJAX)
 function quitarPedido(cod_pedido, event) {
     event.stopPropagation();
-    if (!confirm("Ã‚Â¿EstÃƒÂ¡s seguro de quitar este pedido de la visita?")) {
+    if (!confirm("¿Estás seguro de quitar este pedido de la visita?")) {
         return;
     }
     $.ajax({

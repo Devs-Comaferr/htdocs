@@ -34,7 +34,7 @@ $pageTitle = "Registrar Visita";
 include(BASE_PATH . '/resources/views/layouts/header.php');
 
 /* ---------------------------------------------------------------------------
-   SecciÃ³n de bÃºsqueda de clientes (cuando aÃºn no se ha seleccionado un cliente)
+   Sección de búsqueda de clientes (cuando aún no se ha seleccionado un cliente)
 --------------------------------------------------------------------------- */
 if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
     if (isset($_GET['buscar']) && !empty($_GET['buscar'])) {
@@ -115,7 +115,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
 
         <body>
             <div class="container">
-                <h1>Resultados de la bÃºsqueda</h1>
+                <h1>Resultados de la búsqueda</h1>
                 <div class="list-group">
                     <?php
                     $hayResultados = false;
@@ -131,11 +131,11 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
                         echo "<a href='$link' class='list-group-item'>$displayName</a>";
                     }
                     if (!$hayResultados) {
-                        echo "<p class='text-center'>No se encontraron clientes que cumplan con la bÃºsqueda.</p>";
+                        echo "<p class='text-center'>No se encontraron clientes que cumplan con la búsqueda.</p>";
                     }
                     ?>
                 </div>
-                <a href="registrar_visita_manual.php" class="back-link">Realizar nueva bÃºsqueda</a>
+                <a href="registrar_visita_manual.php" class="back-link">Realizar nueva búsqueda</a>
             </div>
         </body>
 
@@ -143,7 +143,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
     <?php
         exit();
     } else {
-        // Mostrar formulario de bÃºsqueda
+        // Mostrar formulario de búsqueda
     ?>
         <!DOCTYPE html>
         <html lang="es">
@@ -231,7 +231,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
 $cod_cliente = intval($_GET['cod_cliente']);
 $cod_seccion = (isset($_GET['cod_seccion']) && $_GET['cod_seccion'] !== '') ? intval($_GET['cod_seccion']) : null;
 
-// Recuperar la asignaciÃ³n del cliente filtrando por secciÃ³n si procede.
+// Recuperar la asignación del cliente filtrando por sección si procede.
 $sql_assignment = "SELECT * FROM [integral].[dbo].[cmf_asignacion_zonas_clientes] WHERE cod_cliente = ? AND activo = 1";
 $assignmentParams = [$cod_cliente];
 if ($cod_seccion !== null) {
@@ -248,7 +248,7 @@ if (!$result_assignment) {
 }
 $assignment = odbc_fetch_array($result_assignment);
 if (!$assignment) {
-    error_log("No se encontrÃ³ asignaciÃ³n para este cliente" . ($cod_seccion !== null ? " (SecciÃ³n: $cod_seccion)" : ""));
+    error_log("No se encontró asignación para este cliente" . ($cod_seccion !== null ? " (Sección: $cod_seccion)" : ""));
     echo 'Error interno';
     return;
 }
@@ -259,7 +259,7 @@ $result_cliente = registrarVisitaManualPrepareExecute($conn, $sql_cliente, [$cod
 $clienteData = odbc_fetch_array($result_cliente);
 $nombreCliente = $clienteData ? $clienteData['nombre_comercial'] : $cod_cliente;
 
-// Obtener nombre de la secciÃ³n, si procede
+// Obtener nombre de la sección, si procede
 if ($cod_seccion !== null) {
     $sql_seccion = "SELECT nombre FROM [integral].[dbo].[secciones_cliente] WHERE cod_cliente = ? AND cod_seccion = ?";
     $result_seccion = registrarVisitaManualPrepareExecute($conn, $sql_seccion, [$cod_cliente, $cod_seccion]);
@@ -289,7 +289,7 @@ $hora_fin_manana    = !empty($assignment['hora_fin_manana']) ? substr($assignmen
 $hora_inicio_tarde  = !empty($assignment['hora_inicio_tarde']) ? substr($assignment['hora_inicio_tarde'], 0, 5) : "";
 $hora_fin_tarde     = !empty($assignment['hora_fin_tarde']) ? substr($assignment['hora_fin_tarde'], 0, 5) : "";
 
-// Consultar visitas programadas o pendientes para este cliente y secciÃ³n (o IS NULL)
+// Consultar visitas programadas o pendientes para este cliente y sección (o IS NULL)
 $currentDate = date('Y-m-d');
 $sql_citas = "SELECT fecha_visita, hora_inicio_visita, hora_fin_visita, estado_visita 
               FROM [integral].[dbo].[cmf_visitas_comerciales]
@@ -354,11 +354,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             } else {
                 // Validar que la hora de fin no supere el cierre del slot
                 if ($slot == 'morning' && strtotime($hora_fin_visita) > strtotime($hora_fin_manana)) {
-                    $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la maÃ±ana ($hora_fin_manana).";
+                    $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la mañana ($hora_fin_manana).";
                 } elseif ($slot == 'afternoon' && strtotime($hora_fin_visita) > strtotime($hora_fin_tarde)) {
                     $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la tarde ($hora_fin_tarde).";
                 } else {
-                    // ValidaciÃ³n adicional: No se debe solapar la nueva visita con ninguna ya registrada para este vendedor en el mismo dÃ­a
+                    // Validación adicional: No se debe solapar la nueva visita con ninguna ya registrada para este vendedor en el mismo día
                     $overlap = false;
                     $overlapDetails = "";
                     $sql_overlap = "SELECT * FROM [integral].[dbo].[cmf_visitas_comerciales]
@@ -382,7 +382,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     $data_cliente_overlap = odbc_fetch_array($result_cliente_overlap);
                                     $overlapCliente = $data_cliente_overlap ? $data_cliente_overlap['nombre_comercial'] : "";
                                 }
-                                // Si la visita solapada tiene asignada una secciÃ³n, se recupera su nombre
+                                // Si la visita solapada tiene asignada una sección, se recupera su nombre
                                 $overlapSeccion = "";
                                 if ($row['cod_seccion'] !== null) {
                                     $overlap_seccion = intval($row['cod_seccion']);
@@ -643,7 +643,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         }
                     },
                     error: function() {
-                        alert("Error en la peticiÃ³n AJAX.");
+                        alert("Error en la petición AJAX.");
                     }
                 });
             });
@@ -681,7 +681,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="alert alert-success"><?php echo $success; ?></div>
         <?php endif; ?>
 
-        <!-- Alertas de citas programadas o pendientes (filtradas por cliente y secciÃ³n) -->
+        <!-- Alertas de citas programadas o pendientes (filtradas por cliente y sección) -->
         <?php if (count($citas) > 0): ?>
             <?php foreach ($citas as $cita):
                 $estado = normalizarEstadoVisitaClave($cita['estado_visita']);
@@ -694,14 +694,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php endif;
 
         if (!empty($assignment['frecuencia_visita']) && strtolower($assignment['frecuencia_visita']) == 'nunca') {
-            echo '<div class="alert alert-danger">AtenciÃ³n: Este cliente no se visita habitualmente.</div>';
+            echo '<div class="alert alert-danger">Atención: Este cliente no se visita habitualmente.</div>';
         }
         ?>
 
         <h3>Datos del Cliente y Disponibilidad</h3>
         <p><strong>Cliente:</strong> <?php echo htmlspecialchars($nombreCliente); ?></p>
         <?php if (!empty($nombreSeccion)): ?>
-            <p><strong>SecciÃ³n:</strong> <?php echo htmlspecialchars($nombreSeccion); ?></p>
+            <p><strong>Sección:</strong> <?php echo htmlspecialchars($nombreSeccion); ?></p>
         <?php endif; ?>
         <p><strong>Tiempo Promedio de Visita:</strong>
             <?php
@@ -723,7 +723,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ?>
         </p>
         <p>
-            <strong>Disponibilidad MaÃ±ana:</strong>
+            <strong>Disponibilidad Mañana:</strong>
             <?php echo !empty($hora_inicio_manana) ? $hora_inicio_manana : 'No definido'; ?> a
             <?php echo !empty($hora_fin_manana) ? $hora_fin_manana : 'No definido'; ?>
         </p>
@@ -734,7 +734,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </p>
         <p>
             <strong>Preferencia Horaria:</strong>
-            <?php echo !empty($assignment['preferencia_horaria']) ? ($assignment['preferencia_horaria'] == 'M' ? 'MaÃ±ana' : ($assignment['preferencia_horaria'] == 'T' ? 'Tarde' : $assignment['preferencia_horaria'])) : 'No definida'; ?>
+            <?php echo !empty($assignment['preferencia_horaria']) ? ($assignment['preferencia_horaria'] == 'M' ? 'Mañana' : ($assignment['preferencia_horaria'] == 'T' ? 'Tarde' : $assignment['preferencia_horaria'])) : 'No definida'; ?>
         </p>
         <button id="btnDefinirHorario" type="button" class="btn btn-info" style="margin-bottom:15px;">Definir Horario</button>
 
@@ -749,11 +749,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <input type="hidden" name="cod_seccion" value="<?php echo $cod_seccion; ?>" />
                     <?php endif; ?>
                     <div class="form-group">
-                        <label for="hora_inicio_manana">Hora Inicio MaÃ±ana:</label>
+                        <label for="hora_inicio_manana">Hora Inicio Mañana:</label>
                         <input type="time" class="form-control" name="hora_inicio_manana" id="hora_inicio_manana" value="<?php echo !empty($hora_inicio_manana) ? $hora_inicio_manana : ''; ?>" required />
                     </div>
                     <div class="form-group">
-                        <label for="hora_fin_manana">Hora Fin MaÃ±ana:</label>
+                        <label for="hora_fin_manana">Hora Fin Mañana:</label>
                         <input type="time" class="form-control" name="hora_fin_manana" id="hora_fin_manana" value="<?php echo !empty($hora_fin_manana) ? $hora_fin_manana : ''; ?>" required />
                     </div>
                     <div class="form-group">

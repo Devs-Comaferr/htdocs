@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -98,7 +98,7 @@
       display: none;
     }
     
-    /* CSS para pedidos histÃ³ricos: gris, tachado e itÃ¡lico */
+    /* CSS para pedidos históricos: gris, tachado e itálico */
     .historico, .historico * {
       color: #d3d3d3 !important;
       text-decoration: line-through !important;
@@ -221,7 +221,7 @@
     <form method="GET" action="<?php echo $_SERVER['PHP_SELF']; ?>" id="filtrosForm" class="mb-4">
       <div class="mb-3">
         <div class="d-flex align-items-center">
-          <input type="text" id="cliente" name="cliente" class="form-control" value="<?php echo htmlspecialchars($cliente_filtro); ?>" placeholder="Buscar por cÃ³digo o nombre del cliente..." />
+          <input type="text" id="cliente" name="cliente" class="form-control" value="<?php echo htmlspecialchars($cliente_filtro); ?>" placeholder="Buscar por código o nombre del cliente..." />
           <button type="submit" class="btn btn-primary ms-2 d-flex align-items-center">
             <i class="fas fa-search"></i> <span class="ms-1">Filtrar</span>
           </button>
@@ -251,14 +251,14 @@
       <table class="table table-bordered">
         <thead>
           <tr>
-            <!-- Columna para el icono del camiÃ³n -->
+            <!-- Columna para el icono del camión -->
             <th></th>
             <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Pedido', 'direccion' => $direccion_invertida))); ?>">Pedido</a></th>
             <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Fecha_Pedido', 'direccion' => $direccion_invertida))); ?>">Fecha</a></th>
-            <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Cod_Cliente', 'direccion' => $direccion_invertida))); ?>">CÃ³digo Cliente</a></th>
+            <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Cod_Cliente', 'direccion' => $direccion_invertida))); ?>">Código Cliente</a></th>
             <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Cliente', 'direccion' => $direccion_invertida))); ?>">Nombre Cliente</a></th>
             <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Importe', 'direccion' => $direccion_invertida))); ?>">Importe Pedido</a></th>
-            <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Articulos_Pendientes', 'direccion' => $direccion_invertida))); ?>">LÃ­neas Pdtes.</a></th>
+            <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Articulos_Pendientes', 'direccion' => $direccion_invertida))); ?>">Líneas Pdtes.</a></th>
             <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Importe_Pendiente', 'direccion' => $direccion_invertida))); ?>">Importe Pdte.</a></th>
             <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Importe_Disponible', 'direccion' => $direccion_invertida))); ?>">Importe Disponible</a></th>
             <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Importe_Pdte_Recibir', 'direccion' => $direccion_invertida))); ?>">Importe Pdte. Recibir</a></th>
@@ -272,7 +272,7 @@
       </table>
     </div>
     
-    <!-- PaginaciÃ³n -->
+    <!-- Paginación -->
     <div class="mobile-items" id="pedidosMobileItems">
       <p id="pedidosMobileLoading">Cargando pedidos...</p>
     </div>
@@ -464,7 +464,7 @@
             + '<div class="mobile-item-line"><strong>Cliente:</strong> <a href="' + escapeHtml(pedidoUrl) + '">' + escapeHtml(pedido.cod_cliente) + ' - ' + escapeHtml(nombreCliente) + '</a></div>'
             + observacion
             + '<div class="mobile-item-line"><strong>Importe Pedido:</strong> ' + formatNumberEs(pedido.Importe, 2) + '</div>'
-            + '<div class="mobile-item-line"><strong>LÃ­neas Pdtes.:</strong> ' + formatNumberEs(pedido.Articulos_Pendientes, 0) + '</div>'
+            + '<div class="mobile-item-line"><strong>Líneas Pdtes.:</strong> ' + formatNumberEs(pedido.Articulos_Pendientes, 0) + '</div>'
             + '<div class="mobile-item-line"><strong>Importe Pdte.:</strong> ' + formatNumberEs(pedido.Importe_Pendiente, 2) + '</div>'
             + '<div class="mobile-item-line"><strong>Importe Disponible:</strong> ' + formatNumberEs(pedido.importeDisponibleTotal, 2) + '</div>'
             + '<div class="mobile-item-line"><strong>Importe Pdte. Recibir:</strong> ' + formatNumberEs(pedido.importePdteRecibirTotal, 2) + '</div>'

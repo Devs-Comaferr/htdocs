@@ -2,20 +2,20 @@
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
-// Si se envÃƒÂ­a el parÃƒÂ¡metro 'origen' se guarda en sesiÃƒÂ³n (se mantiene por compatibilidad)
+// Si se envía el parámetro 'origen' se guarda en sesión (se mantiene por compatibilidad)
 if (isset($_GET['origen']) && !empty($_GET['origen'])) {
     $_SESSION['origen'] = $_GET['origen'];
 }
 
-// Leer el parÃƒÂ¡metro GET "tabla"
+// Leer el parámetro GET "tabla"
 $tabla_param = isset($_GET['tabla']) ? $_GET['tabla'] : '';
 
-// Verificar si el usuario ha iniciado sesiÃƒÂ³n
+// Verificar si el usuario ha iniciado sesión
 
 
-// Verificar que se pase el parÃƒÂ¡metro `cod_cliente`
+// Verificar que se pase el parámetro `cod_cliente`
 if (!isset($_GET['cod_cliente']) || $_GET['cod_cliente'] === '') {
-    error_log("El parÃƒÂ¡metro 'cod_cliente' es obligatorio.");
+    error_log("El parámetro 'cod_cliente' es obligatorio.");
     echo 'Error interno';
     return;
 }
@@ -28,7 +28,7 @@ $lineas = array();
 $num_lineas = 0;
 $suma_total = 0;
 
-// Validar orden y direcciÃƒÂ³n
+// Validar orden y dirección
 $orden_permitido = array(
   'pedido'                     => 'pedido',
   'Fecha_Venta'                => 'Fecha_Venta',
@@ -45,7 +45,7 @@ $orden_permitido = array(
 $orden     = isset($_GET['orden']) && array_key_exists($_GET['orden'], $orden_permitido) ? $_GET['orden'] : 'Fecha_Venta';
 $direccion = isset($_GET['direccion']) && in_array($_GET['direccion'], array('ASC', 'DESC')) ? $_GET['direccion'] : 'DESC';
 
-// Alternar direcciÃƒÂ³n para las cabeceras
+// Alternar dirección para las cabeceras
 $direccion_invertida = ($direccion == 'ASC') ? 'DESC' : 'ASC';
 
 require_once BASE_PATH . '/app/Support/functions.php';
@@ -54,7 +54,7 @@ require_once BASE_PATH . '/app/Support/db.php';
 $conn = db();
 
 // -------------------------------------------------------------------------
-// Construir la consulta principal segÃƒÂºn el valor del parÃƒÂ¡metro GET "tabla"
+// Construir la consulta principal según el valor del parámetro GET "tabla"
 // -------------------------------------------------------------------------
 if ($tabla_param === 'vcelim') {
     // Consulta para datos de las tablas eliminadas (ventas_linea_elim / ventas_cabecera_elim)
@@ -102,7 +102,7 @@ if ($tabla_param === 'vcelim') {
         $pedido = addslashes($_GET['pedido']);
         $sql_lineas .= " AND vlelim.cod_venta = '$pedido'";
     } else {
-        error_log("El parÃƒÂ¡metro 'pedido' es obligatorio.");
+        error_log("El parámetro 'pedido' es obligatorio.");
         echo 'Error interno';
         return;
     }
@@ -171,7 +171,7 @@ if ($tabla_param === 'vcelim') {
         $pedido = addslashes($_GET['pedido']);
         $sql_lineas .= " AND hvl.cod_venta = '$pedido'";
     } else {
-        error_log("El parÃƒÂ¡metro 'pedido' es obligatorio.");
+        error_log("El parámetro 'pedido' es obligatorio.");
         echo 'Error interno';
         return;
     }
@@ -215,20 +215,20 @@ while ($linea = odbc_fetch_array($result_lineas)) {
 }
 $num_lineas = count($lineas);
 
-// Obtener el nÃƒÂºmero de pedido si estÃƒÂ¡ presente
+// Obtener el número de pedido si está presente
 $numero_pedido = isset($_GET['pedido']) && $_GET['pedido'] !== '' ? $_GET['pedido'] : null;
 
-// Definir la variable base_url para los enlaces de ordenaciÃƒÂ³n
+// Definir la variable base_url para los enlaces de ordenación
 $base_url = basename($_SERVER['PHP_SELF']) . '?cod_cliente=' . urlencode($cod_cliente) . '&pedido=' . urlencode($numero_pedido);
 if ($cod_seccion) {
     $base_url .= '&cod_seccion=' . urlencode($cod_seccion);
 }
 
-// Obtener datos del cliente y secciÃƒÂ³n
+// Obtener datos del cliente y sección
 $sql_cliente_seccion = "
     SELECT 
         c.nombre_comercial AS nombre_cliente, 
-        COALESCE(s.nombre, 'Sin SecciÃƒÂ³n') AS nombre_seccion
+        COALESCE(s.nombre, 'Sin Sección') AS nombre_seccion
     FROM [integral].[dbo].[clientes] c
     LEFT JOIN [integral].[dbo].[secciones_cliente] s
         ON c.cod_cliente = s.cod_cliente
@@ -239,7 +239,7 @@ if ($cod_seccion !== null) {
 }
 $result_cliente_seccion = odbc_exec($conn, $sql_cliente_seccion);
 if (!$result_cliente_seccion) {
-    error_log("Error al obtener datos del cliente y secciÃƒÂ³n: " . odbc_errormsg($conn));
+    error_log("Error al obtener datos del cliente y sección: " . odbc_errormsg($conn));
     echo 'Error interno';
     return;
 }
@@ -247,15 +247,15 @@ $cliente_seccion = odbc_fetch_array($result_cliente_seccion);
 
 if (!$cliente_seccion) {
     $nombre_cliente = "Cliente no encontrado";
-    $nombre_seccion = "Sin secciÃƒÂ³n";
+    $nombre_seccion = "Sin sección";
 } else {
     $nombre_cliente = isset($cliente_seccion['nombre_cliente']) ? $cliente_seccion['nombre_cliente'] : "Desconocido";
-    $nombre_seccion = isset($cliente_seccion['nombre_seccion']) ? $cliente_seccion['nombre_seccion'] : "Sin secciÃƒÂ³n";
+    $nombre_seccion = isset($cliente_seccion['nombre_seccion']) ? $cliente_seccion['nombre_seccion'] : "Sin sección";
 }
 
 // Generar el ttulo para la pgina
 $pageTitle = $nombre_cliente;
-if ($nombre_seccion != 'Sin SecciÃƒÂ³n') {
+if ($nombre_seccion != 'Sin Sección') {
     $pageTitle .= " - " . $nombre_seccion;
 }
 if ($numero_pedido) {
@@ -263,7 +263,7 @@ if ($numero_pedido) {
 }
 
 $url_faltas = 'faltas.php?cod_cliente=' . urlencode($cod_cliente);
-// FIX cod_seccion: 0 es valor vÃƒÂ¡lido, no usar empty()
+// FIX cod_seccion: 0 es valor válido, no usar empty()
 if (isset($cod_seccion) && tieneValor($cod_seccion)) {
     $url_faltas .= '&cod_seccion=' . urlencode($cod_seccion);
 }
@@ -477,18 +477,18 @@ include BASE_PATH . '/resources/views/layouts/header.php';
 </head>
 <body>
   <div class="container">
-    <!-- Grupo de botones: Se muestran solo si el pedido es NO histÃƒÂ³rico -->
+    <!-- Grupo de botones: Se muestran solo si el pedido es NO histórico -->
     <?php if (!empty($lineas) && isset($lineas[0]['Historico']) && $lineas[0]['Historico'] === 'N'): ?>
       <div class="button-group">
       <?php if (!$existeHistorico): ?>
-  <a href="pasarHistorico.php?pedido=<?php echo urlencode($numero_pedido); ?>&cod_cliente=<?php echo urlencode($cod_cliente); ?><?php echo isset($cod_seccion) ? '&cod_seccion=' . urlencode($cod_seccion) : ''; ?>" class="btn btn-pasar" aria-label="Pasar a HistÃƒÂ³rico">
+  <a href="pasarHistorico.php?pedido=<?php echo urlencode($numero_pedido); ?>&cod_cliente=<?php echo urlencode($cod_cliente); ?><?php echo isset($cod_seccion) ? '&cod_seccion=' . urlencode($cod_seccion) : ''; ?>" class="btn btn-pasar" aria-label="Pasar a Histórico">
     <i class="fa-solid fa-xmark" style="font-size: 40px;"></i>
-    <span>HistÃƒÂ³rico</span>
+    <span>Histórico</span>
   </a>
 <?php else: ?>
-  <button class="btn btn-disabled" disabled aria-label="Pedido a histÃƒÂ³rico ya ingresado">
+  <button class="btn btn-disabled" disabled aria-label="Pedido a histórico ya ingresado">
     <i class="fa-solid fa-xmark" style="font-size: 40px;"></i>
-    <span>HistÃƒÂ³rico Solicitado</span>
+    <span>Histórico Solicitado</span>
   </button>
 <?php endif; ?>
 
@@ -516,8 +516,8 @@ include BASE_PATH . '/resources/views/layouts/header.php';
         <table class="table table-bordered">
           <thead>
             <tr>
-              <th><a href="<?php echo $base_url . '&orden=Articulo&direccion=' . $direccion_invertida; ?>">ArtÃƒÂ­culo</a></th>
-              <th><a href="<?php echo $base_url . '&orden=Descripcion&direccion=' . $direccion_invertida; ?>">DescripciÃƒÂ³n</a></th>
+              <th><a href="<?php echo $base_url . '&orden=Articulo&direccion=' . $direccion_invertida; ?>">Artículo</a></th>
+              <th><a href="<?php echo $base_url . '&orden=Descripcion&direccion=' . $direccion_invertida; ?>">Descripción</a></th>
               <th><a href="<?php echo $base_url . '&orden=Cantidad_Pedida&direccion=' . $direccion_invertida; ?>">Cantidad Pedida</a></th>
               <th><a href="<?php echo $base_url . '&orden=Cantidad_Servida&direccion=' . $direccion_invertida; ?>">Cantidad Servida</a></th>
               <th><a href="<?php echo $base_url . '&orden=Cantidad_Restante&direccion=' . $direccion_invertida; ?>">Cantidad Restante</a></th>
@@ -567,9 +567,9 @@ include BASE_PATH . '/resources/views/layouts/header.php';
                     <i class="fas fa-trash-alt text-danger" title="Eliminado"></i>
                   <?php else: ?>
                     <?php if (!empty($linea['Historico']) && $linea['Historico'] === 'S'): ?>
-                      <i class="fas fa-lock" title="HistÃƒÂ³rico (S)"></i>
+                      <i class="fas fa-lock" title="Histórico (S)"></i>
                     <?php else: ?>
-                      <i class="fas fa-lock-open" title="No HistÃƒÂ³rico (N)"></i>
+                      <i class="fas fa-lock-open" title="No Histórico (N)"></i>
                     <?php endif; ?>
                     <?php if (!empty($linea['CodPedidoWeb'])): ?>
                       &nbsp;<i class="fas fa-globe" title="Pedido Web"></i>
@@ -581,11 +581,11 @@ include BASE_PATH . '/resources/views/layouts/header.php';
           </tbody>
         </table>
         <div class="summary">
-          NÃƒÂºmero de lÃƒÂ­neas: <?php echo $num_lineas; ?><br>
+          Número de líneas: <?php echo $num_lineas; ?><br>
           Suma total: <?php echo number_format($suma_total, 2, ',', '.'); ?> 
         </div>
       <?php else: ?>
-        <p>No se encontraron pedido de entrega para este cliente y secciÃƒÂ³n.</p>
+        <p>No se encontraron pedido de entrega para este cliente y sección.</p>
       <?php endif; ?>
     </div>
   </div>

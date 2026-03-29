@@ -15,23 +15,23 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 header('Content-Type: text/html; charset=utf-8');
 
-// Si el usuario no ha iniciado sesiÃ³n
+// Si el usuario no ha iniciado sesión
 
 
-// Definir el tÃ­tulo de la pÃ¡gina (usa el que se haya pasado, o uno por defecto)
+// Definir el título de la página (usa el que se haya pasado, o uno por defecto)
 if (!isset($pageTitle)) {
     $pageTitle = "Panel de " . ($_SESSION['nombre'] ?? 'Usuario');
 }
 
-// ConexiÃ³n a la base de datos
+// Conexión a la base de datos
 
 // Incluir funciones comunes
 require_once BASE_PATH . '/app/Support/functions.php';
 
 $conn = db();
 
-// Consulta para contar los pedidos abiertos (histÃ³ricos)
-// Comentario saneado para evitar basura de encoding en esta secciÃ³n.
+// Consulta para contar los pedidos abiertos (históricos)
+// Comentario saneado para evitar basura de encoding en esta sección.
 
 $codigoSesion = null;
 if (isset($_SESSION['codigo']) && $_SESSION['codigo'] !== '' && $_SESSION['codigo'] !== null) {
@@ -426,8 +426,8 @@ if ($isJcasado) {
   <!-- 
        ESTILOS: Mantiene la sidebar al 20%, y si es layout-normal => 2 columnas de 40%;
                 si es layout-jcasado => 3 columnas (c. 26.66%) para escritorio.
-       AdemÃ¡s, se mantiene el comportamiento actual para escritorio.
-       Scroll normal en mÃ³vil.
+       Además, se mantiene el comportamiento actual para escritorio.
+       Scroll normal en móvil.
   -->
   <style type="text/css">
     /* ==== Reseteo general ==== */
@@ -448,7 +448,7 @@ if ($isJcasado) {
       padding-right: 12px;
     }
 
-    /* ==== Header (o .header, segÃºn header.php) ==== */
+    /* ==== Header (o .header, según header.php) ==== */
     header, .header {
       background-color: #fff; 
       /* Ajusta si quieres un header fijo en escritorio (ver media query) */
@@ -535,7 +535,7 @@ if ($isJcasado) {
     background-color: red;
     color: white;
     border-radius: 50%;
-    padding: 8px 12px; /* TamaÃ±o consistente */
+    padding: 8px 12px; /* Tamaño consistente */
     font-size: 14px;
     font-weight: bold;
     box-shadow: 0 0 5px rgba(0,0,0,0.3);
@@ -724,7 +724,7 @@ if ($isJcasado) {
       color: #007BFF;
     }
 
-    /* ==== PaginaciÃ³n ==== */
+    /* ==== Paginación ==== */
     .pagination {
       margin-top: 20px;
       text-align: center;
@@ -795,9 +795,9 @@ if ($isJcasado) {
     /* ======== MEDIA QUERIES ===== */
     /* ============================= */
 
-    /* === MÃ³vil y tablet === */
+    /* === Móvil y tablet === */
 @media (max-width: 1024px) {
-  /* Permitimos scroll normal en <body> o lo dejas oculto, segÃºn tu preferencia */
+  /* Permitimos scroll normal en <body> o lo dejas oculto, según tu preferencia */
   html, body {
     overflow-x: hidden;
     overflow-y: auto;
@@ -807,7 +807,7 @@ if ($isJcasado) {
   header, .header {
     position: fixed;
     top: 0; left: 0; right: 0;
-    height: 60px; /* Ajusta segÃºn tu header */
+    height: 60px; /* Ajusta según tu header */
     z-index: 9999;
   }
   .page-container {
@@ -1207,7 +1207,7 @@ if ($isJcasado) {
     <div class="mobile-menu-backdrop" onclick="toggleMobileMenu(false)"></div>
     <div class="buttons-container">
     <?php
-    // Mostrar el botÃ³n correspondiente si procede
+    // Mostrar el botón correspondiente si procede
     if ($puedeVerProductos) {
     ?>
       <a href="productos.php" class="btn btn-productos">
@@ -1277,7 +1277,7 @@ if ($isJcasado) {
     <?php
 // echo "Zona horaria: " . ini_get("date.timezone") . "<br>";
 // echo "Hora actual: " . date("Y-m-d H:i:s") . "<br>";
-// Comentario de depuraciÃ³n saneado
+// Comentario de depuración saneado
 ?>
     <?php 
     if (empty($pedidosHoy)) {
@@ -1480,7 +1480,7 @@ if ($isJcasado) {
                . '</div>';
             echo '<div class="group-content" id="grupoAlb_' . $codComisAlb . '" style="display:' . $displayAlb . ';">';
 
-            // Mostrar cada albarÃ¡n
+            // Mostrar cada albarán
             foreach ($grpA['registros'] as $alb) {
                 $colorAlbaran = '#17a2b8';
                 $obsExt = !empty($alb['observacion_externa']) ? toUTF8($alb['observacion_externa']) : '';
@@ -1520,7 +1520,7 @@ if ($isJcasado) {
                 } else {
                     $prefijo = "Venta";
                 }
-                // Identificador Ãºnico
+                // Identificador único
                 $uniqueId = $codAlb . "_" . $alb['tipo_venta'];
 
                 echo '<div class="item-box" style="border-left:6px solid ' . $colorAlbaran . ';' . $bgAlbaran
@@ -1661,7 +1661,7 @@ if ($isJcasado) {
                     $colorTexto = '#666';
                     $iconoNL = '<i class="fa fa-ban"></i>';
                     if (strpos($tipoEventoLower, 'medico') !== false 
-                        || strpos($tipoEventoLower, 'mÃ©dico') !== false) {
+                        || strpos($tipoEventoLower, 'médico') !== false) {
                         $iconoNL = '<i class="fa fa-user-md"></i>';
                     } else if (strpos($tipoEventoLower, 'comaferr') !== false) {
                         $iconoNL = '<i class="fa fa-building"></i>';
@@ -1813,7 +1813,7 @@ function abrirModalAlbaran(codVentaTipo, codCliente) {
 
 // ================ Visitas ================
 function abrirModalVisita(idVisita) {
-  // Redirige a la pÃ¡gina de ediciÃ³n de visita
+  // Redirige a la página de edición de visita
   window.location.href = "editar_visita.php?id_visita=" + idVisita + "&origen=index";
 }
 
@@ -1886,7 +1886,7 @@ if (window.matchMedia('(max-width: 1024px)').matches) {
 </script>
 
 <?php
-// Cerrar la conexiÃ³n ODBC
+// Cerrar la conexión ODBC
 ?>
 <script src="<?= BASE_URL ?>/assets/js/app-ui.js"></script>
 <?php require BASE_PATH . '/modales/modal_documento.php'; ?>

@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </style>
         </head>
         <body>
-            <div class='message'>Datos invÃƒÂ¡lidos para la asignaciÃƒÂ³n de la ruta.</div><br>
+            <div class='message'>Datos inválidos para la asignación de la ruta.</div><br>
             <a href='zonas_rutas.php?cod_zona=$cod_zona' class='back-button'>Volver</a>
         </body>
         </html>";
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </style>
         </head>
         <body>
-            <div class='message'>Error al asignar la ruta a la zona. IntÃƒÂ©ntalo de nuevo.</div><br>
+            <div class='message'>Error al asignar la ruta a la zona. Inténtalo de nuevo.</div><br>
             <a href='zonas_rutas.php?cod_zona=$cod_zona' class='back-button'>Volver</a>
         </body>
         </html>";
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     echo "<!DOCTYPE html>
     <html>
     <head>
-        <title>MÃƒÂ©todo InvÃƒÂ¡lido</title>
+        <title>Método Inválido</title>
         <meta charset='UTF-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
         <!-- Bootstrap 3.3.7 -->
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </style>
     </head>
     <body>
-        <div class='message'>MÃƒÂ©todo de solicitud no vÃƒÂ¡lido.</div><br>
+        <div class='message'>Método de solicitud no válido.</div><br>
         <a href='zonas.php' class='back-button'>Volver</a>
     </body>
     </html>";

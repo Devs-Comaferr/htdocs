@@ -9,7 +9,7 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 }
 // check_visita_previa.php
 
-// Deshabilitar la visualizaciÃƒÂ³n de errores en producciÃƒÂ³n
+// Deshabilitar la visualización de errores en producción
 ini_set('display_errors', 0);
 ini_set('display_startup_errors', 0);
 error_reporting(0);
@@ -23,7 +23,7 @@ require_once BASE_PATH . '/app/Support/db.php';
 
 $conn = db();
 
-// FunciÃƒÂ³n de validaciÃƒÂ³n de fecha (compatible con PHP 5.2.3)
+// Función de validación de fecha (compatible con PHP 5.2.3)
 function is_valid_date($date) {
     $parts = explode('-', $date);
     if (count($parts) != 3) {
@@ -37,7 +37,7 @@ function is_valid_date($date) {
 
 // Verificar que la solicitud sea POST
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-    echo "error:Solicitud invÃƒÂ¡lida.";
+    echo "error:Solicitud inválida.";
     exit();
 }
 
@@ -46,7 +46,7 @@ $cod_cliente = isset($_POST['cod_cliente']) ? intval($_POST['cod_cliente']) : 0;
 $fecha_visita = isset($_POST['fecha_visita']) ? $_POST['fecha_visita'] : '';
 $cod_seccion = isset($_POST['cod_seccion']) ? $_POST['cod_seccion'] : null;
 
-// Convertir cod_seccion a NULL si estÃƒÂ¡ vacÃƒÂ­o
+// Convertir cod_seccion a NULL si está vacío
 if ($cod_seccion === '' || strtoupper($cod_seccion) === 'NULL') {
     $cod_seccion = null;
 }
@@ -59,14 +59,14 @@ if ($cod_cliente <= 0 || empty($fecha_visita)) {
 
 // Validar formato de fecha (YYYY-MM-DD)
 if (!is_valid_date($fecha_visita)) {
-    echo "error:Formato de fecha invÃƒÂ¡lido.";
+    echo "error:Formato de fecha inválido.";
     exit();
 }
 
-// Calcular la fecha lÃƒÂ­mite (5 dÃƒÂ­as antes de fecha_visita)
+// Calcular la fecha límite (5 días antes de fecha_visita)
 $fecha_limite = date('Y-m-d', strtotime($fecha_visita . ' -5 days'));
 
-// Consulta para verificar si existe una visita previa en los ÃƒÂºltimos 5 dÃƒÂ­as
+// Consulta para verificar si existe una visita previa en los últimos 5 días
 $sql = "
 SELECT TOP 1 id_visita
 FROM [integral].[dbo].[cmf_visitas_comerciales]
@@ -95,7 +95,7 @@ $params = array(
     ($cod_seccion === null ? null : $cod_seccion)
 );
 
-// Ejecutar la consulta con los parÃƒÂ¡metros
+// Ejecutar la consulta con los parámetros
 $exec = odbc_execute($stmt, $params);
 if (!$exec) {
     echo "error:Error al ejecutar la consulta.";

@@ -192,7 +192,7 @@ if (isset($_GET['cod_zona'])) {
             <h2>Rutas Asignadas</h2>
             <table>
                 <tr>
-                    <th>Código de Ruta</th>
+                    <th>CÃ³digo de Ruta</th>
                     <th>Nombre de Ruta</th>
                 </tr>
                 <?php if (!empty($rutas_asignadas)): ?>

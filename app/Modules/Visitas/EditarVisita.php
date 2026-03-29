@@ -37,7 +37,7 @@ function editarVisitaModernPrepareExecute($conn, string $sql, array $params = []
 
 $id_visita = isset($_GET['id_visita']) ? intval($_GET['id_visita']) : 0;
 if ($id_visita <= 0) {
-    error_log('ID de visita invÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lido.');
+    error_log('ID de visita inválido.');
     echo 'Error interno';
     return;
 }
@@ -62,7 +62,7 @@ $sql = "
 ";
 $result = editarVisitaModernPrepareExecute($conn, $sql, [$id_visita]);
 if (!$result || !odbc_fetch_row($result)) {
-    $error = "No se encontrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³ la visita especificada.";
+    $error = "No se encontró la visita especificada.";
     error_log("<div class='alert alert-danger'>$error</div>");
     echo 'Error interno';
     return;
@@ -116,11 +116,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $morning_start = strtotime($hora_inicio_manana);
                 $morning_end = strtotime($hora_fin_manana);
                 if (strtotime($hora_inicio_visita) < $morning_start) {
-                    $error = "La hora de inicio de la visita no puede ser anterior a la apertura de la maÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±ana ($hora_inicio_manana).";
+                    $error = "La hora de inicio de la visita no puede ser anterior a la apertura de la mañana ($hora_inicio_manana).";
                 } elseif (strtotime($hora_inicio_visita) >= $morning_start && strtotime($hora_inicio_visita) < $morning_end) {
                     $slot = 'morning';
                     if (strtotime($hora_fin_visita) > $morning_end) {
-                        $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la maÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±ana ($hora_fin_manana).";
+                        $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la mañana ($hora_fin_manana).";
                     }
                 }
             }
@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (empty($slot) && empty($error)) {
                 $horarios = '';
                 if (!empty($hora_inicio_manana) && !empty($hora_fin_manana)) {
-                    $horarios .= "MaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±ana: $hora_inicio_manana a $hora_fin_manana. ";
+                    $horarios .= "Mañana: $hora_inicio_manana a $hora_fin_manana. ";
                 }
                 if (!empty($hora_inicio_tarde) && !empty($hora_fin_tarde)) {
                     $horarios .= "Tarde: $hora_inicio_tarde a $hora_fin_tarde.";
@@ -293,7 +293,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <?php if (!is_null($cod_seccion)) { ?>
         <div class="form-group">
-            <label>SecciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n:</label>
+            <label>Sección:</label>
             <input type="text" class="form-control" value="<?php echo htmlspecialchars($cod_seccion); ?>" readonly>
         </div>
         <?php } ?>

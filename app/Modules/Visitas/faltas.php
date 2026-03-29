@@ -16,17 +16,17 @@ setlocale(LC_TIME, 'es_ES.UTF-8', 'es_ES', 'esp');
 // Incluir el archivo de funciones centralizado
 require_once BASE_PATH . '/app/Support/functions.php';
 
-// Si se recibe el parÃƒÂ¡metro 'origen', se guarda en la sesiÃƒÂ³n.
+// Si se recibe el parámetro 'origen', se guarda en la sesión.
 if (!empty($_GET['origen'])) {
     $_SESSION['origen'] = $_GET['origen'];
 }
 
-// Verificar si el usuario ha iniciado sesiÃƒÂ³n
+// Verificar si el usuario ha iniciado sesión
 
 
-// Verificar que se pase el parÃƒÂ¡metro `cod_cliente`
+// Verificar que se pase el parámetro `cod_cliente`
 if (empty($_GET['cod_cliente'])) {
-    error_log("El parÃƒÂ¡metro 'cod_cliente' es obligatorio.");
+    error_log("El parámetro 'cod_cliente' es obligatorio.");
     echo 'Error interno';
     return;
 }
@@ -48,7 +48,7 @@ $fecha_hasta  = $_GET['fecha_hasta']  ?? null;
 $cod_articulo = $_GET['cod_articulo'] ?? null;
 $descripcion  = $_GET['descripcion']  ?? null;
 
-// Validar orden y direcciÃƒÂ³n
+// Validar orden y dirección
 $orden_permitido = [
     'Pedido'                     => 'Pedido',
     'Fecha_Venta'                => 'Fecha_Venta',
@@ -179,7 +179,7 @@ if ($fecha_desde) {
     if (validarFechaSQL($fecha_desde)) {
         $sql_normal .= " AND hvc.fecha_venta >= CONVERT(smalldatetime, '" . addslashes($fecha_desde) . "', 120) ";
     } else {
-        error_log("Formato de fecha 'desde' invÃƒÂ¡lido. Debe ser 'YYYY-MM-DD'.");
+        error_log("Formato de fecha 'desde' inválido. Debe ser 'YYYY-MM-DD'.");
         echo 'Error interno';
         return;
     }
@@ -188,7 +188,7 @@ if ($fecha_hasta) {
     if (validarFechaSQL($fecha_hasta)) {
         $sql_normal .= " AND hvc.fecha_venta <= CONVERT(smalldatetime, '" . addslashes($fecha_hasta) . "', 120) ";
     } else {
-        error_log("Formato de fecha 'hasta' invÃƒÂ¡lido. Debe ser 'YYYY-MM-DD'.");
+        error_log("Formato de fecha 'hasta' inválido. Debe ser 'YYYY-MM-DD'.");
         echo 'Error interno';
         return;
     }
@@ -218,7 +218,7 @@ HAVING
 ";
 
 // -----------------------------------------------------------------------------
-// Consulta para registros eliminados (vlelim/vcelim) con comprobaciÃƒÂ³n en las normales
+// Consulta para registros eliminados (vlelim/vcelim) con comprobación en las normales
 // -----------------------------------------------------------------------------
 $sql_elim = "
 SELECT 
@@ -337,7 +337,7 @@ if ($fecha_desde) {
     if (validarFechaSQL($fecha_desde)) {
         $sql_elim .= " AND vcelim.fecha_venta >= CONVERT(smalldatetime, '" . addslashes($fecha_desde) . "', 120) ";
     } else {
-        error_log("Formato de fecha 'desde' invÃƒÂ¡lido. Debe ser 'YYYY-MM-DD'.");
+        error_log("Formato de fecha 'desde' inválido. Debe ser 'YYYY-MM-DD'.");
         echo 'Error interno';
         return;
     }
@@ -346,7 +346,7 @@ if ($fecha_hasta) {
     if (validarFechaSQL($fecha_hasta)) {
         $sql_elim .= " AND vcelim.fecha_venta <= CONVERT(smalldatetime, '" . addslashes($fecha_hasta) . "', 120) ";
     } else {
-        error_log("Formato de fecha 'hasta' invÃƒÂ¡lido. Debe ser 'YYYY-MM-DD'.");
+        error_log("Formato de fecha 'hasta' inválido. Debe ser 'YYYY-MM-DD'.");
         echo 'Error interno';
         return;
     }
@@ -406,7 +406,7 @@ $numero_pedido = $_GET['pedido'] ?? null;
 $sql_cliente_seccion = "
     SELECT 
         c.nombre_comercial AS nombre_cliente, 
-        COALESCE(s.nombre, 'Sin SecciÃƒÂ³n') AS nombre_seccion
+        COALESCE(s.nombre, 'Sin Sección') AS nombre_seccion
     FROM [integral].[dbo].[clientes] c
     LEFT JOIN [integral].[dbo].[secciones_cliente] s
         ON c.cod_cliente = s.cod_cliente
@@ -417,23 +417,23 @@ if ($cod_seccion !== null && $cod_seccion !== '') {
 }
 $result_cliente_seccion = odbc_exec($conn, $sql_cliente_seccion);
 if (!$result_cliente_seccion) {
-    error_log("Error al obtener datos del cliente y secciÃƒÂ³n: " . odbc_errormsg($conn));
+    error_log("Error al obtener datos del cliente y sección: " . odbc_errormsg($conn));
     echo 'Error interno';
     return;
 }
 $cliente_seccion = odbc_fetch_array($result_cliente_seccion);
 if (!$cliente_seccion) {
     $nombre_cliente = "Cliente no encontrado";
-    $nombre_seccion = "Sin secciÃƒÂ³n";
+    $nombre_seccion = "Sin sección";
 } else {
     $nombre_cliente = $cliente_seccion['nombre_cliente'] ?? "Desconocido";
-    $nombre_seccion = $cliente_seccion['nombre_seccion'] ?? "Sin secciÃƒÂ³n";
+    $nombre_seccion = $cliente_seccion['nombre_seccion'] ?? "Sin sección";
 }
 $pageTitle = "Faltas de " . $nombre_cliente;
 if ($numero_pedido) {
     $pageTitle .= " - Pedido: " . htmlspecialchars($numero_pedido);
 }
-if ($nombre_seccion !== 'Sin SecciÃƒÂ³n') {
+if ($nombre_seccion !== 'Sin Sección') {
     $pageTitle .= " - " . htmlspecialchars($nombre_seccion);
 }
 include BASE_PATH . '/resources/views/layouts/header.php';
@@ -506,7 +506,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
       min-width: 100%;
     }
 
-    /* Columnas de la fila de CÃƒÂ³digo, DescripciÃƒÂ³n y Botones */
+    /* Columnas de la fila de Código, Descripción y Botones */
     .code {
       flex: 0 0 150px;
     }
@@ -621,19 +621,19 @@ include BASE_PATH . '/resources/views/layouts/header.php';
       </div>
     </div>
 
-    <!-- Fila para CÃƒÂ³digo, DescripciÃƒÂ³n y Botones en lÃƒÂ­nea -->
+    <!-- Fila para Código, Descripción y Botones en línea -->
     <div class="filter-row">
       <div class="filter-group code">
-        <label for="cod_articulo">CÃƒÂ³digo:</label>
+        <label for="cod_articulo">Código:</label>
         <input type="text" id="cod_articulo" name="cod_articulo"
                value="<?php echo htmlspecialchars($cod_articulo ?? ''); ?>"
-               placeholder="Buscar cÃƒÂ³digo...">
+               placeholder="Buscar código...">
       </div>
       <div class="filter-group desc">
-        <label for="descripcion">DescripciÃƒÂ³n:</label>
+        <label for="descripcion">Descripción:</label>
         <input type="text" id="descripcion" name="descripcion"
                value="<?php echo htmlspecialchars($descripcion ?? ''); ?>"
-               placeholder="Buscar descripciÃƒÂ³n...">
+               placeholder="Buscar descripción...">
       </div>
       <div class="filter-group buttons">
         <input type="hidden" name="cod_cliente" value="<?php echo htmlspecialchars($cod_cliente ?? ''); ?>">
@@ -652,7 +652,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
   <?php if (!empty($lineas)): ?>
     <div class="table-container">
       <?php
-      // Agrupar las lÃƒÂ­neas por mes
+      // Agrupar las líneas por mes
       $lineas_por_mes = [];
       foreach ($lineas as $linea) {
           $mes = date("Y-m", strtotime($linea['Fecha_Venta']));
@@ -670,11 +670,11 @@ include BASE_PATH . '/resources/views/layouts/header.php';
         <table>
           <thead>
             <tr>
-              <th><a href="<?php echo $base_url_mes . '&orden=Pedido&direccion=' . $direccion_invertida; ?>">CÃƒÂ³digo Pedido</a></th>
+              <th><a href="<?php echo $base_url_mes . '&orden=Pedido&direccion=' . $direccion_invertida; ?>">Código Pedido</a></th>
               <th><a href="<?php echo $base_url_mes . '&orden=Fecha_Venta&direccion=' . $direccion_invertida; ?>">Fecha Pedido</a></th>
-              <th><a href="<?php echo $base_url_mes . '&orden=Fecha_Albaran&direccion=' . $direccion_invertida; ?>">AlbarÃƒÂ¡n</a></th>
-              <th><a href="<?php echo $base_url_mes . '&orden=Articulo&direccion=' . $direccion_invertida; ?>">ArtÃƒÂ­culo</a></th>
-              <th><a href="<?php echo $base_url_mes . '&orden=Descripcion&direccion=' . $direccion_invertida; ?>">DescripciÃƒÂ³n</a></th>
+              <th><a href="<?php echo $base_url_mes . '&orden=Fecha_Albaran&direccion=' . $direccion_invertida; ?>">Albarán</a></th>
+              <th><a href="<?php echo $base_url_mes . '&orden=Articulo&direccion=' . $direccion_invertida; ?>">Artículo</a></th>
+              <th><a href="<?php echo $base_url_mes . '&orden=Descripcion&direccion=' . $direccion_invertida; ?>">Descripción</a></th>
               <th><a href="<?php echo $base_url_mes . '&orden=Cantidad_Pedida&direccion=' . $direccion_invertida; ?>">Pedido</a></th>
               <th><a href="<?php echo $base_url_mes . '&orden=Cantidad_Servida&direccion=' . $direccion_invertida; ?>">Servido</a></th>
               <th><a href="<?php echo $base_url_mes . '&orden=Cantidad_Restante&direccion=' . $direccion_invertida; ?>">Resto</a></th>
@@ -736,9 +736,9 @@ include BASE_PATH . '/resources/views/layouts/header.php';
                         echo '<i class="fas fa-trash-alt text-danger" title="Eliminado"></i>';
                     } else {
                         if (!empty($linea['Historico']) && $linea['Historico'] === 'S') {
-                            echo '<i class="fas fa-lock" title="HistÃƒÂ³rico (S)"></i>';
+                            echo '<i class="fas fa-lock" title="Histórico (S)"></i>';
                         } else {
-                            echo '<i class="fas fa-lock-open" title="No HistÃƒÂ³rico (N)"></i>';
+                            echo '<i class="fas fa-lock-open" title="No Histórico (N)"></i>';
                         }
                         if (!empty($linea['CodPedidoWeb'])) {
                             echo '&nbsp;<i class="fas fa-globe" title="Pedido Web"></i>';
@@ -752,7 +752,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
         </table>
         <div class="summary">
           <strong>Resumen del Mes:</strong><br>
-          NÃƒÂºmero de lÃƒÂ­neas: <?php echo count($lineas_por_mes[$mes]); ?><br>
+          Número de líneas: <?php echo count($lineas_por_mes[$mes]); ?><br>
           Importe total: <?php 
             $suma_mes = 0;
             foreach ($lineas_por_mes[$mes] as $l) {
@@ -766,13 +766,13 @@ include BASE_PATH . '/resources/views/layouts/header.php';
         <br><br>
         <hr>
         <strong>Resumen Global:</strong><br>
-        NÃƒÂºmero total de lÃƒÂ­neas: <?php echo $num_lineas; ?><br>
+        Número total de líneas: <?php echo $num_lineas; ?><br>
         Importe total: <?php echo number_format($suma_total, 2, ',', '.'); ?> 
         <hr><br><br>
       </div>
     </div>
   <?php else: ?>
-    <p>No se encontraron faltas de entrega para este cliente y secciÃƒÂ³n.</p>
+    <p>No se encontraron faltas de entrega para este cliente y sección.</p>
   <?php endif; ?>
   <?php 
     $origen = $_SESSION['origen'] ?? 'index.php';
@@ -791,7 +791,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var fechaDesdePHP = <?php echo $fecha_desde ? json_encode($fecha_desde) : 'null'; ?>;
   var fechaHastaPHP = <?php echo $fecha_hasta ? json_encode($fecha_hasta) : 'null'; ?>;
   
-  // FunciÃƒÂ³n para crear un objeto Date a partir de "YYYY-MM-DD"
+  // Función para crear un objeto Date a partir de "YYYY-MM-DD"
   function parseLocalDate(str) {
     var parts = str.split('-');
     return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), 12, 0, 0);

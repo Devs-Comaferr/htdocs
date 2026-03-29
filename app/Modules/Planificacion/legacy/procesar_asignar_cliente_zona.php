@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cod_zona = isset($_POST['cod_zona']) ? intval($_POST['cod_zona']) : 0;
     $cod_cliente = isset($_POST['cod_cliente']) ? intval($_POST['cod_cliente']) : 0;
     
-    // Verificar si se ha seleccionado una secciÃ³n
+    // Verificar si se ha seleccionado una sección
     if (isset($_POST['cod_seccion']) && $_POST['cod_seccion'] !== '') {
         $cod_seccion = intval($_POST['cod_seccion']);
     } else {
@@ -45,18 +45,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Verificar si el cliente tiene secciones disponibles (si cod_seccion != NULL)
     if ($cod_seccion !== 'NULL') {
-        // Verificar si la secciÃ³n estÃ¡ disponible
+        // Verificar si la sección está disponible
         $query_verificar = "SELECT COUNT(*) AS total FROM cmf_asignacion_zonas_clientes 
                             WHERE cod_cliente = '$cod_cliente' AND cod_seccion = '$cod_seccion'";
         $resultado_verificar = odbc_exec($conn, $query_verificar);
         if (!$resultado_verificar) {
-            error_log('Error al verificar la disponibilidad de la secciÃ³n: ' . odbc_errormsg($conn));
+            error_log('Error al verificar la disponibilidad de la sección: ' . odbc_errormsg($conn));
             echo 'Error interno';
             return;
         }
         $fila_verificar = odbc_fetch_array($resultado_verificar);
         if ($fila_verificar['total'] > 0) {
-            error_log('La secciÃ³n seleccionada ya estÃ¡ asignada a una zona.');
+            error_log('La sección seleccionada ya está asignada a una zona.');
             echo 'Error interno';
             return;
         }
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $resultado = asignarClienteZonaService($cod_cliente, $cod_seccion, $cod_zona, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones);
     
     if ($resultado) {
-        // Redirigir de vuelta a la pÃ¡gina de asignaciÃ³n con un mensaje de Ã©xito
+        // Redirigir de vuelta a la página de asignación con un mensaje de éxito
         header("Location: asignacion_clientes_zonas.php?cod_zona=$cod_zona&mensaje=asignado");
         exit();
     } else {

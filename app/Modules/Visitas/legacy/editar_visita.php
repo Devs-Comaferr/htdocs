@@ -4,7 +4,7 @@ if (!defined('BASE_PATH')) {
     exit;
 }
 
-// Ã¢Å¡Â Ã¯Â¸Â ARCHIVO LEGACY
+// âš ï¸ ARCHIVO LEGACY
 // Este archivo ya no debe usarse directamente.
 // Se mantiene por compatibilidad.
 // Usar /visitas.php?action=crear|editar|eliminar
@@ -44,7 +44,7 @@ function editarVisitaPrepareExecute($conn, string $sql, array $params = [])
 // Se espera recibir el id de la visita mediante GET
 $id_visita = isset($_GET['id_visita']) ? intval($_GET['id_visita']) : 0;
 if ($id_visita <= 0) {
-    error_log('ID de visita invÃƒÆ’Ã‚Â¡lido.');
+    error_log('ID de visita inválido.');
     echo 'Error interno';
     return;
 }
@@ -52,7 +52,7 @@ if ($id_visita <= 0) {
 $error = "";
 $success = "";
 
-// Recuperar los datos actuales de la visita, incluyendo cod_cliente (para luego obtener la asignaciÃƒÆ’Ã‚Â³n)
+// Recuperar los datos actuales de la visita, incluyendo cod_cliente (para luego obtener la asignación)
 $sql = "
     SELECT 
         cvc.id_visita,
@@ -70,7 +70,7 @@ $sql = "
 ";
 $result = editarVisitaPrepareExecute($conn, $sql, [$id_visita]);
 if (!$result || !odbc_fetch_row($result)) {
-    $error = "No se encontrÃƒÆ’Ã‚Â³ la visita especificada.";
+    $error = "No se encontró la visita especificada.";
     error_log("<div class='alert alert-danger'>$error</div>");
     echo 'Error interno';
     return;
@@ -89,7 +89,7 @@ $estado_visita_db = odbc_result($result, 'estado_visita');
 $hora_inicio_visita_db = $hora_inicio_visita_db ? substr($hora_inicio_visita_db, 0, 5) : "";
 $hora_fin_visita_db = $hora_fin_visita_db ? substr($hora_fin_visita_db, 0, 5) : "";
 
-// Recuperar la asignaciÃƒÆ’Ã‚Â³n del cliente para obtener los horarios de disponibilidad y el tiempo promedio
+// Recuperar la asignación del cliente para obtener los horarios de disponibilidad y el tiempo promedio
 $sql_assignment = "SELECT * FROM [integral].[dbo].[cmf_asignacion_zonas_clientes] WHERE cod_cliente = ? AND activo = 1";
 $assignmentParams = [$cod_cliente];
 if (!is_null($cod_seccion)) {
@@ -109,7 +109,7 @@ $hora_fin_tarde     = !empty($assignment['hora_fin_tarde']) ? substr($assignment
 $tiempo_promedio = floatval($assignment['tiempo_promedio_visita']); // en horas
 $tiempo_promedio_minutes = $tiempo_promedio * 60;
 
-// Si se enviÃƒÆ’Ã‚Â³ el formulario, usar los valores enviados; en caso contrario, usar los actuales de la BD
+// Si se envió el formulario, usar los valores enviados; en caso contrario, usar los actuales de la BD
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $fecha_visita = date('Y-m-d', strtotime(trim($_POST['fecha_visita'])));
     $hora_inicio_visita = trim($_POST['hora_inicio_visita']);
@@ -122,18 +122,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif (strtotime($hora_inicio_visita) >= strtotime($hora_fin_visita)) {
         $error = "La hora de inicio debe ser anterior a la de fin.";
     } else {
-        // ValidaciÃƒÆ’Ã‚Â³n de franjas horarias (si el estado no es "Realizada")
+        // Validación de franjas horarias (si el estado no es "Realizada")
         if (estadoVisitaRequiereFranja($estado_visita)) {
             $slot = "";
             if (!empty($hora_inicio_manana) && !empty($hora_fin_manana)) {
                 $morning_start = strtotime($hora_inicio_manana);
                 $morning_end = strtotime($hora_fin_manana);
                 if (strtotime($hora_inicio_visita) < $morning_start) {
-                    $error = "La hora de inicio de la visita no puede ser anterior a la apertura de la maÃƒÆ’Ã‚Â±ana ($hora_inicio_manana).";
+                    $error = "La hora de inicio de la visita no puede ser anterior a la apertura de la mañana ($hora_inicio_manana).";
                 } elseif (strtotime($hora_inicio_visita) >= $morning_start && strtotime($hora_inicio_visita) < $morning_end) {
                     $slot = "morning";
                     if (strtotime($hora_fin_visita) > $morning_end) {
-                        $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la maÃƒÆ’Ã‚Â±ana ($hora_fin_manana).";
+                        $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la mañana ($hora_fin_manana).";
                     }
                 }
             }
@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (empty($slot) && empty($error)) {
                 $horarios = "";
                 if (!empty($hora_inicio_manana) && !empty($hora_fin_manana)) {
-                    $horarios .= "MaÃƒÆ’Ã‚Â±ana: $hora_inicio_manana a $hora_fin_manana. ";
+                    $horarios .= "Mañana: $hora_inicio_manana a $hora_fin_manana. ";
                 }
                 if (!empty($hora_inicio_tarde) && !empty($hora_fin_tarde)) {
                     $horarios .= "Tarde: $hora_inicio_tarde a $hora_fin_tarde.";
@@ -161,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
         
-        // ValidaciÃƒÆ’Ã‚Â³n de solapamiento
+        // Validación de solapamiento
         if (empty($error)) {
             $estadoLower = normalizarEstadoVisitaClave($estado_visita);
             if ($estadoLower == 'descartada') {
@@ -203,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             if ($result_cliente_overlap && odbc_fetch_row($result_cliente_overlap)) {
                                 $overlapCliente = odbc_result($result_cliente_overlap, 'nombre_comercial');
                             }
-                            // Si la visita solapada tiene asignada una secciÃƒÆ’Ã‚Â³n, recuperar su nombre
+                            // Si la visita solapada tiene asignada una sección, recuperar su nombre
                             $overlapSeccion = "";
                             if (!empty($row['cod_seccion'])) {
                                 $overlap_seccion = intval($row['cod_seccion']);
@@ -311,7 +311,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         <?php if (!is_null($cod_seccion)) { ?>
         <div class="form-group">
-            <label>SecciÃƒÆ’Ã‚Â³n:</label>
+            <label>Sección:</label>
             <input type="text" class="form-control" value="<?php echo htmlspecialchars($cod_seccion); ?>" readonly>
         </div>
         <?php } ?>
@@ -364,7 +364,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </a>
         
         <!-- Botn Ficha de Cliente a la derecha -->
-        <!-- FIX cod_seccion: 0 es valor vÃƒÆ’Ã‚Â¡lido, no usar empty() -->
+        <!-- FIX cod_seccion: 0 es valor válido, no usar empty() -->
         <a href="cliente_detalles.php?cod_cliente=<?php echo urlencode($cod_cliente); ?><?php echo tieneValor($cod_seccion) ? '&cod_seccion=' . urlencode($cod_seccion) : ''; ?>" class="btn btn-warning boton-derecha">
             Ficha de Cliente
         </a>

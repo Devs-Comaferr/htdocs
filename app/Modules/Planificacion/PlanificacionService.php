@@ -56,7 +56,7 @@ function obtenerZonasVisita() {
 }
 
 /**
- * Obtener informaciÃ³n de una zona por su cÃ³digo
+ * Obtener información de una zona por su código
  */
 function obtenerZonaPorCodigo($cod_zona) {
     $cod_vendedor = obtenerCodVendedorPlanificacionService();
@@ -88,7 +88,7 @@ function obtenerRutasPorZona($cod_zona) {
     $cod_zona = intval($cod_zona);
     
     // Consulta con JOIN para obtener las rutas asociadas a la zona
-    $query = "SELECT r.cod_ruta, COALESCE(r.descripcion, 'Sin DescripciÃ³n') AS nombre_ruta 
+    $query = "SELECT r.cod_ruta, COALESCE(r.descripcion, 'Sin Descripción') AS nombre_ruta 
               FROM cmf_zonas_rutas czr 
               JOIN rutas r ON czr.cod_ruta = r.cod_ruta 
               WHERE czr.cod_zona = $cod_zona
@@ -115,7 +115,7 @@ function obtenerRutasPorZona($cod_zona) {
 function obtenerTodasRutas() {
     $conn = db();
     
-    $query = "SELECT DISTINCT r.cod_ruta, COALESCE(r.descripcion, 'Sin DescripciÃ³n') AS nombre_ruta 
+    $query = "SELECT DISTINCT r.cod_ruta, COALESCE(r.descripcion, 'Sin Descripción') AS nombre_ruta 
               FROM rutas r 
               ORDER BY nombre_ruta ASC";
     $resultado = odbc_exec($conn, $query);
@@ -134,7 +134,7 @@ function obtenerTodasRutas() {
 }
 
 /**
- * Obtener secciones de un cliente especÃ­fico que no estÃ¡n asignadas a ninguna zona
+ * Obtener secciones de un cliente específico que no están asignadas a ninguna zona
  */
 /**
  * Asignar una ruta a una zona.
@@ -180,7 +180,7 @@ function obtenerSeccionesPorCliente($cod_cliente) {
     // Sanitizar la entrada
     $cod_cliente = intval($cod_cliente);
     
-    // Obtener secciones que no estÃ¡n asignadas a ninguna zona
+    // Obtener secciones que no están asignadas a ninguna zona
     $query = "SELECT sc.cod_seccion, sc.nombre 
               FROM secciones_cliente sc
               WHERE sc.cod_cliente = '$cod_cliente' 
@@ -230,7 +230,7 @@ function obtenerClientesDisponiblesParaAsignar($cod_zona, $rutas_asignadas) {
     // Convertir el array de cod_ruta a una cadena separada por comas
     $cod_rutas_str = implode(',', $cod_rutas);
     
-    // Consulta para obtener clientes con al menos una secciÃ³n sin asignar
+    // Consulta para obtener clientes con al menos una sección sin asignar
     $query_secciones_disponibles = "
         SELECT DISTINCT sc.cod_cliente
         FROM secciones_cliente sc
@@ -332,11 +332,11 @@ function obtenerClientesDisponiblesParaAsignar($cod_zona, $rutas_asignadas) {
 }
 
 /**
- * FunciÃ³n de comparaciÃ³n para ordenar clientes por nombre_comercial.
+ * Función de comparación para ordenar clientes por nombre_comercial.
  *
  * @param array $a Primer cliente a comparar.
  * @param array $b Segundo cliente a comparar.
- * @return int Resultado de la comparaciÃ³n.
+ * @return int Resultado de la comparación.
  */
 function compararNombreCliente($a, $b) {
     return strcmp($a['nombre_cliente'], $b['nombre_cliente']);
@@ -346,7 +346,7 @@ function compararNombreCliente($a, $b) {
 
 
 /**
- * Asignar un cliente y su secciÃ³n a una zona
+ * Asignar un cliente y su sección a una zona
  */
 function asignarClienteZona($cod_cliente, $cod_seccion, $zona_principal, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones = '') {
     $conn = db();
@@ -365,24 +365,24 @@ function asignarClienteZona($cod_cliente, $cod_seccion, $zona_principal, $zona_s
         $cod_seccion = intval($cod_seccion);
     }
     
-    // Verificar si la asignaciÃ³n ya existe
+    // Verificar si la asignación ya existe
     $query_check = "SELECT COUNT(*) AS total FROM cmf_asignacion_zonas_clientes 
                    WHERE cod_cliente = '$cod_cliente' 
                      AND (cod_seccion = " . ($cod_seccion === 'NULL' ? "NULL" : "'$cod_seccion'") . ")
                      AND zona_principal = '$zona_principal'";
     $resultado_check = odbc_exec($conn, $query_check);
     if (!$resultado_check) {
-        error_log('Error al verificar asignaciÃ³n existente: ' . odbc_errormsg($conn));
+        error_log('Error al verificar asignación existente: ' . odbc_errormsg($conn));
         return;
     }
     $fila_check = odbc_fetch_array($resultado_check);
     
     if ($fila_check['total'] > 0) {
-        // AsignaciÃ³n ya existe
+        // Asignación ya existe
         return false;
     }
     
-    // Insertar la nueva asignaciÃ³n
+    // Insertar la nueva asignación
     $query = "INSERT INTO cmf_asignacion_zonas_clientes 
               (cod_cliente, cod_seccion, zona_principal, zona_secundaria, tiempo_promedio_visita, preferencia_horaria, frecuencia_visita, observaciones)
               VALUES 
@@ -407,8 +407,8 @@ function asignarClienteZona($cod_cliente, $cod_seccion, $zona_principal, $zona_s
 /**
  * Obtener clientes asignados a una zona especfica, tanto principales como secundarios.
  *
- * @param int $cod_zona CÃ³digo de la zona.
- * @return array Lista de clientes con detalles de asignaciÃ³n.
+ * @param int $cod_zona Código de la zona.
+ * @return array Lista de clientes con detalles de asignación.
  */
 function obtenerClientesPorZona($cod_zona) {
     $conn = db();
@@ -421,10 +421,10 @@ function obtenerClientesPorZona($cod_zona) {
         SELECT 
             c.cod_cliente, 
             c.nombre_comercial AS nombre_cliente, 
-            c.poblacion AS poblacion_cliente, -- PoblaciÃ³n del cliente
+            c.poblacion AS poblacion_cliente, -- Población del cliente
             sc.cod_seccion, 
             sc.nombre AS nombre_seccion,
-            sc.poblacion AS poblacion_seccion, -- PoblaciÃ³n de la secciÃ³n
+            sc.poblacion AS poblacion_seccion, -- Población de la sección
             azc.frecuencia_visita,
             azc.observaciones,
             'primaria' AS tipo_asignacion
@@ -440,10 +440,10 @@ function obtenerClientesPorZona($cod_zona) {
         SELECT 
             c.cod_cliente, 
             c.nombre_comercial AS nombre_cliente, 
-            c.poblacion AS poblacion_cliente, -- PoblaciÃ³n del cliente
+            c.poblacion AS poblacion_cliente, -- Población del cliente
             sc.cod_seccion, 
             sc.nombre AS nombre_seccion,
-            sc.poblacion AS poblacion_seccion, -- PoblaciÃ³n de la secciÃ³n
+            sc.poblacion AS poblacion_seccion, -- Población de la sección
             azc.frecuencia_visita,
             azc.observaciones,
             'secundaria' AS tipo_asignacion
@@ -483,7 +483,7 @@ function obtenerClientesPorZona($cod_zona) {
 
 
 /**
- * FunciÃ³n para comparar clientes por nombre_comercial y nombre_seccion.
+ * Función para comparar clientes por nombre_comercial y nombre_seccion.
  */
 function compararNombreClienteYSeccion($a, $b) {
     $resultado = strcmp($a['nombre_cliente'], $b['nombre_cliente']);
@@ -496,7 +496,7 @@ function compararNombreClienteYSeccion($a, $b) {
 /**
  * Obtener el nombre comercial de un cliente.
  *
- * @param int $cod_cliente CÃ³digo del cliente.
+ * @param int $cod_cliente Código del cliente.
  * @return array|null Nombre comercial del cliente.
  */
 function obtenerNombreCliente($cod_cliente) {
@@ -516,10 +516,10 @@ function obtenerNombreCliente($cod_cliente) {
 }
 
 /**
- * Obtener informaciÃ³n de una zona por su cÃ³digo.
+ * Obtener información de una zona por su código.
  *
- * @param int $cod_zona CÃ³digo de la zona.
- * @return array|null InformaciÃ³n de la zona.
+ * @param int $cod_zona Código de la zona.
+ * @return array|null Información de la zona.
  */
 function obtenerZonaPorCodigoEditar($cod_zona) {
     $conn = db();
@@ -538,12 +538,12 @@ function obtenerZonaPorCodigoEditar($cod_zona) {
 }
 
 /**
- * Obtener una asignaciÃ³n especÃ­fica.
+ * Obtener una asignación específica.
  *
- * @param int $cod_cliente CÃ³digo del cliente.
- * @param int $cod_zona CÃ³digo de la zona.
- * @param int|null $cod_seccion CÃ³digo de la secciÃ³n (puede ser NULL).
- * @return array|null AsignaciÃ³n encontrada.
+ * @param int $cod_cliente Código del cliente.
+ * @param int $cod_zona Código de la zona.
+ * @param int|null $cod_seccion Código de la sección (puede ser NULL).
+ * @return array|null Asignación encontrada.
  */
 function obtenerAsignacion($cod_cliente, $cod_zona, $cod_seccion = null) {
     $conn = db();
@@ -551,13 +551,13 @@ function obtenerAsignacion($cod_cliente, $cod_zona, $cod_seccion = null) {
     $cod_cliente = intval($cod_cliente);
     $cod_zona = intval($cod_zona);
 
-    // ConstrucciÃ³n de la condiciÃ³n para manejar NULL en cod_seccion
+    // Construcción de la condición para manejar NULL en cod_seccion
     $condicion_seccion = $cod_seccion === null ? "azc.cod_seccion IS NULL" : "azc.cod_seccion = " . intval($cod_seccion);
 
     $query = "
         SELECT azc.*, 
                c.nombre_comercial, 
-               COALESCE(sc.nombre, 'Sin SecciÃ³n') AS nombre_seccion, 
+               COALESCE(sc.nombre, 'Sin Sección') AS nombre_seccion, 
                z.nombre_zona
         FROM cmf_asignacion_zonas_clientes azc
         JOIN clientes c ON azc.cod_cliente = c.cod_cliente
@@ -572,7 +572,7 @@ function obtenerAsignacion($cod_cliente, $cod_zona, $cod_seccion = null) {
     $resultado = odbc_exec($conn, $query);
 
     if (!$resultado) {
-        error_log('Error al obtener la asignaciÃ³n: ' . odbc_errormsg($conn));
+        error_log('Error al obtener la asignación: ' . odbc_errormsg($conn));
         return;
     }
 
@@ -584,18 +584,18 @@ function obtenerAsignacion($cod_cliente, $cod_zona, $cod_seccion = null) {
 
 
 /**
- * Actualizar una asignaciÃ³n en la base de datos.
+ * Actualizar una asignación en la base de datos.
  *
- * @param int $cod_cliente CÃ³digo del cliente.
- * @param int $cod_zona CÃ³digo de la zona principal.
- * @param int $cod_seccion CÃ³digo de la secciÃ³n.
- * @param int|null $zona_secundaria CÃ³digo de la zona secundaria (puede ser NULL).
+ * @param int $cod_cliente Código del cliente.
+ * @param int $cod_zona Código de la zona principal.
+ * @param int $cod_seccion Código de la sección.
+ * @param int|null $zona_secundaria Código de la zona secundaria (puede ser NULL).
  * @param float|null $tiempo_promedio_visita Tiempo promedio de visita.
- * @param string|null $preferencia_horaria Preferencia horaria ('M' para maÃ±ana, 'T' para tarde).
+ * @param string|null $preferencia_horaria Preferencia horaria ('M' para mañana, 'T' para tarde).
  * @param string|null $frecuencia_visita Frecuencia de visita ('Todos', 'Cada2', 'Cada3', 'Nunca').
  * @param string|null $observaciones Observaciones.
  *
- * @return bool True si la actualizaciÃ³n fue exitosa, false en caso contrario.
+ * @return bool True si la actualización fue exitosa, false en caso contrario.
  */
 function actualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones) {
     $conn = db();
@@ -610,7 +610,7 @@ function actualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secun
     $frecuencia_visita = is_null($frecuencia_visita) ? 'NULL' : "'" . addslashes($frecuencia_visita) . "'";
     $observaciones = is_null($observaciones) ? 'NULL' : "'" . addslashes($observaciones) . "'";
 
-    // Construir la consulta de actualizaciÃ³n
+    // Construir la consulta de actualización
     $query = "
         UPDATE cmf_asignacion_zonas_clientes
         SET
@@ -629,7 +629,7 @@ function actualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secun
     $resultado = odbc_exec($conn, $query);
 
     if (!$resultado) {
-        error_log('Error al actualizar la asignaciÃ³n: ' . odbc_errormsg($conn));
+        error_log('Error al actualizar la asignación: ' . odbc_errormsg($conn));
         return;
     }
 

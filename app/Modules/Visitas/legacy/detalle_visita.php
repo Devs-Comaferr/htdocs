@@ -16,7 +16,7 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 header('Content-Type: text/html; charset=utf-8');
 
-// ConexiÃƒÂ³n a la base de datos
+// Conexión a la base de datos
 require_once BASE_PATH . '/app/Support/functions.php';
 
 $conn = db();

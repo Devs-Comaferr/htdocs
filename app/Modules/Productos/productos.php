@@ -19,7 +19,7 @@ requierePermiso('perm_productos');
 // Definir el ttulo de la pgina para el header
 $pageTitle = 'Productos';
 
-// Incluir la conexiÃƒÂ³n ODBC y las funciones generales (necesarias para el header)
+// Incluir la conexión ODBC y las funciones generales (necesarias para el header)
 require_once BASE_PATH . '/app/Support/functions.php';
 
 $conn = db();
@@ -33,7 +33,7 @@ $brandStmt  = odbc_exec($conn, $brandQuery);
 $brands     = [];
 if ($brandStmt) {
     while ($row = odbc_fetch_array($brandStmt)) {
-        // Si la descripciÃƒÂ³n es null o vacÃƒÂ­a, reemplazar por "Sin marca rellenada"
+        // Si la descripción es null o vacía, reemplazar por "Sin marca rellenada"
         if (!isset($row['descripcion']) || trim($row['descripcion']) === '') {
             $row['descripcion'] = 'Sin marca rellenada';
         }
@@ -41,14 +41,14 @@ if ($brandStmt) {
     }
 }
 
-// Procesar la visualizaciÃƒÂ³n de detalles o la bÃƒÂºsqueda compuesta
+// Procesar la visualización de detalles o la búsqueda compuesta
 $producto = null;
 if (isset($_GET['cod_articulo']) && !empty($_GET['cod_articulo'])) {
     $cod_articulo = $_GET['cod_articulo'];
     $producto = obtenerProducto($conn, $cod_articulo);
 }
 
-// FunciÃƒÂ³n auxiliar para reconstruir los parÃƒÂ¡metros de bÃƒÂºsqueda en la URL
+// Función auxiliar para reconstruir los parámetros de búsqueda en la URL
 function getSearchParams(): string {
     $params = [];
     if (isset($_GET['codigo']) && $_GET['codigo'] !== '') {
@@ -163,7 +163,7 @@ $searchQuery = getSearchParams();
         }
     </style>
     <script>
-        // FunciÃƒÂ³n para actualizar el select de marcas segÃƒÂºn los valores ingresados en "codigo" o "descripcion"
+        // Función para actualizar el select de marcas según los valores ingresados en "codigo" o "descripcion"
         function updateBrandSelect() {
             var codigo = document.getElementById('codigo').value;
             var descripcion = document.getElementById('descripcion').value;
@@ -173,9 +173,9 @@ $searchQuery = getSearchParams();
                 .then(response => response.json())
                 .then(data => {
                     var select = document.getElementById('marca');
-                    // Limpiar las opciones actuales y dejar la opciÃƒÂ³n por defecto
+                    // Limpiar las opciones actuales y dejar la opción por defecto
                     select.innerHTML = '<option value="">-- Seleccione marca --</option>';
-                    // Agregar la opciÃƒÂ³n manual "Sin marca rellenada" solo si no existe ya en los datos
+                    // Agregar la opción manual "Sin marca rellenada" solo si no existe ya en los datos
                     var alreadyExists = false;
                     data.forEach(function(item) {
                         if (item.cod_marca === null || item.cod_marca === "NULL") {
@@ -214,23 +214,23 @@ $searchQuery = getSearchParams();
 </head>
 <body>
     <main>
-        <!-- Formulario de bÃƒÂºsqueda -->
+        <!-- Formulario de búsqueda -->
         <section>
             <form method="get" action="productos.php">
-                <label for="codigo">CÃƒÂ³digo / Referencia Alternativa:</label>
+                <label for="codigo">Código / Referencia Alternativa:</label>
                 <input type="text" name="codigo" id="codigo" value="<?= isset($_GET['codigo']) ? htmlspecialchars($_GET['codigo']) : ''; ?>">
                 
-                <label for="descripcion">DescripciÃƒÂ³n:</label>
+                <label for="descripcion">Descripción:</label>
                 <input type="text" name="descripcion" id="descripcion" value="<?= isset($_GET['descripcion']) ? htmlspecialchars($_GET['descripcion']) : ''; ?>">
                 
                 <label for="marca">Marca:</label>
                 <select name="marca" id="marca">
                     <option value="">-- Seleccione marca --</option>
-                    <!-- OpciÃƒÂ³n manual para Sin marca rellenada -->
+                    <!-- Opción manual para Sin marca rellenada -->
                     <option value="NULL" <?= (isset($_GET['marca']) && $_GET['marca'] == "NULL") ? 'selected' : '' ?>>Sin marca rellenada</option>
                     <?php foreach ($brands as $brand): ?>
                         <?php
-                        // Si la descripciÃƒÂ³n es vacÃƒÂ­a, asignar "NULL" como valor
+                        // Si la descripción es vacía, asignar "NULL" como valor
                         $optValue = (empty(trim($brand['descripcion']))) ? "NULL" : $brand['cod_marca'];
                         $optText = (empty(trim($brand['descripcion']))) ? "Sin marca rellenada" : $brand['descripcion'];
                         ?>
@@ -245,7 +245,7 @@ $searchQuery = getSearchParams();
             </form>
         </section>
         
-        <!-- SecciÃƒÂ³n para mostrar resultados o detalles -->
+        <!-- Sección para mostrar resultados o detalles -->
         <section>
         <?php
             // Si se muestran detalles de un producto
@@ -253,20 +253,20 @@ $searchQuery = getSearchParams();
                 if ($producto) {
                     echo '<div class="detalles">';
                     echo "<h2>Detalles del Producto</h2>";
-                    echo "<p><strong>CÃƒÂ³digo:</strong> " . htmlspecialchars($producto['cod_articulo']) . "</p>";
+                    echo "<p><strong>Código:</strong> " . htmlspecialchars($producto['cod_articulo']) . "</p>";
                     echo "<p><strong>Marca:</strong> " . (isset($producto['marca']) && trim($producto['marca']) !== '' ? htmlspecialchars($producto['marca']) : 'Sin marca rellenada') . "</p>";
-                    echo "<p><strong>DescripciÃƒÂ³n:</strong> " . htmlspecialchars($producto['descripcion_articulo'] ?? $producto['descripcion']) . "</p>";
+                    echo "<p><strong>Descripción:</strong> " . htmlspecialchars($producto['descripcion_articulo'] ?? $producto['descripcion']) . "</p>";
                     $backUrl = "productos.php";
                     if ($searchQuery) {
                         $backUrl .= "?" . $searchQuery;
                     }
-                    echo '<p class="volver"><a href="' . $backUrl . '">Volver a la bÃƒÂºsqueda</a></p>';
+                    echo '<p class="volver"><a href="' . $backUrl . '">Volver a la búsqueda</a></p>';
                     echo '</div>';
                 } else {
                     echo "<p>No se encontr el producto solicitado.</p>";
                 }
             }
-            // Si se han enviado parÃƒÂ¡metros de bÃƒÂºsqueda (y no se estÃƒÂ¡ mostrando un producto concreto)
+            // Si se han enviado parámetros de búsqueda (y no se está mostrando un producto concreto)
             elseif ((isset($_GET['codigo']) && $_GET['codigo'] !== '') || (isset($_GET['descripcion']) && $_GET['descripcion'] !== '') || (isset($_GET['marca']) && $_GET['marca'] !== '')) {
                 $codigo      = isset($_GET['codigo']) ? trim($_GET['codigo']) : '';
                 $descripcion = isset($_GET['descripcion']) ? trim($_GET['descripcion']) : '';
@@ -274,13 +274,13 @@ $searchQuery = getSearchParams();
                 
                 $resultados = buscarProductosCompuesta($conn, $codigo, $descripcion, $marca);
                 
-                echo "<h2>Resultados de la BÃƒÂºsqueda</h2>";
+                echo "<h2>Resultados de la Búsqueda</h2>";
                 if (!empty($resultados)) {
                     echo "<table>";
                     echo "<thead>";
                     echo "<tr>";
-                    echo "<th>CÃƒÂ³digo</th>";
-                    echo "<th>DescripciÃƒÂ³n</th>";
+                    echo "<th>Código</th>";
+                    echo "<th>Descripción</th>";
                     echo "<th>Marca</th>";
                     echo "</tr>";
                     echo "</thead>";
@@ -299,7 +299,7 @@ $searchQuery = getSearchParams();
                     echo "</tbody>";
                     echo "</table>";
                 } else {
-                    echo "<p>No se encontraron productos que coincidan con la bÃƒÂºsqueda.</p>";
+                    echo "<p>No se encontraron productos que coincidan con la búsqueda.</p>";
                 }
             }
         ?>

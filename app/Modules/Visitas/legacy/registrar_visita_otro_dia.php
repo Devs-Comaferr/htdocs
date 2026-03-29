@@ -35,7 +35,7 @@ $tipo_visita = isset($_POST['tipo_visita']) ? trim($_POST['tipo_visita']) : '';
 $ampliacion = isset($_POST['ampliacion']) ? 1 : 0;
 $previous_id_visita = isset($_POST['previous_id_visita']) ? intval($_POST['previous_id_visita']) : 0;
 
-// Validar que los campos obligatorios no estÃƒÂ¡n vacÃƒÂ­os
+// Validar que los campos obligatorios no están vacíos
 if (empty($nombre_comercial) || $cod_cliente <= 0 || $seccion_visita <= 0 || $cod_vendedor <= 0 || empty($fecha_visita) || empty($hora_inicio_visita) || empty($hora_fin_visita)) {
     header("Location: pedidos_visitas.php?msg=error");
     exit();
@@ -61,7 +61,7 @@ if (!$inicio || !$fin) {
 $diff = $fin->getTimestamp() - $inicio->getTimestamp();
 $diff_min = $diff / 60;
 
-// Validar diferencia mÃƒÂ­nima y mÃƒÂ¡xima
+// Validar diferencia mínima y máxima
 if ($diff_min < 15 || $diff_min > 300) {
     header("Location: pedidos_visitas.php?msg=error_min_tiempo");
     exit();

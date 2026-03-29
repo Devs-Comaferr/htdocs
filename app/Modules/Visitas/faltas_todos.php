@@ -10,12 +10,12 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
-// Verificar si el usuario ha iniciado sesiÃƒÂ³n
+// Verificar si el usuario ha iniciado sesión
 
 
-require_once BASE_PATH . '/app/Support/functions.php'; // Se asume que incluye la funciÃƒÂ³n toUTF8
+require_once BASE_PATH . '/app/Support/functions.php'; // Se asume que incluye la función toUTF8
 
-// Obtener el cÃƒÂ³digo de vendedor asociado al usuario actual
+// Obtener el código de vendedor asociado al usuario actual
 $conn = db();
 if (isset($_SESSION['codigo']) && $_SESSION['codigo'] !== '') {
     $cod_vendedor = (string)$_SESSION['codigo'];
@@ -27,7 +27,7 @@ $sql_cod_vendedor = "
 ";
 $result_vendedor = odbc_exec($conn, $sql_cod_vendedor);
 if (!$result_vendedor || !odbc_fetch_row($result_vendedor)) {
-    error_log("Error: No se pudo determinar el cÃƒÂ³digo de vendedor.");
+    error_log("Error: No se pudo determinar el código de vendedor.");
     echo 'Error interno';
     return;
 }
@@ -40,11 +40,11 @@ $defaultStart = date('Y-m-d', strtotime('-15 days'));
 $start_date   = isset($_GET['start_date']) ? $_GET['start_date'] : $defaultStart;
 $end_date     = isset($_GET['end_date']) ? $_GET['end_date'] : $defaultEnd;
 
-// Filtro de cliente: se busca tanto por cÃƒÂ³digo como por nombre
+// Filtro de cliente: se busca tanto por código como por nombre
 $cliente_filtro = isset($_GET['cliente']) ? mb_convert_encoding($_GET['cliente'], 'Windows-1252', 'UTF-8') : '';
 
-// ParÃƒÂ¡metros de ordenaciÃƒÂ³n
-// Se agregÃƒÂ³ "Importe" para poder ordenar por ese campo.
+// Parámetros de ordenación
+// Se agregó "Importe" para poder ordenar por ese campo.
 $orden_permitido = array(
     'Pedido'               => 'Pedido',
     'Fecha_Pedido'         => 'Fecha_Pedido',
@@ -66,7 +66,7 @@ if (in_array($orden, array('Importe_Disponible', 'Importe_Pdte_Recibir'))) {
     $sql_order = $orden;
 }
 
-// ParÃƒÂ¡metros de paginaciÃƒÂ³n
+// Parámetros de paginación
 $resultsPerPage = 30;
 $page           = (isset($_GET['page'])) ? (int) $_GET['page'] : 1;
 if ($page < 1) { 
@@ -80,7 +80,7 @@ $offset = ($page - 1) * $resultsPerPage;
 $whereConditionsNormal = array();
 $whereConditionsNormal[] = "hvl.tipo_venta = 1";
 $whereConditionsNormal[] = "hvc.tipo_venta = 1";
-// Pedidos histÃƒÂ³ricos (faltas)
+// Pedidos históricos (faltas)
 $whereConditionsNormal[] = "hvc.historico = 'S'";
 $whereConditionsNormal[] = "(hvl.cantidad > ISNULL(elv.cantidad_servida, 0))";
 if (!is_null($cod_vendedor)) {
@@ -243,13 +243,13 @@ while ($row = odbc_fetch_array($result_pedidos)) {
     $pedidos[] = $row;
 }
 
-// CÃƒÂ¡lculo de importes (adaptado para faltas)
+// Cálculo de importes (adaptado para faltas)
 if (in_array($orden, array('Importe_Disponible', 'Importe_Pdte_Recibir'))) {
     foreach ($pedidos as &$pedido) {
         $pedidoId = addslashes($pedido['Pedido']);
         $importeDisponibleTotal = 0;
         $importePdteRecibirTotal = 0;
-        // Consulta para obtener las lÃƒÂ­neas del pedido (se asume misma estructura para ambos orÃƒÂ­genes)
+        // Consulta para obtener las líneas del pedido (se asume misma estructura para ambos orígenes)
         $sql_lineas = "
             SELECT 
                 hvl.cantidad AS Cantidad_Pedida,
@@ -301,7 +301,7 @@ if (in_array($orden, array('Importe_Disponible', 'Importe_Pdte_Recibir'))) {
         $pedido['Importe_Disponible'] = $importeDisponibleTotal;
         $pedido['Importe_Pdte_Recibir'] = $importePdteRecibirTotal;
     }
-    // Ordenar segÃƒÂºn la columna calculada
+    // Ordenar según la columna calculada
     usort($pedidos, function($a, $b) use ($orden, $direccion) {
         if ($a[$orden] == $b[$orden]) return 0;
         if ($direccion === 'ASC') {
@@ -312,7 +312,7 @@ if (in_array($orden, array('Importe_Disponible', 'Importe_Pdte_Recibir'))) {
     });
 }
 
-// Consulta para el total de registros (para paginaciÃƒÂ³n)
+// Consulta para el total de registros (para paginación)
 $sql_count_normal = "
     SELECT hvl.cod_venta
     FROM 
@@ -690,7 +690,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
       </div>
       <div class="mb-3">
         <div class="d-flex align-items-center">
-          <input type="text" id="cliente" name="cliente" class="form-control" value="<?php echo htmlspecialchars($cliente_filtro); ?>" placeholder="Buscar por cÃƒÂ³digo o nombre del cliente..." />
+          <input type="text" id="cliente" name="cliente" class="form-control" value="<?php echo htmlspecialchars($cliente_filtro); ?>" placeholder="Buscar por código o nombre del cliente..." />
           <button type="submit" class="btn btn-primary ms-2 d-flex align-items-center">
             <i class="fas fa-search"></i> <span class="ms-1">Filtrar</span>
           </button>
@@ -707,7 +707,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
             <option value="Fecha_Pedido" <?php echo ($orden === 'Fecha_Pedido') ? 'selected' : ''; ?>>Ordenar por Fecha</option>
             <option value="Cliente" <?php echo ($orden === 'Cliente') ? 'selected' : ''; ?>>Ordenar por Cliente</option>
             <option value="Importe" <?php echo ($orden === 'Importe') ? 'selected' : ''; ?>>Ordenar por Importe</option>
-            <option value="Articulos_Pendientes" <?php echo ($orden === 'Articulos_Pendientes') ? 'selected' : ''; ?>>Ordenar por LÃƒÂ­neas Pdtes.</option>
+            <option value="Articulos_Pendientes" <?php echo ($orden === 'Articulos_Pendientes') ? 'selected' : ''; ?>>Ordenar por Líneas Pdtes.</option>
             <option value="Importe_Pendiente" <?php echo ($orden === 'Importe_Pendiente') ? 'selected' : ''; ?>>Ordenar por Importe Pdte.</option>
             <option value="Importe_Disponible" <?php echo ($orden === 'Importe_Disponible') ? 'selected' : ''; ?>>Ordenar por Importe Disponible</option>
             <option value="Importe_Pdte_Recibir" <?php echo ($orden === 'Importe_Pdte_Recibir') ? 'selected' : ''; ?>>Ordenar por Importe Pdte. Recibir</option>
@@ -723,15 +723,15 @@ include BASE_PATH . '/resources/views/layouts/header.php';
         <table class="table table-bordered">
           <thead>
             <tr>
-              <!-- Columna para el icono (camiÃƒÂ³n o eliminado) -->
+              <!-- Columna para el icono (camión o eliminado) -->
               <th></th>
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Pedido', 'direccion' => $direccion_invertida))); ?>">Pedido</a></th>
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Fecha_Pedido', 'direccion' => $direccion_invertida))); ?>">Fecha</a></th>
-              <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Cod_Cliente', 'direccion' => $direccion_invertida))); ?>">CÃƒÂ³digo Cliente</a></th>
+              <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Cod_Cliente', 'direccion' => $direccion_invertida))); ?>">Código Cliente</a></th>
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Cliente', 'direccion' => $direccion_invertida))); ?>">Nombre Cliente</a></th>
               <!-- Nueva columna Importe -->
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Importe', 'direccion' => $direccion_invertida))); ?>">Importe del Pedido</a></th>
-              <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Articulos_Pendientes', 'direccion' => $direccion_invertida))); ?>">LÃƒÂ­neas Pdtes.</a></th>
+              <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Articulos_Pendientes', 'direccion' => $direccion_invertida))); ?>">Líneas Pdtes.</a></th>
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Importe_Pendiente', 'direccion' => $direccion_invertida))); ?>">Importe Pdte.</a></th>
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Importe_Disponible', 'direccion' => $direccion_invertida))); ?>">Importe Disponible</a></th>
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Importe_Pdte_Recibir', 'direccion' => $direccion_invertida))); ?>">Importe Pdte. Recibir</a></th>
@@ -741,7 +741,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
             <?php foreach ($pedidos as $pedido): ?>
               <?php
                 $pedidoUrl = buildPedidoUrlFaltas($pedido);
-                // Para cada pedido, recalcular los importes para visualizaciÃƒÂ³n
+                // Para cada pedido, recalcular los importes para visualización
                 $pedidoId = addslashes($pedido['Pedido']);
                 $importeDisponibleTotal = 0;
                 $importePdteRecibirTotal = 0;
@@ -808,11 +808,11 @@ include BASE_PATH . '/resources/views/layouts/header.php';
               ?>
               <tr class="<?php echo trim($rowClass); ?>" onclick="window.location.href=<?php echo htmlspecialchars(json_encode($pedidoUrl), ENT_QUOTES); ?>">
                 <?php
-                  // Mostrar icono segÃƒÂºn el valor de la columna 'tabla'
+                  // Mostrar icono según el valor de la columna 'tabla'
                   if ($pedido['tabla'] == 'vcelim') {
                       $camionIcon = '<i class="fas fa-trash-alt text-danger"></i>';
                   } else {
-                      // Icono del camiÃƒÂ³n si existe registro en entrega_lineas_venta
+                      // Icono del camión si existe registro en entrega_lineas_venta
                       $queryEntrega = "
                           SELECT TOP 1 cod_venta_origen 
                           FROM integral.dbo.entrega_lineas_venta 
@@ -854,7 +854,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
       <?php endif; ?>
     </div>
 
-    <!-- Vista mÃƒÂ³vil en formato item/card con todos los campos -->
+    <!-- Vista móvil en formato item/card con todos los campos -->
     <div class="mobile-items">
       <?php if (!empty($pedidos)): ?>
         <?php foreach ($pedidos as $pedido): ?>
@@ -948,7 +948,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
               <div class="mobile-item-line obs-int"><?php echo htmlspecialchars(toUTF8($pedido['ObservacionInterna'])); ?></div>
             <?php endif; ?>
             <div class="mobile-item-line"><strong>Importe Pedido:</strong> <?php echo number_format($pedido['Importe'], 2, ',', '.') . " "; ?></div>
-            <div class="mobile-item-line"><strong>LÃƒÂ­neas Pdtes.:</strong> <?php echo number_format((float)$pedido['Articulos_Pendientes'], 0, ',', '.'); ?></div>
+            <div class="mobile-item-line"><strong>Líneas Pdtes.:</strong> <?php echo number_format((float)$pedido['Articulos_Pendientes'], 0, ',', '.'); ?></div>
             <div class="mobile-item-line"><strong>Importe Pdte.:</strong> <?php echo number_format($pedido['Importe_Pendiente'], 2, ',', '.') . " "; ?></div>
             <div class="mobile-item-line"><strong>Importe Disponible:</strong> <?php echo $impDisponible_formatted; ?></div>
             <div class="mobile-item-line"><strong>Importe Pdte. Recibir:</strong> <?php echo $impPdteRecibir_formatted; ?></div>
@@ -959,7 +959,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
       <?php endif; ?>
     </div>
     
-    <!-- PaginaciÃƒÂ³n -->
+    <!-- Paginación -->
     <?php if ($totalPages > 1): ?>
       <div class="d-flex justify-content-center">
         <div class="pagination">

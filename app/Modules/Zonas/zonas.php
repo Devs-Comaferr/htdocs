@@ -13,7 +13,7 @@ requierePermiso('perm_planificador');
 // zonas.php
 require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 require_once BASE_PATH . '/app/Support/functions.php';
-$pageTitle = 'Gesti髇 de Zonas';
+$pageTitle = 'Gesti贸n de Zonas';
 include BASE_PATH . '/resources/views/layouts/header.php';
 $zonas = obtenerZonasVisitaService();
 
@@ -24,7 +24,7 @@ $zonas = obtenerZonasVisitaService();
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gesti髇 de Zonas</title>
+    <title>Gesti贸n de Zonas</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap 3.3.7 -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
@@ -179,10 +179,10 @@ $zonas = obtenerZonasVisitaService();
                 <label for="nombre_zona">Nombre de la Zona:</label>
                 <input type="text" id="nombre_zona" name="nombre_zona" required>
                 
-                <label for="descripcion">Descripci髇:</label>
+                <label for="descripcion">Descripci贸n:</label>
                 <textarea id="descripcion" name="descripcion"></textarea>
                 
-                <label for="duracion_semanas">Duraci髇 (semanas):</label>
+                <label for="duracion_semanas">Duraci贸n (semanas):</label>
                 <input type="number" id="duracion_semanas" name="duracion_semanas" min="1" required>
                 
                 <label for="orden">Orden en el Ciclo:</label>

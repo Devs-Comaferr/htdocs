@@ -111,7 +111,7 @@ $factor = 480 / 720;
       }
       .event.completed { background: #28a745; }
       .event.pending { background: #ffc107; color: #333; }
-      /* Ajustes para dispositivos mÃƒÆ’Ã‚Â³viles */
+      /* Ajustes para dispositivos móviles */
       @media (max-width: 1024px) {
           .timeline-container { height: 400px; }
       }

@@ -24,7 +24,7 @@ if (isset($_GET['cod_cliente'])) {
     
     $conn = db();
     
-    // Obtener secciones que no estÃ¡n asignadas a ninguna zona
+    // Obtener secciones que no están asignadas a ninguna zona
     $query = "SELECT sc.cod_seccion, sc.nombre 
               FROM secciones_cliente sc
               WHERE sc.cod_cliente = '$cod_cliente' 

@@ -1,5 +1,5 @@
 <?php
-// Ã¢Å¡Â Ã¯Â¸Â ARCHIVO LEGACY
+// âš ï¸ ARCHIVO LEGACY
 // Este archivo ya no debe usarse directamente.
 // Se mantiene por compatibilidad.
 // Usar /visitas.php?action=crear|editar|eliminar
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar']) && $_POS
             <h2 class="panel-title">Eliminar visita</h2>
         </div>
         <div class="panel-body">
-            <p>Ãƒâ€šÃ‚Â¿Seguro que quieres eliminar esta visita? Se eliminarÃƒÆ’Ã‚Â¡n tambiÃƒÆ’Ã‚Â©n los pedidos asociados.</p>
+            <p>¿Seguro que quieres eliminar esta visita? Se eliminarán también los pedidos asociados.</p>
             <form action="eliminar_visita.php" method="POST" class="confirm-actions">
                 <input type="hidden" name="id_visita" value="<?php echo htmlspecialchars((string)$idVisita, ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="confirmar" value="1">

@@ -11,12 +11,12 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/functions.php'; // Se incluyen todas las funciones centralizadas
 
-// Verificar sesiÃƒÂ³n
+// Verificar sesión
 
 
 // Verificar que venga cod_cliente
 if (empty($_GET['cod_cliente'])) {
-    error_log("El parÃƒÂ¡metro 'cod_cliente' es obligatorio.");
+    error_log("El parámetro 'cod_cliente' es obligatorio.");
     echo 'Error interno';
     return;
 }
@@ -45,7 +45,7 @@ $solo_programa_nuevo = (isset($_GET['solo_programa_nuevo']) && $_GET['solo_progr
 // (NUEVO) Filtro agrupar: true si llega agrupar=1
 $agrupar = (isset($_GET['agrupar']) && $_GET['agrupar'] == '1');
 
-// Columnas permitidas para la ordenaciÃƒÂ³n
+// Columnas permitidas para la ordenación
 $orden_permitido_detallado = [
     'cod_venta', 'fecha_venta', 'cod_articulo', 'descripcion',
     'cantidad', 'precio', 'dto1', 'dto2', 'importe', 'tipo_programa'
@@ -54,7 +54,7 @@ $orden_permitido_agrupado = [
     'cod_articulo', 'descripcion', 'cantidad', 'precio', 'importe'
 ];
 
-// Elegir la lista en funciÃƒÂ³n de si estÃƒÂ¡ agrupado
+// Elegir la lista en función de si está agrupado
 $orden_permitido = $agrupar ? $orden_permitido_agrupado : $orden_permitido_detallado;
 
 // Determinar la columna orden
@@ -73,14 +73,14 @@ if ($agrupar) {
 }
 $direccion_invertida = ($direccion === 'ASC') ? 'DESC' : 'ASC';
 
-// Incluir conexiÃƒÂ³n a la base de datos.
+// Incluir conexión a la base de datos.
 
-// Consultar datos del cliente y su secciÃƒÂ³n
+// Consultar datos del cliente y su sección
 $conn = db();
 $sql_cli_sec = "
     SELECT
         c.nombre_comercial AS nombre_cliente,
-        COALESCE(s.nombre, 'Sin SecciÃƒÂ³n') AS nombre_seccion
+        COALESCE(s.nombre, 'Sin Sección') AS nombre_seccion
     FROM [integral].[dbo].[clientes] c
     LEFT JOIN [integral].[dbo].[secciones_cliente] s
            ON c.cod_cliente = s.cod_cliente
@@ -95,20 +95,20 @@ if ($cod_seccion !== null) {
 }
 $res_cli_sec = odbc_exec($conn, $sql_cli_sec);
 if (!$res_cli_sec) {
-    error_log("Error al obtener datos del cliente y secciÃƒÂ³n: " . odbc_errormsg($conn));
+    error_log("Error al obtener datos del cliente y sección: " . odbc_errormsg($conn));
     echo 'Error interno';
     return;
 }
 $cli_sec = odbc_fetch_array($res_cli_sec);
 if (!$cli_sec) {
-    error_log("No se encontraron datos para el cliente o la secciÃƒÂ³n.");
+    error_log("No se encontraron datos para el cliente o la sección.");
     echo 'Error interno';
     return;
 }
 $nombre_cliente = $cli_sec['nombre_cliente'] ?? 'Desconocido';
-$nombre_seccion = $cli_sec['nombre_seccion'] ?? 'Sin SecciÃƒÂ³n';
+$nombre_seccion = $cli_sec['nombre_seccion'] ?? 'Sin Sección';
 
-$pageTitle = "HistÃƒÂ³rico de " . $nombre_cliente . ($nombre_seccion != 'Sin SecciÃƒÂ³n' ? " - " . $nombre_seccion : '');
+$pageTitle = "Histórico de " . $nombre_cliente . ($nombre_seccion != 'Sin Sección' ? " - " . $nombre_seccion : '');
 
 /**
  * Se obtienen los filtros SQL usando las funciones definidas en funciones.php.
@@ -117,7 +117,7 @@ $sql_filtros_nuevo = construir_filtros_nuevo();
 $sql_filtros_antiguo = construir_filtros_antiguo();
 
 /**
- * Filtro por vendedor usando la variable de sesiÃƒÂ³n 'codigo'.
+ * Filtro por vendedor usando la variable de sesión 'codigo'.
  * Recibe la columna completa (por ejemplo 'v.cod_vendedor' o 'm.cod_vendedor')
  * y devuelve un fragmento SQL de tipo " AND <col> = 'valor'" cuando existe.
  */
@@ -172,7 +172,7 @@ $sql_antiguo_detallado = "
         COALESCE(m.documento, CAST(m.cod_fac AS VARCHAR(50))) AS cod_venta,
         m.fecha AS fecha_venta,
         m.referencia AS cod_articulo,
-        COALESCE(ad.descripcion,'ArtÃƒÂ­culo eliminado') AS descripcion,
+        COALESCE(ad.descripcion,'Artículo eliminado') AS descripcion,
         m.cantidad,
         m.precio,
         m.importe,
@@ -211,7 +211,7 @@ $sql_nuevo_sin_agrup .= $sql_filtros_nuevo;
 $sql_antiguo_sin_agrup = "
     SELECT
         m.referencia AS cod_articulo,
-        COALESCE(ad.descripcion,'ArtÃƒÂ­culo eliminado') AS descripcion,
+        COALESCE(ad.descripcion,'Artículo eliminado') AS descripcion,
         m.cantidad,
         m.precio,
         m.importe
@@ -377,7 +377,7 @@ if (!$agrupar) {
         <input type="hidden" id="fecha_desde" name="fecha_desde" value="<?= htmlspecialchars($fecha_desde); ?>">
         <input type="hidden" id="fecha_hasta" name="fecha_hasta" value="<?= htmlspecialchars($fecha_hasta); ?>">
         
-        <!-- Fila 1: LÃƒÂ­nea de tiempo (slider) -->
+        <!-- Fila 1: Línea de tiempo (slider) -->
         <div class="row mb-3">
             <div class="col">
                 <label for="date-slider" class="form-label">Rango de Fechas:</label>
@@ -388,10 +388,10 @@ if (!$agrupar) {
         <!-- Fila 2: Filtros y botones -->
         <div class="row mb-3 align-items-end">
             <div class="col-12 col-md-2 mb-2 mb-md-0">
-                <input type="text" class="form-control" id="cod_articulo" name="cod_articulo" maxlength="15" value="<?= htmlspecialchars($cod_articulo); ?>" placeholder="CÃƒÂ³digo ArtÃƒÂ­culo">
+                <input type="text" class="form-control" id="cod_articulo" name="cod_articulo" maxlength="15" value="<?= htmlspecialchars($cod_articulo); ?>" placeholder="Código Artículo">
             </div>
             <div class="col-12 col-md-6 mb-2 mb-md-0">
-                <input type="text" class="form-control" id="descripcion" name="descripcion" value="<?= htmlspecialchars($descripcion); ?>" placeholder="DescripciÃƒÂ³n">
+                <input type="text" class="form-control" id="descripcion" name="descripcion" value="<?= htmlspecialchars($descripcion); ?>" placeholder="Descripción">
             </div>
             <div class="col-12 col-md-4 d-flex justify-content-end flex-wrap">
                 <button type="submit" name="filtrar" value="1" class="btn btn-primary btn-sm me-2 mb-2">
@@ -423,7 +423,7 @@ if (!$agrupar) {
                                echo $fecha_hasta ? '&fecha_hasta=' . urlencode($fecha_hasta) : '';
                                echo $cod_articulo ? '&cod_articulo=' . urlencode($cod_articulo) : '';
                                echo $descripcion ? '&descripcion=' . urlencode($descripcion) : '';
-                            ?>">CÃƒÂ³digo Venta</a>
+                            ?>">Código Venta</a>
                         </th>
                         <th class="text-center">
                             <a href="?orden=fecha_venta&direccion=<?= $direccion_invertida;
@@ -445,7 +445,7 @@ if (!$agrupar) {
                                echo $fecha_hasta ? '&fecha_hasta=' . urlencode($fecha_hasta) : '';
                                echo $cod_articulo ? '&cod_articulo=' . urlencode($cod_articulo) : '';
                                echo $descripcion ? '&descripcion=' . urlencode($descripcion) : '';
-                            ?>">ArtÃƒÂ­culo</a>
+                            ?>">Artículo</a>
                         </th>
                         <th class="text-start">
                             <a href="?orden=descripcion&direccion=<?= $direccion_invertida;
@@ -456,7 +456,7 @@ if (!$agrupar) {
                                echo $fecha_hasta ? '&fecha_hasta=' . urlencode($fecha_hasta) : '';
                                echo $cod_articulo ? '&cod_articulo=' . urlencode($cod_articulo) : '';
                                echo $descripcion ? '&descripcion=' . urlencode($descripcion) : '';
-                            ?>">DescripciÃƒÂ³n</a>
+                            ?>">Descripción</a>
                         </th>
                         <th class="text-end">
                             <a href="?orden=cantidad&direccion=<?= $direccion_invertida;
@@ -530,7 +530,7 @@ if (!$agrupar) {
                                echo $cod_articulo ? '&cod_articulo=' . urlencode($cod_articulo) : '';
                                echo $descripcion ? '&descripcion=' . urlencode($descripcion) : '';
                                echo '&agrupar=1';
-                            ?>">ArtÃƒÂ­culo</a>
+                            ?>">Artículo</a>
                         </th>
                         <th class="text-start">
                             <a href="?orden=descripcion&direccion=<?= $direccion_invertida;
@@ -542,7 +542,7 @@ if (!$agrupar) {
                                echo $cod_articulo ? '&cod_articulo=' . urlencode($cod_articulo) : '';
                                echo $descripcion ? '&descripcion=' . urlencode($descripcion) : '';
                                echo '&agrupar=1';
-                            ?>">DescripciÃƒÂ³n</a>
+                            ?>">Descripción</a>
                         </th>
                         <th class="text-end">
                             <a href="?orden=cantidad&direccion=<?= $direccion_invertida;
@@ -585,7 +585,7 @@ if (!$agrupar) {
                 <?php foreach ($ventas_unificadas as $venta): 
                     // Usamos la clase table-danger de Bootstrap si la cantidad es menor que 0
                     $rowClass = (isset($venta['cantidad']) && floatval($venta['cantidad']) < 0) ? 'table-danger' : '';
-                    if (isset($venta['descripcion']) && $venta['descripcion'] === 'ArtÃƒÂ­culo eliminado') {
+                    if (isset($venta['descripcion']) && $venta['descripcion'] === 'Artículo eliminado') {
                         $rowClass .= ' row-eliminated';
                     }
                 ?>
@@ -628,7 +628,7 @@ if (!$agrupar) {
             <strong>Suma total:</strong> <?= number_format($suma_total, 2, ',', '.') . '&nbsp;'; ?>
         </div>
     <?php else: ?>
-        <p>No se encontraron ventas para este cliente y secciÃƒÂ³n.</p>
+        <p>No se encontraron ventas para este cliente y sección.</p>
     <?php endif; ?>
     </div>
 
@@ -679,7 +679,7 @@ $(function(){
 </html>
 
 <?php
-// Cerrar conexiÃƒÂ³n
+// Cerrar conexión
 ?>
 
 

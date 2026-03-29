@@ -13,7 +13,7 @@ require_once BASE_PATH . '/app/Support/functions.php';
 
 $conn = db();
 
-$pageTitle = 'ConfiguraciÃ³n - Usuarios';
+$pageTitle = 'Configuración - Usuarios';
 
 $sql = "SELECT email, nombre, cod_vendedor, tipo_plan,
                perm_productos, perm_estadisticas, perm_planificador,

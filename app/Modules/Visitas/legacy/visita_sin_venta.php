@@ -41,10 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validar formatos
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_visita)) {
-        $errors[] = "Formato de fecha invÃƒÆ’Ã‚Â¡lido.";
+        $errors[] = "Formato de fecha inválido.";
     }
     if (!preg_match('/^\d{2}:\d{2}$/', $hora_inicio_visita) || !preg_match('/^\d{2}:\d{2}$/', $hora_fin_visita)) {
-        $errors[] = "Formato de hora invÃƒÆ’Ã‚Â¡lido.";
+        $errors[] = "Formato de hora inválido.";
     }
     
     // Validar diferencia de tiempo
@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <form action="visita_sin_venta.php" method="POST">
     <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
     
-    <!-- Campo de BÃƒÆ’Ã‚Âºsqueda de Cliente -->
+    <!-- Campo de Búsqueda de Cliente -->
     <div class="form-group">
       <label for="nombre_comercial">Buscar Cliente</label>
       <input type="text" class="form-control" id="nombre_comercial" name="nombre_comercial" placeholder="Escribe el nombre comercial del cliente" required>
@@ -115,9 +115,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Lista Desplegable de Secciones (se cargar dinmicamente) -->
     <div class="form-group" id="seccion_container" style="display: none;">
-      <label for="cod_seccion">Seleccionar SecciÃƒÆ’Ã‚Â³n</label>
+      <label for="cod_seccion">Seleccionar Sección</label>
       <select class="form-control" id="cod_seccion" name="cod_seccion" required>
-        <!-- Opciones se cargarÃƒÆ’Ã‚Â¡n vÃƒÆ’Ã‚Â­a AJAX -->
+        <!-- Opciones se cargarán vía AJAX -->
       </select>
     </div>
     
@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <input type="time" class="form-control" id="hora_inicio_visita" name="hora_inicio_visita" required>
     </div>
     <div class="form-group">
-      <label for="hora_fin_visita">Hora de FinalizaciÃƒÆ’Ã‚Â³n de la Visita</label>
+      <label for="hora_fin_visita">Hora de Finalización de la Visita</label>
       <input type="time" class="form-control" id="hora_fin_visita" name="hora_fin_visita" required>
     </div>
     <div class="form-group">
@@ -148,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.11.3.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 
-<!-- Scripts para Autocompletado y ValidaciÃƒÆ’Ã‚Â³n -->
+<!-- Scripts para Autocompletado y Validación -->
 <script>
 $(document).ready(function() {
     // Autocompletado para Buscar Cliente
@@ -176,7 +176,7 @@ $(document).ready(function() {
             data: { cod_cliente: cod_cliente },
             success: function(secciones) {
                 if (secciones.length > 0) {
-                    var opciones = '<option value="">Selecciona una secciÃƒÆ’Ã‚Â³n</option>';
+                    var opciones = '<option value="">Selecciona una sección</option>';
                     $.each(secciones, function(index, seccion) {
                         opciones += '<option value="' + seccion.cod_seccion + '">' + seccion.nombre_seccion + '</option>';
                     });
@@ -205,7 +205,7 @@ $("#hora_inicio_visita, #hora_fin_visita").on('change', function() {
             var diff = fin_total - inicio_total;
             if (diff < 15 || diff > 300) {
                 alert("La diferencia entre la hora de inicio y la hora de fin debe ser de al menos 15 minutos y no exceder las 5 horas.");
-                // Opcional: Resetear las horas o ajustarlas automÃƒÆ’Ã‚Â¡ticamente
+                // Opcional: Resetear las horas o ajustarlas automáticamente
             }
         }
     });

@@ -17,7 +17,7 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 // Cabecera para que el navegador use UTF-8
 header("Content-Type: text/html; charset=utf-8");
 
-// Abrir la conexiÃƒÂ³n ODBC
+// Abrir la conexión ODBC
 require_once BASE_PATH . '/app/Support/functions.php';
 
 $conn = db();
@@ -48,7 +48,7 @@ function convertRowToUtf8($row) {
     return $row;
 }
 
-// ParÃƒÂ¡metros de fecha
+// Parámetros de fecha
 $start_date_iso  = isset($_GET['start_date']) ? $_GET['start_date'] : "";
 $end_date_iso    = isset($_GET['end_date'])   ? $_GET['end_date']   : "";
 $start_date_full = $start_date_iso . " 00:00:00";
@@ -62,7 +62,7 @@ if ($level == 1) {
     // NIVEL 1: Provincias (para un comisionista)
     // ------------------------------------------------------------
     if (!isset($_GET['comercial'])) {
-        echo "ParÃƒÂ¡metros insuficientes para nivel 1.";
+        echo "Parámetros insuficientes para nivel 1.";
         exit;
     }
     $comercial = $_GET['comercial'];
@@ -134,7 +134,7 @@ if ($level == 1) {
     // NIVEL 2: Clientes (para la provincia seleccionada)
     // ------------------------------------------------------------
     if (!isset($_GET['comercial']) || !isset($_GET['provincia'])) {
-        echo "ParÃƒÂ¡metros insuficientes para nivel 2.";
+        echo "Parámetros insuficientes para nivel 2.";
         exit;
     }
     $comercial = $_GET['comercial'];
@@ -178,7 +178,7 @@ if ($level == 1) {
                    <thead class='table-dark'>
                      <tr>
                        <th>Mostrar datos por:</th>
-                        <th>Cliente - SecciÃƒÂ³n</th>
+                        <th>Cliente - Sección</th>
                        <th>Pedidos</th>
                        <th>Albaranes</th>
                        <th>% Servicio</th>
@@ -226,14 +226,14 @@ if ($level == 1) {
     // NIVEL 3: Detalle por grupo (Marca, Familia o Producto) para un cliente
     // ------------------------------------------------------------
     if (!isset($_GET['cod_cliente'])) {
-        echo "ParÃƒÂ¡metro insuficiente para nivel 3.";
+        echo "Parámetro insuficiente para nivel 3.";
         exit;
     }
     $cliente = $_GET['cod_cliente'];
     $cod_seccion = isset($_GET['cod_seccion']) ? $_GET['cod_seccion'] : "";
     $group = isset($_GET['group']) ? $_GET['group'] : "";
     if ($group === "") {
-        echo "ParÃƒÂ¡metro de agrupaciÃƒÂ³n no especificado.";
+        echo "Parámetro de agrupación no especificado.";
         exit;
     }
     $where = "WHERE hc.fecha_venta >= CONVERT(smalldatetime, '$start_date_full', 120)
@@ -241,7 +241,7 @@ if ($level == 1) {
               AND hc.cod_cliente = '" . odbc_escape($cliente) . "'
               AND h.tipo_venta = hc.tipo_venta
               AND h.tipo_venta IN (1,2)";
-    // FIX cod_seccion: 0 es valor vÃƒÂ¡lido, no usar empty()
+    // FIX cod_seccion: 0 es valor válido, no usar empty()
     if (tieneValor($cod_seccion)) {
         $where .= " AND hc.cod_seccion = '" . odbc_escape($cod_seccion) . "'";
     }
@@ -274,7 +274,7 @@ JOIN articulos a ON h.cod_articulo = a.cod_articulo
                   ORDER BY pedidos DESC";
     } elseif ($group == "producto") {
         // Para el grupo "producto" se usa una consulta UNION ALL:
-        // - Para el ArtÃƒÂ­culo LM se agrupa por cod_articulo y h.descripcion.
+        // - Para el Artículo LM se agrupa por cod_articulo y h.descripcion.
         // - Para el resto se agrupa solo por cod_articulo.
         $query = "(
                     SELECT 
@@ -307,7 +307,7 @@ JOIN articulos a ON h.cod_articulo = a.cod_articulo
                   )
                   ORDER BY pedidos DESC";
     } else {
-        echo "ParÃƒÂ¡metro de agrupaciÃƒÂ³n no vÃƒÂ¡lido.";
+        echo "Parámetro de agrupación no válido.";
         exit;
     }
     $res = odbc_exec($conn, $query);
@@ -361,7 +361,7 @@ JOIN articulos a ON h.cod_articulo = a.cod_articulo
                       <thead class='table-dark'>
                         <tr>
                           <th>Familia</th>
-                          <th>DescripciÃƒÂ³n</th>
+                          <th>Descripción</th>
                           <th>Pedidos</th>
                           <th>Albaranes</th>
                           <th>% Servicio</th>
@@ -401,7 +401,7 @@ JOIN articulos a ON h.cod_articulo = a.cod_articulo
                       <thead class='table-dark'>
                         <tr>
                           <th>Producto</th>
-                          <th>DescripciÃƒÂ³n</th>
+                          <th>Descripción</th>
                           <th>Pedidos</th>
                           <th>Albaranes</th>
                           <th>% Servicio</th>
@@ -434,10 +434,10 @@ JOIN articulos a ON h.cod_articulo = a.cod_articulo
 
 } elseif ($level == 4) {
     // ------------------------------------------------------------
-    // NIVEL 4: Detalle final para Marca o Familia (detalle de artÃƒÂ­culos)
+    // NIVEL 4: Detalle final para Marca o Familia (detalle de artículos)
     // ------------------------------------------------------------
     if (!isset($_GET['cod_cliente'])) {
-        echo "Falta indicar parÃƒÂ¡metros para nivel 4.";
+        echo "Falta indicar parámetros para nivel 4.";
         exit;
     }
     $cliente = $_GET['cod_cliente'];
@@ -456,7 +456,7 @@ JOIN articulos a ON h.cod_articulo = a.cod_articulo
                   AND h.tipo_venta = hc.tipo_venta
                   AND $marcaCondition
                   AND h.tipo_venta IN (1,2)";
-        // FIX cod_seccion: 0 es valor vÃƒÂ¡lido, no usar empty()
+        // FIX cod_seccion: 0 es valor válido, no usar empty()
         if (tieneValor($cod_seccion)) {
             $where .= " AND hc.cod_seccion = '" . odbc_escape($cod_seccion) . "'";
         }
@@ -501,7 +501,7 @@ JOIN articulos a ON h.cod_articulo = a.cod_articulo
                   AND h.tipo_venta = hc.tipo_venta
                   AND a.cod_familia = '" . odbc_escape($familia) . "'
                   AND h.tipo_venta IN (1,2)";
-        // FIX cod_seccion: 0 es valor vÃƒÂ¡lido, no usar empty()
+        // FIX cod_seccion: 0 es valor válido, no usar empty()
         if (tieneValor($cod_seccion)) {
             $where .= " AND hc.cod_seccion = '" . odbc_escape($cod_seccion) . "'";
         }
@@ -553,7 +553,7 @@ JOIN articulos a ON h.cod_articulo = a.cod_articulo
                    <thead class='table-dark'>
                      <tr>
                        <th>Producto</th>
-                        <th>DescripciÃƒÂ³n</th>
+                        <th>Descripción</th>
                        <th>Pedidos</th>
                        <th>Albaranes</th>
                        <th>% Servicio</th>
@@ -583,7 +583,7 @@ JOIN articulos a ON h.cod_articulo = a.cod_articulo
     echo $output;
 
 } else {
-    echo "Nivel de drilldown no implementado o parÃƒÂ¡metros insuficientes.";
+    echo "Nivel de drilldown no implementado o parámetros insuficientes.";
 }
 
 ?>
