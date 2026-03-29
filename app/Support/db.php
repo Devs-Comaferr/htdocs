@@ -67,8 +67,6 @@ if (!function_exists('getOdbcConnection')) {
 if (!function_exists('db')) {
     function db()
     {
-        error_log('DB CONNECT CALLED');
-
         static $connection = null;
 
         if ($connection === null) {

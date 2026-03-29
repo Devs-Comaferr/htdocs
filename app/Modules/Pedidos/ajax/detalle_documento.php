@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 
-// Endpoint interno: la exposicion web se realiza desde BASE_URL . '/ajax/detalle_documento.php'.
-
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/statistics.php';
 require_once BASE_PATH . '/includes/funciones_estadisticas.php';

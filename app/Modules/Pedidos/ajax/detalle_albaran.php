@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 
-// Endpoint interno: la exposicion web se realiza desde BASE_URL . '/ajax/detalle_albaran.php'.
-
 if (!defined('BASE_URL')) {
     define('BASE_URL', '/public');
 }
