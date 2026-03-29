@@ -446,7 +446,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
   <title>Faltas de Venta</title>
   
    <!-- Bootstrap CSS -->
-   <link href="<?= BASE_URL ?>/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+   <link href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
   <!-- noUiSlider CSS -->
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.css" />
   

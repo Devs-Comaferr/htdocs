@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?php echo $pageTitle; ?></title>
   <!-- Bootstrap CSS -->
-  <link href="<?= BASE_URL ?>/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
   
   <style type="text/css">
     body {
@@ -514,7 +514,8 @@
     })();
   </script>
   <!-- Bootstrap JS (opcional) -->
-  <script src="<?= BASE_URL ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
+<script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/js/app-navigation.js"></script>
 </body>
 </html>

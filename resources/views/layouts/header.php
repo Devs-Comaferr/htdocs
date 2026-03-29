@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once BASE_PATH . '/app/Support/header.php';
 ?>
+<!-- Frontend policy: version oficial del proyecto = jQuery 1.12.4 y Bootstrap 3.3.7. Cualquier otra version en vendor queda como legacy y no debe cargarse desde vistas activas. -->
 <!-- Font Awesome local (instalado vía Composer/npm-asset) -->
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/fontawesome/css/all.min.css">
 <link rel="icon" href="<?= BASE_URL ?>/imagenes/favicon.ico" sizes="any">

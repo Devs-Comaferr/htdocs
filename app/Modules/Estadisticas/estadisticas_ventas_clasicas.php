@@ -124,7 +124,7 @@ if (isset($_SESSION['codigo'])) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Estadsticas de Ventas</title>
-  <link href="<?= BASE_URL ?>/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.css" />
   <script type="text/javascript">
     function toggleDetails(rowId, url, linkElement) {
@@ -389,7 +389,7 @@ if (isset($_SESSION['codigo'])) {
   
 </div>
 
-<script src="<?= BASE_URL ?>/assets/vendor/jquery/jquery.min.js"></script>
+<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/vendor/wnumb/wNumb.min.js"></script>
 <script type="text/javascript">
@@ -494,7 +494,7 @@ if (isset($_SESSION['codigo'])) {
       });
   }
 </script>
-<script src="<?= BASE_URL ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 </body>
 </html>
 <?php

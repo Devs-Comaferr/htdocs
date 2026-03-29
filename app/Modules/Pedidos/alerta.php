@@ -128,7 +128,7 @@ $numero_pedidos = count($pedidos);
   <meta charset="UTF-8">
   <title>Pgina de Ejemplo</title>
   <!-- Bootstrap CSS -->
-  <link href="<?= BASE_URL ?>/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
   <!-- FontAwesome CSS -->
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/fontawesome/css/all.min.css" />
   <style>
@@ -286,7 +286,8 @@ url += "&pedido=" + encodeURIComponent(pedido);
   <?php endif; ?>
   
   <!-- Bootstrap JS Bundle -->
-  <script src="<?= BASE_URL ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
+<script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
   <script>
     // Si existen pedidos pendientes, se muestra el modal al cargar la pgina
     <?php if (!empty($pedidos)): ?>

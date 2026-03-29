@@ -141,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <!-- jQuery + Bootstrap JS -->
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.11.3.min.js"></script>
+<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 
 <!-- Scripts para Autocompletado y Validación -->
