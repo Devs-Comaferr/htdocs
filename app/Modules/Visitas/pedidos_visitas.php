@@ -7,16 +7,18 @@ requierePermiso('perm_planificador');
 $conn = db();
 
 $pageTitle = "Relacionar Pedidos con Visitas";
-include(BASE_PATH . '/resources/views/layouts/header.php'); // Asegúrate de que header.php solo contiene el header sin etiquetas HTML
+
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
 
 
-// Obtener el código del vendedor
+// Obtener el cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³digo del vendedor
 $codigo_vendedor = 0;
 if (isset($_SESSION['codigo'])) {
   $codigo_vendedor = intval($_SESSION['codigo']);
 }
 
-// Definir la fecha mínima
+// Definir la fecha mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nima
 $fecha_minima = '2025-01-01';
 
 // Construir la consulta modificada para incluir tiempo_promedio_visita
@@ -71,8 +73,8 @@ while ($row = odbc_fetch_array($res_pedidos)) {
     $tiempo_promedio_min = floatval($row['tiempo_promedio_visita']) * 60;
   }
 
-  // Añadir al array de pedidos con tiempo_promedio_min
-  // Dado que PHP 5.2.3 no soporta array_merge con arrays asociativos de la misma manera, realizamos una combinación manual
+  // AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±adir al array de pedidos con tiempo_promedio_min
+  // Dado que PHP 5.2.3 no soporta array_merge con arrays asociativos de la misma manera, realizamos una combinaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n manual
   $row['tiempo_promedio_min'] = $tiempo_promedio_min;
   $pedidos[] = $row;
   $cod_ventas[] = $row['cod_venta'];
@@ -80,7 +82,7 @@ while ($row = odbc_fetch_array($res_pedidos)) {
 
 odbc_free_result($res_pedidos);
 
-// Si hay pedidos, obtener el conteo de líneas
+// Si hay pedidos, obtener el conteo de lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­neas
 $numero_lineas_map = array();
 
 if (!empty($cod_ventas)) {
@@ -105,7 +107,7 @@ if (!empty($cod_ventas)) {
   // Ejecutar la segunda consulta
   $res_lineas = odbc_exec($conn, $sql_lineas);
   if (!$res_lineas) {
-    error_log("Error al ejecutar la consulta de líneas: " . odbc_errormsg($conn));
+    error_log("Error al ejecutar la consulta de lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­neas: " . odbc_errormsg($conn));
     echo 'Error interno';
     return;
   }
@@ -119,7 +121,7 @@ if (!empty($cod_ventas)) {
 }
 
 
-// Funciones para formatear fecha/hora al estándar HTML (YYYY-MM-DD y HH:MM)
+// Funciones para formatear fecha/hora al estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ndar HTML (YYYY-MM-DD y HH:MM)
 function formatoFecha($fechaSql)
 {
   return date('Y-m-d', strtotime($fechaSql));
@@ -136,7 +138,7 @@ function formatoHora($horaSql)
   <meta charset="UTF-8">
   <title><?php echo htmlspecialchars($pageTitle); ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap 3.3.7 -->
+    <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
     <!-- Font Awesome 4.7 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
 
@@ -278,67 +280,12 @@ function formatoHora($horaSql)
       margin-top: 10px;
     }
   </style>
-  <script type="text/javascript">
-    // Funciones para manejar la apertura y cierre de modales
-// Funciones de ayuda para la validación de tiempos
-function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinutes) {
-      var isAdjusting = false;
-
-      $(startSelector).on('change', function() {
-        if (isAdjusting) return;
-        isAdjusting = true;
-
-        var startTime = $(this).val();
-        var endTime = $(endSelector).val();
-
-        if (startTime && endTime) {
-          var start = parseTime(startTime);
-          var end = parseTime(endTime);
-          var diff = end - start;
-
-          if (diff < minMinutes) {
-            end = start + minMinutes;
-            $(endSelector).val(formatTime(end));
-          } else if (diff > maxMinutes) {
-            end = start + maxMinutes;
-            $(endSelector).val(formatTime(end));
-          }
-        }
-
-        isAdjusting = false;
-      });
-
-      $(endSelector).on('change', function() {
-        if (isAdjusting) return;
-        isAdjusting = true;
-
-        var endTime = $(this).val();
-        var startTime = $(startSelector).val();
-
-        if (startTime && endTime) {
-          var start = parseTime(startTime);
-          var end = parseTime(endTime);
-          var diff = end - start;
-
-          if (diff < minMinutes) {
-            start = end - minMinutes;
-            $(startSelector).val(formatTime(start));
-          } else if (diff > maxMinutes) {
-            start = end - maxMinutes;
-            $(startSelector).val(formatTime(start));
-          }
-        }
-
-        isAdjusting = false;
-      });
-    }
-  </script>
-</head>
+  </head>
 
 <body>
   <div class="container">
 
-    <!-- Mostrar mensajes de éxito o error -->
+    <!-- Mostrar mensajes de ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©xito o error -->
     <?php
     $msg = isset($_GET['msg']) ? $_GET['msg'] : '';
     if ($msg == 'web_ok') {
@@ -346,19 +293,19 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
     } elseif ($msg == 'visita_ok') {
       echo '<div class="alert alert-success">Visita registrada exitosamente.</div>';
     } elseif ($msg == 'tel_ok') {
-      echo '<div class="alert alert-success">Teléfono registrado exitosamente.</div>';
+      echo '<div class="alert alert-success">TelÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©fono registrado exitosamente.</div>';
     } elseif ($msg == 'whatsapp_ok') {
       echo '<div class="alert alert-success">WhatsApp registrado exitosamente.</div>';
     } elseif ($msg == 'email_ok') {
       echo '<div class="alert alert-success">Email registrado exitosamente.</div>';
     } elseif ($msg == 'error') {
-      echo '<div class="alert alert-danger">Ocurrió un error al registrar.</div>';
+      echo '<div class="alert alert-danger">OcurriÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³ un error al registrar.</div>';
     } elseif ($msg == 'error_ampliacion') {
-      echo '<div class="alert alert-danger">No existe una visita previa en los últimos 5 días para realizar una ampliación.</div>';
+      echo '<div class="alert alert-danger">No existe una visita previa en los ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºltimos 5 dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as para realizar una ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n.</div>';
     } elseif ($msg == 'error_formato_fecha') {
-      echo '<div class="alert alert-danger">Formato de fecha inválido.</div>';
+      echo '<div class="alert alert-danger">Formato de fecha invÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido.</div>';
     } elseif ($msg == 'error_formato_hora') {
-      echo '<div class="alert alert-danger">Formato de hora inválido.</div>';
+      echo '<div class="alert alert-danger">Formato de hora invÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido.</div>';
     } elseif ($msg == 'error_min_tiempo') {
       echo '<div class="alert alert-danger">La diferencia entre la hora de inicio y la hora de fin debe ser de al menos 15 minutos y no exceder las 5 horas.</div>';
     }
@@ -380,7 +327,7 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
             $fechaInput = formatoFecha($pedido['fecha_venta']);
             $horaVenta  = formatoHora($pedido['hora_venta']);
 
-            // Obtener el número de líneas desde el mapa, o 0 si no existe
+            // Obtener el nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºmero de lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­neas desde el mapa, o 0 si no existe
             $numero_lineas = isset($numero_lineas_map[$pedido['cod_venta']]) ? $numero_lineas_map[$pedido['cod_venta']] : 0;
           ?>
             <div class="pedido-item"
@@ -417,7 +364,7 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
                    <?php echo number_format($pedido['importe'], 2, ',', '.') . " "; ?>
                 </div>
                 <div>
-                   <?php echo intval($numero_lineas) . " líneas"; ?>
+                   <?php echo intval($numero_lineas) . " lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­neas"; ?>
                 </div>
               </div>
               <?php if (!empty($pedido['observacion_interna'])) { ?>
@@ -436,10 +383,10 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
 
               <div class="pedido-buttons">
                 <?php if (!empty($pedido['cod_pedido_web'])) { ?>
-                  <!-- Botón Web -->
+                  <!-- BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Web -->
                   <button class="btn btn-circle btn-web"
-                    data-toggle="modal"
-                    data-target="#webModal"
+                    data-bs-toggle="modal"
+                    data-bs-target="#webModal"
                     data-cod_venta="<?php echo htmlspecialchars($pedido['cod_venta']); ?>"
                     data-cod_cliente="<?php echo htmlspecialchars($pedido['cod_cliente']); ?>"
                     data-cod_seccion="<?php echo htmlspecialchars($pedido['cod_seccion']); ?>"
@@ -448,10 +395,10 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
                     <i class="fa fa-globe"></i>
                   </button>
                 <?php } else { ?>
-                  <!-- Botón Visita -->
+                  <!-- BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Visita -->
                   <button class="btn btn-circle btn-visita"
-                    data-toggle="modal"
-                    data-target="#visitaModal"
+                    data-bs-toggle="modal"
+                    data-bs-target="#visitaModal"
                     data-cod_venta="<?php echo htmlspecialchars($pedido['cod_venta']); ?>"
                     data-cod_cliente="<?php echo htmlspecialchars($pedido['cod_cliente']); ?>"
                     data-cod_seccion="<?php echo htmlspecialchars($pedido['cod_seccion']); ?>"
@@ -460,10 +407,10 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
                     data-tiempo-promedio="<?php echo intval($pedido['tiempo_promedio_min']); ?>">
                     <i class="fa fa-calendar-check-o"></i>
                   </button>
-                  <!-- Botón Teléfono -->
+                  <!-- BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n TelÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©fono -->
                   <button class="btn btn-circle btn-telefono"
-                    data-toggle="modal"
-                    data-target="#telefonoModal"
+                    data-bs-toggle="modal"
+                    data-bs-target="#telefonoModal"
                     data-cod_venta="<?php echo htmlspecialchars($pedido['cod_venta']); ?>"
                     data-cod_cliente="<?php echo htmlspecialchars($pedido['cod_cliente']); ?>"
                     data-cod_seccion="<?php echo htmlspecialchars($pedido['cod_seccion']); ?>"
@@ -471,10 +418,10 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
                     data-hora_visita="<?php echo $horaVenta; ?>">
                     <i class="fa fa-phone"></i>
                   </button>
-                  <!-- Botón WhatsApp -->
+                  <!-- BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n WhatsApp -->
                   <button class="btn btn-circle btn-whatsapp"
-                    data-toggle="modal"
-                    data-target="#whatsappModal"
+                    data-bs-toggle="modal"
+                    data-bs-target="#whatsappModal"
                     data-cod_venta="<?php echo htmlspecialchars($pedido['cod_venta']); ?>"
                     data-cod_cliente="<?php echo htmlspecialchars($pedido['cod_cliente']); ?>"
                     data-cod_seccion="<?php echo htmlspecialchars($pedido['cod_seccion']); ?>"
@@ -482,10 +429,10 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
                     data-hora_visita="<?php echo $horaVenta; ?>">
                     <i class="fa fa-whatsapp"></i>
                   </button>
-                  <!-- Botón Email -->
+                  <!-- BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Email -->
                   <button class="btn btn-circle btn-email"
-                    data-toggle="modal"
-                    data-target="#emailModal"
+                    data-bs-toggle="modal"
+                    data-bs-target="#emailModal"
                     data-cod_venta="<?php echo htmlspecialchars($pedido['cod_venta']); ?>"
                     data-cod_cliente="<?php echo htmlspecialchars($pedido['cod_cliente']); ?>"
                     data-cod_seccion="<?php echo htmlspecialchars($pedido['cod_seccion']); ?>"
@@ -506,20 +453,20 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
     </div>
   </div>
 
-  <!-- Modales aquí -->
+  <!-- Modales aquÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ -->
 
   <div class="modal fade" id="pedidoDetalleModal" tabindex="-1" role="dialog" aria-labelledby="pedidoDetalleModalLabel">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-          <h4 class="modal-title" id="pedidoDetalleModalLabel">Detalle del Pedido</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          <h5 class="modal-title" id="pedidoDetalleModalLabel">Detalle del Pedido</h5>
         </div>
         <div class="modal-body" id="pedidoDetalleModalBody">
           Cargando...
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
         </div>
       </div>
     </div>
@@ -531,8 +478,8 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
       <div class="modal-content">
         <form action="<?= BASE_URL ?>/registrar_visita.php" method="POST">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-            <h4 class="modal-title" id="visitaModalLabel">Registrar Visita</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <h5 class="modal-title" id="visitaModalLabel">Registrar Visita</h5>
           </div>
           <div class="modal-body">
             <input type="hidden" name="cod_venta" id="v_cod_venta">
@@ -541,34 +488,34 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
             <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
             <input type="hidden" name="previous_id_visita" id="v_previous_id_visita"> <!-- Nuevo campo oculto -->
 
-            <div class="form-group">
-              <label>Fecha de la Visita</label>
+            <div class="mb-3">
+              <label class="form-label">Fecha de la Visita</label>
               <input type="date" class="form-control" name="fecha_visita" id="v_fecha_visita" required>
             </div>
-            <div class="form-group">
-              <label>Hora de Inicio de la Visita</label>
+            <div class="mb-3">
+              <label class="form-label">Hora de Inicio de la Visita</label>
               <input type="time" class="form-control" name="hora_inicio_visita" id="v_hora_inicio_visita" required>
             </div>
-            <div class="form-group">
-              <label>Hora de Finalización de la Visita</label>
+            <div class="mb-3">
+              <label class="form-label">Hora de FinalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de la Visita</label>
               <input type="time" class="form-control" name="hora_fin_visita" id="v_hora_fin_visita" required>
             </div>
-            <div class="form-group">
-              <label>Observaciones</label>
+            <div class="mb-3">
+              <label class="form-label">Observaciones</label>
               <textarea class="form-control" name="observaciones" rows="3"></textarea>
             </div>
 
-            <!-- Checkbox ampliación (deshabilitado por defecto, habilitado por AJAX) -->
-            <div class="checkbox">
-              <label>
+            <!-- Checkbox ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n (deshabilitado por defecto, habilitado por AJAX) -->
+            <div class="form-check">
+              <label class="form-label">
                 <input type="checkbox" name="ampliacion" id="v_ampliacion" value="1">
-                Es ampliación de una visita previa en 5 días?
+                Es ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de una visita previa en 5 dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as?
               </label>
             </div>
           </div>
           <div class="modal-footer">
-            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliación -->
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n -->
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             <button type="submit" class="btn btn-primary">Registrar Visita</button>
           </div>
         </form>
@@ -576,14 +523,14 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
     </div>
   </div>
 
-  <!-- Modal Teléfono -->
+  <!-- Modal TelÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©fono -->
   <div class="modal fade" id="telefonoModal" tabindex="-1" role="dialog" aria-labelledby="telefonoModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <form action="<?= BASE_URL ?>/registrar_telefono.php" method="POST">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-            <h4 class="modal-title" id="telefonoModalLabel">Registrar Llamada Telefónica</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <h5 class="modal-title" id="telefonoModalLabel">Registrar Llamada TelefÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³nica</h5>
           </div>
           <div class="modal-body">
             <input type="hidden" name="cod_venta" id="t_cod_venta">
@@ -592,35 +539,35 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
             <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
             <input type="hidden" name="previous_id_visita" id="t_previous_id_visita"> <!-- Nuevo campo oculto -->
 
-            <div class="form-group">
-              <label>Fecha de la Llamada</label>
+            <div class="mb-3">
+              <label class="form-label">Fecha de la Llamada</label>
               <input type="date" class="form-control" name="fecha_visita" id="t_fecha_visita_input" required>
             </div>
-            <div class="form-group">
-              <label>Hora de Inicio de la Llamada</label>
+            <div class="mb-3">
+              <label class="form-label">Hora de Inicio de la Llamada</label>
               <input type="time" class="form-control" name="hora_inicio_visita" id="t_hora_inicio_visita" required>
             </div>
-            <div class="form-group">
-              <label>Hora de Finalización de la Llamada</label>
+            <div class="mb-3">
+              <label class="form-label">Hora de FinalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de la Llamada</label>
               <input type="time" class="form-control" name="hora_fin_visita" id="t_hora_fin_visita" required>
             </div>
-            <div class="form-group">
-              <label>Observaciones</label>
+            <div class="mb-3">
+              <label class="form-label">Observaciones</label>
               <textarea class="form-control" name="observaciones" rows="3"></textarea>
             </div>
 
-            <!-- Checkbox ampliación (deshabilitado por defecto, habilitado por AJAX) -->
-            <div class="checkbox">
-              <label>
+            <!-- Checkbox ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n (deshabilitado por defecto, habilitado por AJAX) -->
+            <div class="form-check">
+              <label class="form-label">
                 <input type="checkbox" name="ampliacion" id="t_ampliacion" value="1">
-                Es ampliación de una visita previa en 5 días?
+                Es ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de una visita previa en 5 dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as?
               </label>
             </div>
           </div>
           <div class="modal-footer">
-            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliación -->
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-            <button type="submit" class="btn btn-warning">Registrar Teléfono</button>
+            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n -->
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-warning">Registrar TelÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©fono</button>
           </div>
         </form>
       </div>
@@ -633,8 +580,8 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
       <div class="modal-content">
         <form action="<?= BASE_URL ?>/registrar_whatsapp.php" method="POST">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-            <h4 class="modal-title" id="whatsappModalLabel">Registrar Pedido WhatsApp</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <h5 class="modal-title" id="whatsappModalLabel">Registrar Pedido WhatsApp</h5>
           </div>
           <div class="modal-body">
             <input type="hidden" name="cod_venta" id="w_cod_venta">
@@ -643,34 +590,34 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
             <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
             <input type="hidden" name="previous_id_visita" id="w_previous_id_visita"> <!-- Nuevo campo oculto -->
 
-            <div class="form-group">
-              <label>Fecha del Pedido WhatsApp</label>
+            <div class="mb-3">
+              <label class="form-label">Fecha del Pedido WhatsApp</label>
               <input type="date" class="form-control" name="fecha_visita" id="w_fecha_visita_input" required>
             </div>
-            <div class="form-group">
-              <label>Hora de Inicio del Pedido WhatsApp</label>
+            <div class="mb-3">
+              <label class="form-label">Hora de Inicio del Pedido WhatsApp</label>
               <input type="time" class="form-control" name="hora_inicio_visita" id="w_hora_inicio_visita" required>
             </div>
-            <div class="form-group">
-              <label>Hora de Finalización del Pedido WhatsApp</label>
+            <div class="mb-3">
+              <label class="form-label">Hora de FinalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del Pedido WhatsApp</label>
               <input type="time" class="form-control" name="hora_fin_visita" id="w_hora_fin_visita" required>
             </div>
-            <div class="form-group">
-              <label>Observaciones</label>
+            <div class="mb-3">
+              <label class="form-label">Observaciones</label>
               <textarea class="form-control" name="observaciones" rows="3"></textarea>
             </div>
 
-            <!-- Checkbox ampliación (deshabilitado por defecto, habilitado por AJAX) -->
-            <div class="checkbox">
-              <label>
+            <!-- Checkbox ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n (deshabilitado por defecto, habilitado por AJAX) -->
+            <div class="form-check">
+              <label class="form-label">
                 <input type="checkbox" name="ampliacion" id="w_ampliacion" value="1">
-                Es ampliación de una visita previa en 5 días?
+                Es ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de una visita previa en 5 dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as?
               </label>
             </div>
           </div>
           <div class="modal-footer">
-            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliación -->
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n -->
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             <button type="submit" class="btn btn-success">Registrar WhatsApp</button>
           </div>
         </form>
@@ -684,8 +631,8 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
       <div class="modal-content">
         <form action="<?= BASE_URL ?>/registrar_email.php" method="POST">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-            <h4 class="modal-title" id="emailModalLabel">Registrar Pedido Email</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <h5 class="modal-title" id="emailModalLabel">Registrar Pedido Email</h5>
           </div>
           <div class="modal-body">
             <input type="hidden" name="cod_venta" id="e_cod_venta">
@@ -694,34 +641,34 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
             <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
             <input type="hidden" name="previous_id_visita" id="e_previous_id_visita"> <!-- Nuevo campo oculto -->
 
-            <div class="form-group">
-              <label>Fecha del Pedido Email</label>
+            <div class="mb-3">
+              <label class="form-label">Fecha del Pedido Email</label>
               <input type="date" class="form-control" name="fecha_visita" id="e_fecha_visita_input" required>
             </div>
-            <div class="form-group">
-              <label>Hora de Inicio del Pedido Email</label>
+            <div class="mb-3">
+              <label class="form-label">Hora de Inicio del Pedido Email</label>
               <input type="time" class="form-control" name="hora_inicio_visita" id="e_hora_inicio_visita" required>
             </div>
-            <div class="form-group">
-              <label>Hora de Finalización del Pedido Email</label>
+            <div class="mb-3">
+              <label class="form-label">Hora de FinalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del Pedido Email</label>
               <input type="time" class="form-control" name="hora_fin_visita" id="e_hora_fin_visita" required>
             </div>
-            <div class="form-group">
-              <label>Observaciones</label>
+            <div class="mb-3">
+              <label class="form-label">Observaciones</label>
               <textarea class="form-control" name="observaciones" rows="3"></textarea>
             </div>
 
-            <!-- Checkbox ampliación (deshabilitado por defecto, habilitado por AJAX) -->
-            <div class="checkbox">
-              <label>
+            <!-- Checkbox ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n (deshabilitado por defecto, habilitado por AJAX) -->
+            <div class="form-check">
+              <label class="form-label">
                 <input type="checkbox" name="ampliacion" id="e_ampliacion" value="1">
-                Es ampliación de una visita previa en 5 días?
+                Es ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de una visita previa en 5 dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as?
               </label>
             </div>
           </div>
           <div class="modal-footer">
-            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliación -->
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n -->
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             <button type="submit" class="btn btn-info">Registrar Email</button>
           </div>
         </form>
@@ -735,8 +682,8 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
       <div class="modal-content">
         <form action="<?= BASE_URL ?>/registrar_web.php" method="POST">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-            <h4 class="modal-title" id="webModalLabel">Registrar Pedido Web</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <h5 class="modal-title" id="webModalLabel">Registrar Pedido Web</h5>
           </div>
           <div class="modal-body">
             <input type="hidden" name="cod_venta" id="w_cod_venta_web">
@@ -745,46 +692,47 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
             <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
             <input type="hidden" name="previous_id_visita" id="w_previous_id_visita"> <!-- Nuevo campo oculto -->
 
-            <div class="form-group">
-              <label>Fecha del Pedido Web</label>
+            <div class="mb-3">
+              <label class="form-label">Fecha del Pedido Web</label>
               <input type="date" class="form-control" name="fecha_visita" id="w_fecha_visita_input_web" required>
             </div>
-            <div class="form-group">
-              <label>Hora de Inicio del Pedido Web</label>
+            <div class="mb-3">
+              <label class="form-label">Hora de Inicio del Pedido Web</label>
               <input type="time" class="form-control" name="hora_inicio_visita" id="w_hora_inicio_visita_web" required>
             </div>
-            <div class="form-group">
-              <label>Hora de Finalización del Pedido Web</label>
+            <div class="mb-3">
+              <label class="form-label">Hora de FinalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del Pedido Web</label>
               <input type="time" class="form-control" name="hora_fin_visita" id="w_hora_fin_visita_web" required>
             </div>
-            <div class="form-group">
-              <label>Observaciones</label>
+            <div class="mb-3">
+              <label class="form-label">Observaciones</label>
               <textarea class="form-control" name="observaciones" rows="3"></textarea>
             </div>
           </div>
           <div class="modal-footer">
-            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliación -->
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            <div id="ampliacionMensaje" class="info-message"></div> <!-- Contenedor para mensajes de ampliaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n -->
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             <button type="submit" class="btn btn-primary">Registrar Web</button>
           </div>
         </form>
       </div>
     </div>
-  </div>
-
-  <!-- jQuery + Bootstrap JS -->
-    
-  <script>
-    // Funciones de ayuda para la validación de tiempos
-function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinutes) {
+  </div>  <script>
+    function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinutes) {
       var isAdjusting = false;
+      var startInput = document.querySelector(startSelector);
+      var endInput = document.querySelector(endSelector);
 
-      $(startSelector).on('change', function() {
+      if (!startInput || !endInput) {
+        return;
+      }
+
+      startInput.addEventListener('change', function() {
         if (isAdjusting) return;
         isAdjusting = true;
 
-        var startTime = $(this).val();
-        var endTime = $(endSelector).val();
+        var startTime = startInput.value;
+        var endTime = endInput.value;
 
         if (startTime && endTime) {
           var start = parseTime(startTime);
@@ -792,23 +740,21 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
           var diff = end - start;
 
           if (diff < minMinutes) {
-            end = start + minMinutes;
-            $(endSelector).val(formatTime(end));
+            endInput.value = formatTime(start + minMinutes);
           } else if (diff > maxMinutes) {
-            end = start + maxMinutes;
-            $(endSelector).val(formatTime(end));
+            endInput.value = formatTime(start + maxMinutes);
           }
         }
 
         isAdjusting = false;
       });
 
-      $(endSelector).on('change', function() {
+      endInput.addEventListener('change', function() {
         if (isAdjusting) return;
         isAdjusting = true;
 
-        var endTime = $(this).val();
-        var startTime = $(startSelector).val();
+        var endTime = endInput.value;
+        var startTime = startInput.value;
 
         if (startTime && endTime) {
           var start = parseTime(startTime);
@@ -816,11 +762,9 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
           var diff = end - start;
 
           if (diff < minMinutes) {
-            start = end - minMinutes;
-            $(startSelector).val(formatTime(start));
+            startInput.value = formatTime(end - minMinutes);
           } else if (diff > maxMinutes) {
-            start = end - maxMinutes;
-            $(startSelector).val(formatTime(start));
+            startInput.value = formatTime(end - maxMinutes);
           }
         }
 
@@ -828,237 +772,268 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
       });
     }
 
-    $(document).ready(function() {
-      // Abrir detalle al pulsar la tarjeta (excepto en los botones de accion).
-      $('.pedido-item').on('click', function(event) {
-        if ($(event.target).closest('.pedido-buttons').length > 0) {
-          return;
-        }
-
-        var codVenta = $(this).data('cod_venta');
-        if (!codVenta) {
-          return;
-        }
-
-        $('#pedidoDetalleModalLabel').text('Detalle del Pedido #' + codVenta);
-        $('#pedidoDetalleModalBody').html('Cargando...');
-        $('#pedidoDetalleModal').modal('show');
-
-        $.get('<?= BASE_URL ?>/ajax/detalle_pedido.php', { cod_venta: codVenta }, function(resp) {
-          $('#pedidoDetalleModalBody').html(resp);
-        }).fail(function() {
-          $('#pedidoDetalleModalBody').html('<div class="alert alert-danger">Error al cargar el detalle del pedido.</div>');
-        });
-      });
-
-      // Aplicar la función de validación a cada par de campos de hora en los modales
-      enforceTimeDifference('#v_hora_inicio_visita', '#v_hora_fin_visita', 15, 300); // Visita Modal
-      enforceTimeDifference('#t_hora_inicio_visita', '#t_hora_fin_visita', 15, 300); // Teléfono Modal
-      enforceTimeDifference('#w_hora_inicio_visita', '#w_hora_fin_visita', 15, 300); // WhatsApp Modal
-      enforceTimeDifference('#e_hora_inicio_visita', '#e_hora_fin_visita', 15, 300); // Email Modal
-      enforceTimeDifference('#w_hora_inicio_visita_web', '#w_hora_fin_visita_web', 15, 300); // Web Modal
-
-      // Función para realizar la comprobación de visitas previas utilizando la fecha del input del modal
-      function checkVisitaPreviaGeneral(modal, inputSelector, cod_cliente, cod_seccion, fecha, checkboxSelector, previousIdSelector) {
-        var cod_seccion_val = cod_seccion !== '' ? cod_seccion : '';
-        $.ajax({
-          url: '<?= BASE_URL ?>/check_visita_previa.php',
-          type: 'POST',
-          data: {
-            cod_cliente: cod_cliente,
-            fecha_visita: fecha,
-            cod_seccion: cod_seccion_val
-          },
-          dataType: 'text',
-          success: function(resp) {
-            console.log('Respuesta AJAX:', resp);
-            modal.find('.modal-body #ampliacionMensaje').remove();
-            if (resp.indexOf("error:") === 0) {
-              var errorMsg = resp.substring(6);
-              modal.find('.modal-body').append('<div id="ampliacionMensaje" class="alert alert-danger">' + errorMsg + '</div>');
-              return;
-            }
-            if (resp.indexOf("yes:") === 0) {
-              var id_visita = resp.substring(4);
-              // Se activa (checked) automáticamente la casilla si hay visita previa
-              modal.find(checkboxSelector).prop('disabled', false).prop('checked', true);
-              modal.find(previousIdSelector).val(id_visita);
-              modal.find('.modal-body').append('<div id="ampliacionMensaje" class="alert alert-success info-message">Hay visitas previas en los últimos 5 días.</div>');
-            } else if (resp === "no") {
-              modal.find(checkboxSelector).prop('disabled', true).prop('checked', false);
-              modal.find(previousIdSelector).val('');
-              modal.find('.modal-body').append('<div id="ampliacionMensaje" class="alert alert-info info-message">No hay visitas previas en los últimos 5 días.</div>');
-            } else {
-              modal.find('.modal-body').append('<div id="ampliacionMensaje" class="alert alert-danger">Respuesta inesperada del servidor: ' + resp + '</div>');
-            }
-          },
-          error: function(xhr, status, error) {
-            console.error("Error en AJAX:", status, error);
-            modal.find('.modal-body #ampliacionMensaje').remove();
-            modal.find('.modal-body').append('<div id="ampliacionMensaje" class="alert alert-danger">Error al verificar visitas previas.</div>');
-          }
-        });
+    document.addEventListener('DOMContentLoaded', function() {
+      function getData(element, name) {
+        return element ? (element.getAttribute('data-' + name) || '') : '';
       }
 
-      // Modal Visita
-      $('#visitaModal').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget); // Botón que abrió el modal
-        var cod_venta = button.data('cod_venta');
-        var cod_cliente = button.data('cod_cliente');
-        var cod_seccion = button.data('cod_seccion');
-        var fecha_visita = button.data('fecha_visita'); // YYYY-MM-DD
-        var hora_visita = button.data('hora_visita'); // HH:MM
-        var tiempo_promedio_min = parseInt(button.data('tiempo-promedio')); // en minutos
-
-        // Validar tiempo_promedio_min
-        if (isNaN(tiempo_promedio_min) || tiempo_promedio_min <= 0) {
-          tiempo_promedio_min = 60; // Valor predeterminado en minutos
+      function removeAmpliacionMensaje(modal) {
+        var existing = modal.querySelector('.modal-body #ampliacionMensaje');
+        if (existing) {
+          existing.remove();
         }
+      }
 
-        // Convertir hora_visita a minutos
-        var parts = hora_visita.split(':');
-        var hora = parseInt(parts[0], 10);
-        var minuto = parseInt(parts[1], 10);
-        var hora_visita_min = hora * 60 + minuto;
+      function appendAmpliacionMensaje(modal, className, message) {
+        removeAmpliacionMensaje(modal);
+        var body = modal.querySelector('.modal-body');
+        if (!body) return;
+        body.insertAdjacentHTML('beforeend', '<div id="ampliacionMensaje" class="alert ' + className + '">' + message + '</div>');
+      }
 
-        // Calcular hora_inicio_visita = hora_visita_min - tiempo_promedio_min
-        var hora_inicio_visita_min = hora_visita_min - tiempo_promedio_min;
-
-        // Manejar desbordamientos de hora
-        if (hora_inicio_visita_min < 0) {
-          hora_inicio_visita_min += 24 * 60;
+      function setFieldValue(modal, selector, value) {
+        var element = modal.querySelector(selector);
+        if (element) {
+          element.value = value;
         }
+      }
 
-        var hora_inicio_visita = formatTime(hora_inicio_visita_min);
-        var hora_fin_visita = hora_visita;
+      function resetAmpliacion(modal, checkboxSelector, previousIdSelector) {
+        var checkbox = modal.querySelector(checkboxSelector);
+        var previousId = modal.querySelector(previousIdSelector);
+        if (checkbox) {
+          checkbox.checked = false;
+          checkbox.disabled = true;
+        }
+        if (previousId) {
+          previousId.value = '';
+        }
+        removeAmpliacionMensaje(modal);
+      }
 
-        var modal = $(this);
-        modal.find('#v_cod_venta').val(cod_venta);
-        modal.find('#v_cod_cliente').val(cod_cliente);
-        modal.find('#v_cod_seccion').val(cod_seccion);
-        modal.find('#v_fecha_visita').val(fecha_visita);
-        modal.find('#v_hora_inicio_visita').val(hora_inicio_visita);
-        modal.find('#v_hora_fin_visita').val(hora_fin_visita);
+      document.querySelectorAll('.pedido-item').forEach(function(item) {
+        item.addEventListener('click', function(event) {
+          if (event.target.closest('.pedido-buttons')) {
+            return;
+          }
 
-        // Asignar valores ocultos y limpiar checkbox y mensajes previos
-        modal.find('#v_previous_id_visita').val('');
-        modal.find('#v_ampliacion').prop('checked', false).prop('disabled', true);
-        modal.find('.modal-body #ampliacionMensaje').remove();
+          var codVenta = getData(item, 'cod_venta');
+          if (!codVenta) {
+            return;
+          }
 
-        // Usar el valor actual del input de fecha del modal para la comprobación
-        var currentFecha = modal.find('#v_fecha_visita').val();
-        checkVisitaPreviaGeneral(modal, '#v_fecha_visita', cod_cliente, cod_seccion, currentFecha, '#v_ampliacion', '#v_previous_id_visita');
+          var detalleModal = document.getElementById('pedidoDetalleModal');
+          var detalleLabel = document.getElementById('pedidoDetalleModalLabel');
+          var detalleBody = document.getElementById('pedidoDetalleModalBody');
+          if (!detalleModal || !detalleLabel || !detalleBody) {
+            return;
+          }
 
-        // Si el usuario cambia la fecha, se vuelve a hacer la comprobación
-        modal.find('#v_fecha_visita').off('change').on('change', function() {
-          var nuevaFecha = $(this).val();
-          modal.find('.modal-body #ampliacionMensaje').remove();
-          checkVisitaPreviaGeneral(modal, '#v_fecha_visita', cod_cliente, cod_seccion, nuevaFecha, '#v_ampliacion', '#v_previous_id_visita');
+          detalleLabel.textContent = 'Detalle del Pedido #' + codVenta;
+          detalleBody.innerHTML = 'Cargando...';
+          bootstrap.Modal.getOrCreateInstance(detalleModal).show();
+
+          var detailUrl = new URL('<?= BASE_URL ?>/ajax/detalle_pedido.php', window.location.origin);
+          detailUrl.searchParams.set('cod_venta', codVenta);
+
+          fetch(detailUrl.toString(), {
+            credentials: 'same-origin'
+          })
+            .then(function(response) {
+              if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+              }
+              return response.text();
+            })
+            .then(function(resp) {
+              detalleBody.innerHTML = resp;
+            })
+            .catch(function() {
+              detalleBody.innerHTML = '<div class="alert alert-danger">Error al cargar el detalle del pedido.</div>';
+            });
         });
       });
 
-      // Función para manejar los modales con tiempo estimado fijo de 15 minutos (Teléfono, WhatsApp, Email)
-      function manejarModal(modalId, prefix) {
-        $('#' + modalId).on('show.bs.modal', function(event) {
-          var button = $(event.relatedTarget); // Botón que abrió el modal
-          var cod_venta = button.data('cod_venta');
-          var cod_cliente = button.data('cod_cliente');
-          var cod_seccion = button.data('cod_seccion');
-          var fecha_visita = button.data('fecha_visita'); // YYYY-MM-DD
-          var hora_visita = button.data('hora_visita'); // HH:MM
+      enforceTimeDifference('#v_hora_inicio_visita', '#v_hora_fin_visita', 15, 300);
+      enforceTimeDifference('#t_hora_inicio_visita', '#t_hora_fin_visita', 15, 300);
+      enforceTimeDifference('#w_hora_inicio_visita', '#w_hora_fin_visita', 15, 300);
+      enforceTimeDifference('#e_hora_inicio_visita', '#e_hora_fin_visita', 15, 300);
+      enforceTimeDifference('#w_hora_inicio_visita_web', '#w_hora_fin_visita_web', 15, 300);
 
-          // Convertir hora_visita a minutos
+      function checkVisitaPreviaGeneral(modal, cod_cliente, cod_seccion, fecha, checkboxSelector, previousIdSelector) {
+        var payload = new URLSearchParams();
+        payload.set('cod_cliente', cod_cliente);
+        payload.set('fecha_visita', fecha);
+        payload.set('cod_seccion', cod_seccion !== '' ? cod_seccion : '');
+
+        fetch('<?= BASE_URL ?>/check_visita_previa.php', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+          },
+          body: payload.toString()
+        })
+          .then(function(response) {
+            if (!response.ok) {
+              throw new Error('HTTP ' + response.status);
+            }
+            return response.text();
+          })
+          .then(function(resp) {
+            var checkbox = modal.querySelector(checkboxSelector);
+            var previousId = modal.querySelector(previousIdSelector);
+            removeAmpliacionMensaje(modal);
+
+            if (resp.indexOf('error:') === 0) {
+              appendAmpliacionMensaje(modal, 'alert-danger', resp.substring(6));
+              return;
+            }
+
+            if (resp.indexOf('yes:') === 0) {
+              if (checkbox) {
+                checkbox.disabled = false;
+                checkbox.checked = true;
+              }
+              if (previousId) {
+                previousId.value = resp.substring(4);
+              }
+              appendAmpliacionMensaje(modal, 'alert-success info-message', 'Hay visitas previas en los ÃƒÆ’Ã‚Âºltimos 5 dÃƒÆ’Ã‚Â­as.');
+              return;
+            }
+
+            if (resp === 'no') {
+              if (checkbox) {
+                checkbox.disabled = true;
+                checkbox.checked = false;
+              }
+              if (previousId) {
+                previousId.value = '';
+              }
+              appendAmpliacionMensaje(modal, 'alert-info info-message', 'No hay visitas previas en los ÃƒÆ’Ã‚Âºltimos 5 dÃƒÆ’Ã‚Â­as.');
+              return;
+            }
+
+            appendAmpliacionMensaje(modal, 'alert-danger', 'Respuesta inesperada del servidor: ' + resp);
+          })
+          .catch(function(error) {
+            console.error('Error en fetch:', error);
+            appendAmpliacionMensaje(modal, 'alert-danger', 'Error al verificar visitas previas.');
+          });
+      }
+
+      var visitaModal = document.getElementById('visitaModal');
+      if (visitaModal) {
+        visitaModal.addEventListener('show.bs.modal', function(event) {
+          var button = event.relatedTarget;
+          if (!button) return;
+
+          var cod_venta = getData(button, 'cod_venta');
+          var cod_cliente = getData(button, 'cod_cliente');
+          var cod_seccion = getData(button, 'cod_seccion');
+          var fecha_visita = getData(button, 'fecha_visita');
+          var hora_visita = getData(button, 'hora_visita');
+          var tiempo_promedio_min = parseInt(getData(button, 'tiempo-promedio'), 10);
+          if (isNaN(tiempo_promedio_min) || tiempo_promedio_min <= 0) {
+            tiempo_promedio_min = 60;
+          }
+
           var parts = hora_visita.split(':');
-          var hora = parseInt(parts[0], 10);
-          var minuto = parseInt(parts[1], 10);
-          var hora_visita_min = hora * 60 + minuto;
-
-          // Calcular hora_inicio_visita = hora_visita_min - 15 minutos
-          var hora_inicio_visita_min = hora_visita_min - 15;
-
-          // Manejar desbordamientos de hora
+          var hora_visita_min = (parseInt(parts[0], 10) * 60) + parseInt(parts[1], 10);
+          var hora_inicio_visita_min = hora_visita_min - tiempo_promedio_min;
           if (hora_inicio_visita_min < 0) {
             hora_inicio_visita_min += 24 * 60;
           }
 
-          var hora_inicio_visita = formatTime(hora_inicio_visita_min);
-          var hora_fin_visita = hora_visita;
+          setFieldValue(visitaModal, '#v_cod_venta', cod_venta);
+          setFieldValue(visitaModal, '#v_cod_cliente', cod_cliente);
+          setFieldValue(visitaModal, '#v_cod_seccion', cod_seccion);
+          setFieldValue(visitaModal, '#v_fecha_visita', fecha_visita);
+          setFieldValue(visitaModal, '#v_hora_inicio_visita', formatTime(hora_inicio_visita_min));
+          setFieldValue(visitaModal, '#v_hora_fin_visita', hora_visita);
+          resetAmpliacion(visitaModal, '#v_ampliacion', '#v_previous_id_visita');
 
-          var modal = $(this);
-          modal.find('#' + prefix + '_cod_venta').val(cod_venta);
-          modal.find('#' + prefix + '_cod_cliente').val(cod_cliente);
-          modal.find('#' + prefix + '_cod_seccion').val(cod_seccion);
-          modal.find('#' + prefix + '_fecha_visita_input').val(fecha_visita);
-          modal.find('#' + prefix + '_hora_inicio_visita').val(hora_inicio_visita);
-          modal.find('#' + prefix + '_hora_fin_visita').val(hora_fin_visita);
-
-          // Asignar valores ocultos y limpiar checkbox y mensajes previos
-          modal.find('#' + prefix + '_previous_id_visita').val('');
-          modal.find('#' + prefix + '_ampliacion').prop('checked', false).prop('disabled', true);
-          modal.find('.modal-body #ampliacionMensaje').remove();
-
-          // Usar el valor actual del input de fecha para la comprobación
-          var currentFecha = modal.find('#' + prefix + '_fecha_visita_input').val();
-          checkVisitaPreviaGeneral(modal, '#' + prefix + '_fecha_visita_input', cod_cliente, cod_seccion, currentFecha, '#' + prefix + '_ampliacion', '#' + prefix + '_previous_id_visita');
-
-          // Si el usuario cambia la fecha, se vuelve a hacer la comprobación
-          modal.find('#' + prefix + '_fecha_visita_input').off('change').on('change', function() {
-            var nuevaFecha = $(this).val();
-            modal.find('.modal-body #ampliacionMensaje').remove();
-            checkVisitaPreviaGeneral(modal, '#' + prefix + '_fecha_visita_input', cod_cliente, cod_seccion, nuevaFecha, '#' + prefix + '_ampliacion', '#' + prefix + '_previous_id_visita');
-          });
+          var fechaInput = visitaModal.querySelector('#v_fecha_visita');
+          if (fechaInput) {
+            checkVisitaPreviaGeneral(visitaModal, cod_cliente, cod_seccion, fechaInput.value, '#v_ampliacion', '#v_previous_id_visita');
+            fechaInput.onchange = function() {
+              checkVisitaPreviaGeneral(visitaModal, cod_cliente, cod_seccion, fechaInput.value, '#v_ampliacion', '#v_previous_id_visita');
+            };
+          }
         });
       }
 
-      // Manejar Modal Teléfono (tiempo_estimado = 15 minutos)
+      function manejarModal(modalId, prefix) {
+        var modal = document.getElementById(modalId);
+        if (!modal) return;
+
+        modal.addEventListener('show.bs.modal', function(event) {
+          var button = event.relatedTarget;
+          if (!button) return;
+
+          var cod_venta = getData(button, 'cod_venta');
+          var cod_cliente = getData(button, 'cod_cliente');
+          var cod_seccion = getData(button, 'cod_seccion');
+          var fecha_visita = getData(button, 'fecha_visita');
+          var hora_visita = getData(button, 'hora_visita');
+
+          var parts = hora_visita.split(':');
+          var hora_visita_min = (parseInt(parts[0], 10) * 60) + parseInt(parts[1], 10);
+          var hora_inicio_visita_min = hora_visita_min - 15;
+          if (hora_inicio_visita_min < 0) {
+            hora_inicio_visita_min += 24 * 60;
+          }
+
+          setFieldValue(modal, '#' + prefix + '_cod_venta', cod_venta);
+          setFieldValue(modal, '#' + prefix + '_cod_cliente', cod_cliente);
+          setFieldValue(modal, '#' + prefix + '_cod_seccion', cod_seccion);
+          setFieldValue(modal, '#' + prefix + '_fecha_visita_input', fecha_visita);
+          setFieldValue(modal, '#' + prefix + '_hora_inicio_visita', formatTime(hora_inicio_visita_min));
+          setFieldValue(modal, '#' + prefix + '_hora_fin_visita', hora_visita);
+          resetAmpliacion(modal, '#' + prefix + '_ampliacion', '#' + prefix + '_previous_id_visita');
+
+          var fechaInput = modal.querySelector('#' + prefix + '_fecha_visita_input');
+          if (fechaInput) {
+            checkVisitaPreviaGeneral(modal, cod_cliente, cod_seccion, fechaInput.value, '#' + prefix + '_ampliacion', '#' + prefix + '_previous_id_visita');
+            fechaInput.onchange = function() {
+              checkVisitaPreviaGeneral(modal, cod_cliente, cod_seccion, fechaInput.value, '#' + prefix + '_ampliacion', '#' + prefix + '_previous_id_visita');
+            };
+          }
+        });
+      }
+
       manejarModal('telefonoModal', 't');
-
-      // Manejar Modal WhatsApp (tiempo_estimado = 15 minutos)
       manejarModal('whatsappModal', 'w');
-
-      // Manejar Modal Email (tiempo_estimado = 15 minutos)
       manejarModal('emailModal', 'e');
 
-      // Manejar Modal Web (tiempo_estimado = 15 minutos, editable; sin verificación AJAX de ampliación)
-      $('#webModal').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget); // Botón que abrió el modal
-        var cod_venta = button.data('cod_venta');
-        var cod_cliente = button.data('cod_cliente');
-        var cod_seccion = button.data('cod_seccion');
-        var fecha_visita = button.data('fecha_visita'); // YYYY-MM-DD
-        var hora_visita = button.data('hora_visita'); // HH:MM
+      var webModal = document.getElementById('webModal');
+      if (webModal) {
+        webModal.addEventListener('show.bs.modal', function(event) {
+          var button = event.relatedTarget;
+          if (!button) return;
 
-        // Convertir hora_visita a minutos
-        var parts = hora_visita.split(':');
-        var hora = parseInt(parts[0], 10);
-        var minuto = parseInt(parts[1], 10);
-        var hora_visita_min = hora * 60 + minuto;
+          var cod_venta = getData(button, 'cod_venta');
+          var cod_cliente = getData(button, 'cod_cliente');
+          var cod_seccion = getData(button, 'cod_seccion');
+          var fecha_visita = getData(button, 'fecha_visita');
+          var hora_visita = getData(button, 'hora_visita');
 
-        // Calcular hora_inicio_visita = hora_visita_min - 15 minutos
-        var hora_inicio_visita_min = hora_visita_min - 15;
+          var parts = hora_visita.split(':');
+          var hora_visita_min = (parseInt(parts[0], 10) * 60) + parseInt(parts[1], 10);
+          var hora_inicio_visita_min = hora_visita_min - 15;
+          if (hora_inicio_visita_min < 0) {
+            hora_inicio_visita_min += 24 * 60;
+          }
 
-        // Manejar desbordamientos de hora
-        if (hora_inicio_visita_min < 0) {
-          hora_inicio_visita_min += 24 * 60;
-        }
-
-        var hora_inicio_visita = formatTime(hora_inicio_visita_min);
-        var hora_fin_visita = hora_visita;
-
-        var modal = $(this);
-        modal.find('#w_cod_venta_web').val(cod_venta);
-        modal.find('#w_cod_cliente_web').val(cod_cliente);
-        modal.find('#w_cod_seccion_web').val(cod_seccion);
-        modal.find('#w_fecha_visita_input_web').val(fecha_visita);
-        modal.find('#w_hora_inicio_visita_web').val(hora_inicio_visita);
-        modal.find('#w_hora_fin_visita_web').val(hora_fin_visita);
-
-        // Asignar valores ocultos y limpiar checkbox (no aplica para Web)
-        modal.find('#w_previous_id_visita').val('');
-        modal.find('#w_ampliacion').prop('checked', false).prop('disabled', true);
-        modal.find('.modal-body #ampliacionMensaje').remove();
-      });
-
+          setFieldValue(webModal, '#w_cod_venta_web', cod_venta);
+          setFieldValue(webModal, '#w_cod_cliente_web', cod_cliente);
+          setFieldValue(webModal, '#w_cod_seccion_web', cod_seccion);
+          setFieldValue(webModal, '#w_fecha_visita_input_web', fecha_visita);
+          setFieldValue(webModal, '#w_hora_inicio_visita_web', formatTime(hora_inicio_visita_min));
+          setFieldValue(webModal, '#w_hora_fin_visita_web', hora_visita);
+          resetAmpliacion(webModal, '#w_ampliacion', '#w_previous_id_visita');
+        });
+      }
     });
   </script>
 <script src="<?= BASE_URL ?>/assets/js/app-ui.js"></script>
