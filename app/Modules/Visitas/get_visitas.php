@@ -11,7 +11,14 @@ if (!isset($_GET['fecha']) || empty($_GET['fecha'])) {
 
 $fecha = addslashes((string)$_GET['fecha']);
 
-$sql = "SELECT v.*,
+$sql = "SELECT v.id_visita,
+               v.cod_cliente,
+               v.cod_seccion,
+               v.estado_visita,
+               v.fecha_visita,
+               v.hora_inicio_visita,
+               v.hora_fin_visita,
+               v.observaciones,
                c.nombre_comercial,
                c.cod_cliente,
                sc.nombre AS nombre_seccion
