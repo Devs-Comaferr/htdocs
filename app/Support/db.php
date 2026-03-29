@@ -80,7 +80,13 @@ if (!function_exists('openOdbcConnection')) {
                 return $connection;
             }
         }
+
         error_log('ODBC connection error: ' . $lastError);
+        echo '<pre>';
+        echo 'ERROR ODBC:' . PHP_EOL;
+        echo odbc_errormsg();
+        echo '</pre>';
+        exit;
         throw new Exception('Error de conexión a BD: ' . $lastError);
     }
 }
