@@ -11,7 +11,7 @@ if (!function_exists('getDbConnectionConfig')) {
 
         if ($dsn === null && $host !== null && $database !== null) {
             $dsn = sprintf(
-                'Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;',
+                'Driver={ODBC Driver 17 for SQL Server};Server=%s;Database=%s;CharacterSet=UTF-8;',
                 $host,
                 $database
             );
@@ -24,6 +24,22 @@ if (!function_exists('getDbConnectionConfig')) {
             'username' => appConfigValue('DB_USER', appConfigValue('APP_DB_USER')),
             'password' => appConfigValue('DB_PASS', appConfigValue('APP_DB_PASSWORD')),
         ];
+    }
+}
+
+if (!function_exists('dbEnsureUtf8Dsn')) {
+    function dbEnsureUtf8Dsn(string $dsn): string
+    {
+        $trimmedDsn = trim($dsn);
+        if ($trimmedDsn === '' || stripos($trimmedDsn, 'CharacterSet=') !== false) {
+            return $dsn;
+        }
+
+        if (stripos($trimmedDsn, 'Driver=') === 0 || stripos($trimmedDsn, 'DSN=') === 0 || strpos($trimmedDsn, ';') !== false) {
+            return rtrim($trimmedDsn, ';') . ';CharacterSet=UTF-8;';
+        }
+
+        return 'DSN=' . $trimmedDsn . ';CharacterSet=UTF-8;';
     }
 }
 
@@ -41,7 +57,7 @@ if (!function_exists('openOdbcConnection')) {
             throw new Exception('Error de conexión a BD');
         }
 
-        $dsnOriginal = (string)$config['dsn'];
+        $dsnOriginal = dbEnsureUtf8Dsn((string)$config['dsn']);
         $lastError = '';
 
         if (strpos($dsnOriginal, 'Driver=') === false) {
