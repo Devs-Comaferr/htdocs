@@ -11,7 +11,7 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
-include_once BASE_PATH . '/app/Modules/Planificacion/funciones_planificacion_rutas.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 require_once BASE_PATH . '/app/Support/functions.php';
 $pageTitle = "Gestionar Rutas de la Zona";
 include BASE_PATH . '/resources/views/layouts/header.php';
@@ -53,7 +53,7 @@ if (isset($_GET['cod_zona'])) {
     $cod_zona = intval($_GET['cod_zona']);
     
     // Obtener informaciÃ³n de la zona
-    $zonas = obtenerZonasVisita();
+    $zonas = obtenerZonasVisitaService();
     $zona_actual = null;
     foreach ($zonas as $zona) {
         if ($zona['cod_zona'] == $cod_zona) {
@@ -86,14 +86,14 @@ if (isset($_GET['cod_zona'])) {
     }
     
     // Obtener rutas asignadas a la zona
-    $rutas_asignadas = obtenerRutasPorZona($cod_zona);
+    $rutas_asignadas = obtenerRutasPorZonaService($cod_zona);
     
     // Obtener todas las rutas disponibles
     $todas_rutas = obtenerTodasRutas();
     
 } else {
     // Si 'cod_zona' no est presente, mostrar la lista de zonas disponibles
-    $zonas_disponibles = obtenerZonasVisita();
+    $zonas_disponibles = obtenerZonasVisitaService();
 }
 ?>
 <!DOCTYPE html>
