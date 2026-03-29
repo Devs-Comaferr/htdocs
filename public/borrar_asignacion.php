@@ -1,3 +1,3 @@
 <?php
 require_once dirname(__DIR__) . '/bootstrap/init.php';
-require_once BASE_PATH . '/app/Modules/Planificacion/legacy/borrar_asignacion.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/borrar_asignacion.php';

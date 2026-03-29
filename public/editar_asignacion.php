@@ -1,3 +1,3 @@
 <?php
 require_once dirname(__DIR__) . '/bootstrap/init.php';
-require_once BASE_PATH . '/app/Modules/Planificacion/legacy/editar_asignacion.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/editar_asignacion.php';
