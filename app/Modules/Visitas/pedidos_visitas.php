@@ -54,7 +54,9 @@ ORDER BY
 // Ejecutar la consulta
 $res_pedidos = odbc_exec($conn, $sql_pedidos);
 if (!$res_pedidos) {
-  die("Error al ejecutar la consulta de pedidos: " . odbc_errormsg($conn));
+  error_log("Error al ejecutar la consulta de pedidos: " . odbc_errormsg($conn));
+  echo 'Error interno';
+  return;
 }
 
 $pedidos = array();
@@ -103,7 +105,9 @@ if (!empty($cod_ventas)) {
   // Ejecutar la segunda consulta
   $res_lineas = odbc_exec($conn, $sql_lineas);
   if (!$res_lineas) {
-    die("Error al ejecutar la consulta de lÃ­neas: " . odbc_errormsg($conn));
+    error_log("Error al ejecutar la consulta de lÃ­neas: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
   }
 
   // Construir el mapa de cod_venta a numero_lineas
@@ -1065,5 +1069,8 @@ function enforceTimeDifference(startSelector, endSelector, minMinutes, maxMinute
 </body>
 
 </html>
+
+
+
 
 

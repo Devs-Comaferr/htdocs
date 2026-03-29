@@ -83,7 +83,12 @@ if ($level == 1) {
               $where
               GROUP BY COALESCE(sc.provincia, c.provincia, 'Sin Provincia')
               ORDER BY pedidos DESC";
-    $res = odbc_exec($conn, $query) or die("Error en nivel 1: " . odbc_errormsg($conn));
+    $res = odbc_exec($conn, $query);
+    if (!$res) {
+        error_log("Error en nivel 1: " . odbc_errormsg($conn));
+        echo 'Error interno';
+        return;
+    }
 
     $output = "<div class='table-responsive'>
                  <table class='table table-striped table-bordered table-hover'>
@@ -161,7 +166,12 @@ if ($level == 1) {
               $where
               GROUP BY h.cod_cliente, h.cod_seccion, c.nombre_comercial, sc.nombre
               ORDER BY pedidos DESC";
-    $res = odbc_exec($conn, $query) or die("Error en nivel 2: " . odbc_errormsg($conn));
+    $res = odbc_exec($conn, $query);
+    if (!$res) {
+        error_log("Error en nivel 2: " . odbc_errormsg($conn));
+        echo 'Error interno';
+        return;
+    }
 
     $output = "<div class='table-responsive'>
                  <table class='table table-striped table-bordered table-hover'>
@@ -300,7 +310,12 @@ JOIN articulos a ON h.cod_articulo = a.cod_articulo
         echo "ParÃƒÂ¡metro de agrupaciÃƒÂ³n no vÃƒÂ¡lido.";
         exit;
     }
-    $res = odbc_exec($conn, $query) or die("Error en nivel 3: " . odbc_errormsg($conn));
+    $res = odbc_exec($conn, $query);
+    if (!$res) {
+        error_log("Error en nivel 3: " . odbc_errormsg($conn));
+        echo 'Error interno';
+        return;
+    }
 
     $output = "<div class='mt-3 table-responsive'>";
     if ($group == "marca") {
@@ -527,7 +542,12 @@ JOIN articulos a ON h.cod_articulo = a.cod_articulo
         echo "Falta indicar grupo para Nivel 4.";
         exit;
     }
-    $res = odbc_exec($conn, $query) or die("Error en nivel 4: " . odbc_errormsg($conn));
+    $res = odbc_exec($conn, $query);
+    if (!$res) {
+        error_log("Error en nivel 4: " . odbc_errormsg($conn));
+        echo 'Error interno';
+        return;
+    }
     $output = "<div class='table-responsive'>
                  <table class='table table-striped table-bordered table-hover'>
                    <thead class='table-dark'>

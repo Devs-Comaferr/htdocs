@@ -47,7 +47,9 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
                            AND cl.cod_vendedor = ?";
         $result_busqueda = registrarVisitaManualPrepareExecute($conn, $sql_busqueda, ['%' . $busqueda . '%', $codigo_vendedor]);
         if (!$result_busqueda) {
-            die("Error en la busqueda.");
+            error_log("Error en la busqueda.");
+            echo 'Error interno';
+            return;
         }
 ?>
         <!DOCTYPE html>
@@ -240,11 +242,15 @@ if ($cod_seccion !== null) {
 }
 $result_assignment = registrarVisitaManualPrepareExecute($conn, $sql_assignment, $assignmentParams);
 if (!$result_assignment) {
-    die("Error en la consulta de asignacion.");
+    error_log("Error en la consulta de asignacion.");
+    echo 'Error interno';
+    return;
 }
 $assignment = odbc_fetch_array($result_assignment);
 if (!$assignment) {
-    die("No se encontrÃ³ asignaciÃ³n para este cliente" . ($cod_seccion !== null ? " (SecciÃ³n: $cod_seccion)" : ""));
+    error_log("No se encontrÃ³ asignaciÃ³n para este cliente" . ($cod_seccion !== null ? " (SecciÃ³n: $cod_seccion)" : ""));
+    echo 'Error interno';
+    return;
 }
 
 // Obtener nombre comercial del cliente
@@ -868,3 +874,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </html>
 <?php
 ?>
+
+
+

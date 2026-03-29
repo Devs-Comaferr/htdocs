@@ -8,12 +8,16 @@ require_once BASE_PATH . '/app/Support/functions.php';
 $conn = db();
 
 if (!isset($_GET['cod_cliente']) || $_GET['cod_cliente'] === '') {
-    die('Codigo de cliente no especificado.');
+    error_log('Codigo de cliente no especificado.');
+    echo 'Error interno';
+    return;
 }
 
 $cod_cliente = (int)$_GET['cod_cliente'];
 if ($cod_cliente <= 0) {
-    die('Codigo de cliente invalido.');
+    error_log('Codigo de cliente invalido.');
+    echo 'Error interno';
+    return;
 }
 
 $cod_seccion = null;
@@ -27,7 +31,9 @@ if (array_key_exists('cod_seccion', $_GET)) {
 try {
     $promedio_minutes = recalcularTiempoPromedioVisita($conn, $cod_cliente, $cod_seccion);
 } catch (Exception $e) {
-    die('Error al recalcular promedio: ' . $e->getMessage());
+    error_log('Error al recalcular promedio: ' . $e->getMessage());
+    echo 'Error interno';
+    return;
 }
 
 $horas = floor($promedio_minutes / 60);
@@ -40,3 +46,6 @@ if ($horas == 0) {
 }
 
 echo $formatted;
+
+
+

@@ -150,7 +150,12 @@ $sql_cliente = "
     FROM [integral].[dbo].[clientes] 
     WHERE cod_cliente = ?
 ";
-$result_cliente = execPrepared($conn, $sql_cliente, [$cod_cliente]) or die("Error en consulta de cliente: " . odbc_errormsg($conn));
+$result_cliente = execPrepared($conn, $sql_cliente, [$cod_cliente]);
+if (!$result_cliente) {
+    error_log("Error en consulta de cliente: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
+}
 $cliente = odbc_fetch_array($result_cliente);
 if (!$cliente) {
     header("Location: clientes.php");
@@ -184,7 +189,12 @@ $sql_secciones = "
     FROM [integral].[dbo].[secciones_cliente]
     WHERE cod_cliente = ?
 ";
-$result_secciones = execPrepared($conn, $sql_secciones, [$cod_cliente]) or die("Error en consulta de secciones: " . odbc_errormsg($conn));
+$result_secciones = execPrepared($conn, $sql_secciones, [$cod_cliente]);
+if (!$result_secciones) {
+    error_log("Error en consulta de secciones: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
+}
 $secciones = [];
 while ($seccion = odbc_fetch_array($result_secciones)) {
     $secciones[] = $seccion;
@@ -268,7 +278,12 @@ if (((isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin')
         WHERE v.cod_cliente = ?
         ORDER BY v.fecha_visita DESC
     ";
-    $result_visitas = execPrepared($conn, $sql_visitas, [$cod_cliente]) or die("Error en consulta de visitas: " . odbc_errormsg($conn));
+    $result_visitas = execPrepared($conn, $sql_visitas, [$cod_cliente]);
+    if (!$result_visitas) {
+        error_log("Error en consulta de visitas: " . odbc_errormsg($conn));
+        echo 'Error interno';
+        return;
+    }
     while ($visita = odbc_fetch_array($result_visitas)) {
         $id_visita = (string)$visita['id_visita'];
         $sql_pedido_principal = "

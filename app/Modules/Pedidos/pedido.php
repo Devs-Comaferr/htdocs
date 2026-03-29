@@ -15,7 +15,9 @@ $tabla_param = isset($_GET['tabla']) ? $_GET['tabla'] : '';
 
 // Verificar que se pase el parÃƒÂ¡metro `cod_cliente`
 if (!isset($_GET['cod_cliente']) || $_GET['cod_cliente'] === '') {
-    die("El parÃƒÂ¡metro 'cod_cliente' es obligatorio.");
+    error_log("El parÃƒÂ¡metro 'cod_cliente' es obligatorio.");
+    echo 'Error interno';
+    return;
 }
 
 $cod_cliente = $_GET['cod_cliente'];
@@ -100,7 +102,9 @@ if ($tabla_param === 'vcelim') {
         $pedido = addslashes($_GET['pedido']);
         $sql_lineas .= " AND vlelim.cod_venta = '$pedido'";
     } else {
-        die("El parÃƒÂ¡metro 'pedido' es obligatorio.");
+        error_log("El parÃƒÂ¡metro 'pedido' es obligatorio.");
+        echo 'Error interno';
+        return;
     }
     // Se modifica el HAVING para incluir abonos (cantidad negativa)
     $sql_lineas .= "
@@ -167,7 +171,9 @@ if ($tabla_param === 'vcelim') {
         $pedido = addslashes($_GET['pedido']);
         $sql_lineas .= " AND hvl.cod_venta = '$pedido'";
     } else {
-        die("El parÃƒÂ¡metro 'pedido' es obligatorio.");
+        error_log("El parÃƒÂ¡metro 'pedido' es obligatorio.");
+        echo 'Error interno';
+        return;
     }
     // Se modifica el HAVING para incluir abonos (cantidad negativa)
     $sql_lineas .= "
@@ -197,7 +203,9 @@ $sql_lineas .= " ORDER BY " . $orden_permitido[$orden] . " " . $direccion;
 // Ejecutar la consulta
 $result_lineas = odbc_exec($conn, $sql_lineas);
 if (!$result_lineas) {
-    die("Error en la consulta SQL: " . odbc_errormsg($conn));
+    error_log("Error en la consulta SQL: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
 }
 
 // Procesar resultados
@@ -231,7 +239,9 @@ if ($cod_seccion !== null) {
 }
 $result_cliente_seccion = odbc_exec($conn, $sql_cliente_seccion);
 if (!$result_cliente_seccion) {
-    die("Error al obtener datos del cliente y secciÃƒÂ³n: " . odbc_errormsg($conn));
+    error_log("Error al obtener datos del cliente y secciÃƒÂ³n: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
 }
 $cliente_seccion = odbc_fetch_array($result_cliente_seccion);
 
@@ -585,3 +595,6 @@ include BASE_PATH . '/resources/views/layouts/header.php';
 if ($conn) {
 }
 ?>
+
+
+

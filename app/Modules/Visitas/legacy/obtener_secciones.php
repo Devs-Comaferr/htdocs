@@ -38,7 +38,9 @@ if (isset($_GET['cod_cliente'])) {
     $resultado = odbc_exec($conn, $query);
     
     if (!$resultado) {
-        die('Error al obtener secciones: ' . odbc_errormsg($conn));
+        error_log('Error al obtener secciones: ' . odbc_errormsg($conn));
+        echo 'Error interno';
+        return;
     }
     
     $secciones = array();
@@ -51,3 +53,6 @@ if (isset($_GET['cod_cliente'])) {
     echo json_encode(array());
 }
 ?>
+
+
+

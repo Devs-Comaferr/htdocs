@@ -23,27 +23,10 @@ include BASE_PATH . '/resources/views/layouts/header.php';
 
 // Verificar si el usuario est autenticado
 if (!isset($_SESSION['codigo'])) {
-    die("<!DOCTYPE html>
-    <html>
-    <head>
-        <title>Acceso No Autorizado</title>
-        <meta charset='UTF-8'>
-        <meta name='viewport' content='width=device-width, initial-scale=1'>
-        <!-- Bootstrap 3.3.7 -->
-        <link rel='stylesheet' href='<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css'>
-        <style>
-            body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
-            .message { display: inline-block; padding: 20px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 5px; }
-            .back-button { margin-top: 20px; padding: 10px 20px; font-size: 18px; background-color: #6c757d; color: #fff; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; }
-            .back-button:hover { background-color: #5a6268; }
-        </style>
-    </head>
-    <body>
-        <div class='message'>Acceso no autorizado.</div><br>
-        <a href='login.php' class='back-button'>Iniciar SesiÃ³n</a>
-    </body>
-    </html>");
+    error_log('Acceso no autorizado.');
+    echo 'Error interno';
 }
+    return;
 
 // Obtener el cÃ³digo del vendedor desde la sesiÃ³n
 $cod_vendedor = intval($_SESSION['codigo']);
@@ -63,26 +46,9 @@ if (isset($_GET['cod_zona'])) {
     }
     
     if (!$zona_actual) {
-        die("<!DOCTYPE html>
-        <html>
-        <head>
-            <title>Error</title>
-            <meta charset='UTF-8'>
-            <meta name='viewport' content='width=device-width, initial-scale=1'>
-            <!-- Bootstrap 3.3.7 -->
-            <link rel='stylesheet' href='<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css'>
-            <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
-                .message { display: inline-block; padding: 20px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 5px; }
-                .back-button { margin-top: 20px; padding: 10px 20px; font-size: 18px; background-color: #6c757d; color: #fff; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; }
-                .back-button:hover { background-color: #5a6268; }
-            </style>
-        </head>
-        <body>
-            <div class='message'>Zona no encontrada.</div><br>
-            <a href='zonas_rutas.php' class='back-button'>Volver</a>
-        </body>
-        </html>");
+        error_log('Zona no encontrada.');
+        echo 'Error interno';
+        return;
     }
     
     // Obtener rutas asignadas a la zona

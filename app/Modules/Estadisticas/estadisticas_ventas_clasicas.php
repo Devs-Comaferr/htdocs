@@ -232,7 +232,11 @@ if (isset($_SESSION['codigo'])) {
                             AND h.fecha_venta <= CONVERT(smalldatetime, '$end_date_full', 120)
                           ORDER BY v.nombre";
                 $res = odbc_exec($conn, $query);
-                if (!$res) { die("Error en comisionistas: " . odbc_errormsg($conn)); }
+                if (!$res) {
+                    error_log("Error en comisionistas: " . odbc_errormsg($conn));
+                    echo 'Error interno';
+                    return;
+                }
                 while ($row = odbc_fetch_array($res)) {
                     $code = $row['cod_vendedor'];
                     $name = $row['nombre'];
@@ -262,7 +266,12 @@ if (isset($_SESSION['codigo'])) {
             $where
             GROUP BY v.cod_vendedor, v.nombre
             ORDER BY pedidos DESC";
-  $res = odbc_exec($conn, $query) or die("Error en nivel 0: " . odbc_errormsg($conn));
+  $res = odbc_exec($conn, $query);
+  if (!$res) {
+    error_log("Error en nivel 0: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
+  }
   
   echo "<div class='table-responsive'>";
   echo "<table class='table table-striped table-bordered table-hover'>";
@@ -300,7 +309,12 @@ if (isset($_SESSION['codigo'])) {
              $where
              GROUP BY CONVERT(varchar(7), fecha_venta, 120)
              ORDER BY mes";
-  $res3 = odbc_exec($conn, $query3) or die("Error en ventas por meses: " . odbc_errormsg($conn));
+  $res3 = odbc_exec($conn, $query3);
+  if (!$res3) {
+    error_log("Error en ventas por meses: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
+  }
   echo "<div class='table-responsive mt-4'>";
   echo "<h4>Ventas por Mes</h4>";
   
@@ -339,7 +353,12 @@ if (isset($_SESSION['codigo'])) {
                    SUM(CASE WHEN tipo_venta = 2 THEN importe ELSE 0 END) AS total_albaranes
                  FROM hist_ventas_cabecera
                  $where";
-      $res2 = odbc_exec($conn, $query2) or die("Error en consulta media: " . odbc_errormsg($conn));
+      $res2 = odbc_exec($conn, $query2);
+      if (!$res2) {
+        error_log("Error en consulta media: " . odbc_errormsg($conn));
+        echo 'Error interno';
+        return;
+      }
       $row2 = odbc_fetch_array($res2);
       $total_pedidos = $row2['total_pedidos'];
       $total_albaranes = $row2['total_albaranes'];

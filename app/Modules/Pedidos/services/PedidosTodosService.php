@@ -83,7 +83,8 @@ function obtenerPedidosTodos($params) {
 
     $result_pedidos = odbc_exec($conn, $sql_pedidos);
     if (!$result_pedidos) {
-        die("Error en la consulta SQL: " . odbc_errormsg($conn));
+        error_log("Error en la consulta SQL: " . odbc_errormsg($conn));
+        return;
     }
 
     $pedidos = array();
@@ -152,7 +153,8 @@ function obtenerPedidosTodos($params) {
     ";
     $result_count = odbc_exec($conn, $sql_count);
     if (!$result_count || !odbc_fetch_row($result_count)) {
-        die("Error en la consulta de conteo: " . odbc_errormsg($conn));
+        error_log("Error en la consulta de conteo: " . odbc_errormsg($conn));
+        return;
     }
 
     $totalRecords = (int)odbc_result($result_count, "total");
@@ -183,7 +185,8 @@ function pedidosTodosObtenerCodVendedor($conn) {
     ";
     $result_vendedor = odbc_exec($conn, $sql_cod_vendedor);
     if (!$result_vendedor || !odbc_fetch_row($result_vendedor)) {
-        die("Error: No se pudo determinar el codigo de vendedor.");
+        error_log("Error: No se pudo determinar el codigo de vendedor.");
+        return;
     }
 
     return odbc_result($result_vendedor, "cod_vendedor");
@@ -266,7 +269,8 @@ function pedidosTodosCargarHistoricos($conn, $pedidoIds) {
     ";
     $result = odbc_exec($conn, $sql);
     if (!$result) {
-        die("Error al obtener historicos: " . odbc_errormsg($conn));
+        error_log("Error al obtener historicos: " . odbc_errormsg($conn));
+        return;
     }
 
     $historicos = array();
@@ -291,7 +295,8 @@ function pedidosTodosCargarEntregas($conn, $pedidoIds) {
     ";
     $result = odbc_exec($conn, $sql);
     if (!$result) {
-        die("Error al obtener entregas: " . odbc_errormsg($conn));
+        error_log("Error al obtener entregas: " . odbc_errormsg($conn));
+        return;
     }
 
     $entregas = array();
@@ -407,7 +412,8 @@ function pedidosTodosCargarImportes($conn, $pedidoIds) {
     ";
     $result = odbc_exec($conn, $sql);
     if (!$result) {
-        die("Error al obtener importes agrupados: " . odbc_errormsg($conn));
+        error_log("Error al obtener importes agrupados: " . odbc_errormsg($conn));
+        return;
     }
 
     $importes = array();
@@ -436,3 +442,6 @@ function pedidosTodosConstruirRowClass($pedido) {
 
     return $rowClass;
 }
+
+
+

@@ -27,7 +27,9 @@ $sql_cod_vendedor = "
 ";
 $result_vendedor = odbc_exec($conn, $sql_cod_vendedor);
 if (!$result_vendedor || !odbc_fetch_row($result_vendedor)) {
-    die("Error: No se pudo determinar el cÃƒÂ³digo de vendedor.");
+    error_log("Error: No se pudo determinar el cÃƒÂ³digo de vendedor.");
+    echo 'Error interno';
+    return;
 }
 $cod_vendedor = odbc_result($result_vendedor, "cod_vendedor");
 }
@@ -232,7 +234,9 @@ $sql_pedidos = "
 // Ejecutar consulta de pedidos
 $result_pedidos = odbc_exec($conn, $sql_pedidos);
 if (!$result_pedidos) {
-    die("Error en la consulta SQL: " . odbc_errormsg($conn));
+    error_log("Error en la consulta SQL: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
 }
 $pedidos = array();
 while ($row = odbc_fetch_array($result_pedidos)) {
@@ -381,7 +385,9 @@ $sql_count = "
 ";
 $result_count = odbc_exec($conn, $sql_count);
 if (!$result_count || !odbc_fetch_row($result_count)) {
-    die("Error en la consulta de conteo: " . odbc_errormsg($conn));
+    error_log("Error en la consulta de conteo: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
 }
 $totalRecords = odbc_result($result_count, "total");
 $totalPages   = ceil($totalRecords / $resultsPerPage);
@@ -1018,4 +1024,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
 if ($conn) {
 }
 ?>
+
+
+
 

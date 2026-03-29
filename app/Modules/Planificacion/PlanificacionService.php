@@ -22,7 +22,8 @@ function crearZonaVisita($nombre_zona, $descripcion, $duracion_semanas, $orden) 
               
     $result = odbc_exec($conn, $query);
     if (!$result) {
-        die('Error al crear la zona de visita: ' . odbc_errormsg($conn));
+        error_log('Error al crear la zona de visita: ' . odbc_errormsg($conn));
+        return;
     }
     return true;
 }
@@ -42,7 +43,8 @@ function obtenerZonasVisita() {
     $resultado = odbc_exec($conn, $query);
     
     if (!$resultado) {
-        die('Error al obtener zonas de visita: ' . odbc_errormsg($conn));
+        error_log('Error al obtener zonas de visita: ' . odbc_errormsg($conn));
+        return;
     }
     
     $zonas = array();
@@ -67,7 +69,8 @@ function obtenerZonaPorCodigo($cod_zona) {
     $resultado = odbc_exec($conn, $query);
     
     if (!$resultado) {
-        die('Error al obtener la zona: ' . odbc_errormsg($conn));
+        error_log('Error al obtener la zona: ' . odbc_errormsg($conn));
+        return;
     }
     
     $zona = odbc_fetch_array($resultado);
@@ -94,7 +97,8 @@ function obtenerRutasPorZona($cod_zona) {
     $resultado = odbc_exec($conn, $query);
     
     if (!$resultado) {
-        die('Error al obtener rutas: ' . odbc_errormsg($conn));
+        error_log('Error al obtener rutas: ' . odbc_errormsg($conn));
+        return;
     }
     
     $rutas = array();
@@ -117,7 +121,8 @@ function obtenerTodasRutas() {
     $resultado = odbc_exec($conn, $query);
     
     if (!$resultado) {
-        die('Error al obtener todas las rutas: ' . odbc_errormsg($conn));
+        error_log('Error al obtener todas las rutas: ' . odbc_errormsg($conn));
+        return;
     }
     
     $rutas = array();
@@ -189,7 +194,8 @@ function obtenerSeccionesPorCliente($cod_cliente) {
     $resultado = odbc_exec($conn, $query);
     
     if (!$resultado) {
-        die('Error al obtener secciones: ' . odbc_errormsg($conn));
+        error_log('Error al obtener secciones: ' . odbc_errormsg($conn));
+        return;
     }
     
     $secciones = array();
@@ -245,7 +251,8 @@ function obtenerClientesDisponiblesParaAsignar($cod_zona, $rutas_asignadas) {
     $resultado_secciones = odbc_exec($conn, $query_secciones_disponibles);
     
     if (!$resultado_secciones) {
-        die('Error al obtener secciones disponibles: ' . odbc_errormsg($conn));
+        error_log('Error al obtener secciones disponibles: ' . odbc_errormsg($conn));
+        return;
     }
     
     $clientes_con_secciones_disponibles = array();
@@ -273,7 +280,8 @@ function obtenerClientesDisponiblesParaAsignar($cod_zona, $rutas_asignadas) {
     $resultado_clientes_sin_secciones = odbc_exec($conn, $query_clientes_sin_secciones);
     
     if (!$resultado_clientes_sin_secciones) {
-        die('Error al obtener clientes sin secciones: ' . odbc_errormsg($conn));
+        error_log('Error al obtener clientes sin secciones: ' . odbc_errormsg($conn));
+        return;
     }
     
     $clientes_sin_secciones_disponibles = array();
@@ -302,7 +310,8 @@ function obtenerClientesDisponiblesParaAsignar($cod_zona, $rutas_asignadas) {
         $resultado_clientes_con_secciones = odbc_exec($conn, $query_clientes_con_secciones);
         
         if (!$resultado_clientes_con_secciones) {
-            die('Error al obtener detalles de clientes con secciones disponibles: ' . odbc_errormsg($conn));
+            error_log('Error al obtener detalles de clientes con secciones disponibles: ' . odbc_errormsg($conn));
+            return;
         }
         
         while ($fila = odbc_fetch_array($resultado_clientes_con_secciones)) {
@@ -363,7 +372,8 @@ function asignarClienteZona($cod_cliente, $cod_seccion, $zona_principal, $zona_s
                      AND zona_principal = '$zona_principal'";
     $resultado_check = odbc_exec($conn, $query_check);
     if (!$resultado_check) {
-        die('Error al verificar asignaciÃ³n existente: ' . odbc_errormsg($conn));
+        error_log('Error al verificar asignaciÃ³n existente: ' . odbc_errormsg($conn));
+        return;
     }
     $fila_check = odbc_fetch_array($resultado_check);
     
@@ -388,7 +398,8 @@ function asignarClienteZona($cod_cliente, $cod_seccion, $zona_principal, $zona_s
               
     $result = odbc_exec($conn, $query);
     if (!$result) {
-        die('Error al asignar el cliente a la zona: ' . odbc_errormsg($conn));
+        error_log('Error al asignar el cliente a la zona: ' . odbc_errormsg($conn));
+        return;
     }
     return true;
 }
@@ -448,7 +459,8 @@ function obtenerClientesPorZona($cod_zona) {
     $resultado_asignados = odbc_exec($conn, $query_clientes_asignados);
 
     if (!$resultado_asignados) {
-        die('Error al obtener los clientes asignados: ' . odbc_errormsg($conn));
+        error_log('Error al obtener los clientes asignados: ' . odbc_errormsg($conn));
+        return;
     }
 
     $clientes_asignados = array();
@@ -495,7 +507,8 @@ function obtenerNombreCliente($cod_cliente) {
     $resultado = odbc_exec($conn, $query);
 
     if (!$resultado) {
-        die('Error al obtener el nombre del cliente: ' . odbc_errormsg($conn));
+        error_log('Error al obtener el nombre del cliente: ' . odbc_errormsg($conn));
+        return;
     }
 
     $cliente = odbc_fetch_array($resultado);
@@ -516,7 +529,8 @@ function obtenerZonaPorCodigoEditar($cod_zona) {
     $resultado = odbc_exec($conn, $query);
 
     if (!$resultado) {
-        die('Error al obtener la zona: ' . odbc_errormsg($conn));
+        error_log('Error al obtener la zona: ' . odbc_errormsg($conn));
+        return;
     }
 
     $zona = odbc_fetch_array($resultado);
@@ -558,7 +572,8 @@ function obtenerAsignacion($cod_cliente, $cod_zona, $cod_seccion = null) {
     $resultado = odbc_exec($conn, $query);
 
     if (!$resultado) {
-        die('Error al obtener la asignaciÃ³n: ' . odbc_errormsg($conn));
+        error_log('Error al obtener la asignaciÃ³n: ' . odbc_errormsg($conn));
+        return;
     }
 
     $asignacion = odbc_fetch_array($resultado);
@@ -614,7 +629,8 @@ function actualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secun
     $resultado = odbc_exec($conn, $query);
 
     if (!$resultado) {
-        die('Error al actualizar la asignaciÃ³n: ' . odbc_errormsg($conn));
+        error_log('Error al actualizar la asignaciÃ³n: ' . odbc_errormsg($conn));
+        return;
     }
 
     return true;
@@ -651,5 +667,8 @@ if (!function_exists('asignarRutaZonaService')) {
         return asignarRutaZona($cod_zona, $cod_ruta);
     }
 }
+
+
+
 
 

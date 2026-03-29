@@ -38,7 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validar que se haya seleccionado un cliente
     if (empty($cod_cliente)) {
-        die('No se ha seleccionado ningn cliente.');
+        error_log('No se ha seleccionado ningn cliente.');
+        echo 'Error interno';
+        return;
     }
     
     // Verificar si el cliente tiene secciones disponibles (si cod_seccion != NULL)
@@ -48,11 +50,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             WHERE cod_cliente = '$cod_cliente' AND cod_seccion = '$cod_seccion'";
         $resultado_verificar = odbc_exec($conn, $query_verificar);
         if (!$resultado_verificar) {
-            die('Error al verificar la disponibilidad de la secciÃ³n: ' . odbc_errormsg($conn));
+            error_log('Error al verificar la disponibilidad de la secciÃ³n: ' . odbc_errormsg($conn));
+            echo 'Error interno';
+            return;
         }
         $fila_verificar = odbc_fetch_array($resultado_verificar);
         if ($fila_verificar['total'] > 0) {
-            die('La secciÃ³n seleccionada ya estÃ¡ asignada a una zona.');
+            error_log('La secciÃ³n seleccionada ya estÃ¡ asignada a una zona.');
+            echo 'Error interno';
+            return;
         }
     }
     
@@ -64,9 +70,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: asignacion_clientes_zonas.php?cod_zona=$cod_zona&mensaje=asignado");
         exit();
     } else {
-        die('Error al asignar el cliente a la zona.');
+        error_log('Error al asignar el cliente a la zona.');
+        echo 'Error interno';
+        return;
     }
 } else {
-    die('Mtodo de solicitud no vlido.');
+    error_log('Mtodo de solicitud no vlido.');
+    echo 'Error interno';
+    return;
 }
 ?>
+
+
+

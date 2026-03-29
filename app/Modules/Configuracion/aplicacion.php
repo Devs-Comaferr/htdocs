@@ -5,7 +5,9 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 
 $codSesion = trim((string)($_SESSION['codigo'] ?? ''));
 if (!esAdmin() && $codSesion !== '') {
-    die('Acceso no autorizado.');
+    error_log('Acceso no autorizado.');
+    echo 'Error interno';
+    return;
 }
 
 require_once BASE_PATH . '/app/Support/functions.php';
@@ -184,3 +186,6 @@ $config = obtenerConfiguracionApp($conn);
   </div>
 </body>
 </html>
+
+
+

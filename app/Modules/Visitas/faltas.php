@@ -26,7 +26,9 @@ if (!empty($_GET['origen'])) {
 
 // Verificar que se pase el parÃƒÂ¡metro `cod_cliente`
 if (empty($_GET['cod_cliente'])) {
-    die("El parÃƒÂ¡metro 'cod_cliente' es obligatorio.");
+    error_log("El parÃƒÂ¡metro 'cod_cliente' es obligatorio.");
+    echo 'Error interno';
+    return;
 }
 
 $cod_cliente = (string) $_GET['cod_cliente'];
@@ -177,14 +179,18 @@ if ($fecha_desde) {
     if (validarFechaSQL($fecha_desde)) {
         $sql_normal .= " AND hvc.fecha_venta >= CONVERT(smalldatetime, '" . addslashes($fecha_desde) . "', 120) ";
     } else {
-        die("Formato de fecha 'desde' invÃƒÂ¡lido. Debe ser 'YYYY-MM-DD'.");
+        error_log("Formato de fecha 'desde' invÃƒÂ¡lido. Debe ser 'YYYY-MM-DD'.");
+        echo 'Error interno';
+        return;
     }
 }
 if ($fecha_hasta) {
     if (validarFechaSQL($fecha_hasta)) {
         $sql_normal .= " AND hvc.fecha_venta <= CONVERT(smalldatetime, '" . addslashes($fecha_hasta) . "', 120) ";
     } else {
-        die("Formato de fecha 'hasta' invÃƒÂ¡lido. Debe ser 'YYYY-MM-DD'.");
+        error_log("Formato de fecha 'hasta' invÃƒÂ¡lido. Debe ser 'YYYY-MM-DD'.");
+        echo 'Error interno';
+        return;
     }
 }
 if ($cod_articulo) {
@@ -331,14 +337,18 @@ if ($fecha_desde) {
     if (validarFechaSQL($fecha_desde)) {
         $sql_elim .= " AND vcelim.fecha_venta >= CONVERT(smalldatetime, '" . addslashes($fecha_desde) . "', 120) ";
     } else {
-        die("Formato de fecha 'desde' invÃƒÂ¡lido. Debe ser 'YYYY-MM-DD'.");
+        error_log("Formato de fecha 'desde' invÃƒÂ¡lido. Debe ser 'YYYY-MM-DD'.");
+        echo 'Error interno';
+        return;
     }
 }
 if ($fecha_hasta) {
     if (validarFechaSQL($fecha_hasta)) {
         $sql_elim .= " AND vcelim.fecha_venta <= CONVERT(smalldatetime, '" . addslashes($fecha_hasta) . "', 120) ";
     } else {
-        die("Formato de fecha 'hasta' invÃƒÂ¡lido. Debe ser 'YYYY-MM-DD'.");
+        error_log("Formato de fecha 'hasta' invÃƒÂ¡lido. Debe ser 'YYYY-MM-DD'.");
+        echo 'Error interno';
+        return;
     }
 }
 if ($cod_articulo) {
@@ -377,7 +387,9 @@ $sql_lineas_total = "
     
 $result_lineas = odbc_exec($conn, $sql_lineas_total);
 if (!$result_lineas) {
-    die("Error en la consulta SQL: " . odbc_errormsg($conn));
+    error_log("Error en la consulta SQL: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
 }
 while ($fila = odbc_fetch_array($result_lineas)) {
     $lineas[] = $fila;
@@ -405,7 +417,9 @@ if ($cod_seccion !== null && $cod_seccion !== '') {
 }
 $result_cliente_seccion = odbc_exec($conn, $sql_cliente_seccion);
 if (!$result_cliente_seccion) {
-    die("Error al obtener datos del cliente y secciÃƒÂ³n: " . odbc_errormsg($conn));
+    error_log("Error al obtener datos del cliente y secciÃƒÂ³n: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
 }
 $cliente_seccion = odbc_fetch_array($result_cliente_seccion);
 if (!$cliente_seccion) {
@@ -856,3 +870,6 @@ document.addEventListener('DOMContentLoaded', function() {
 if ($conn) {
 }
 ?>
+
+
+

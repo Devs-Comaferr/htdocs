@@ -19,7 +19,9 @@ include BASE_PATH . '/resources/views/layouts/header.php';
 
 // Verificar si los datos requeridos estÃƒÂ¡n en la URL
 if (!isset($_GET['cod_cliente'], $_GET['cod_zona'])) {
-    die("Error: Datos insuficientes para editar la asignaciÃƒÂ³n.");
+    error_log("Error: Datos insuficientes para editar la asignaciÃƒÂ³n.");
+    echo 'Error interno';
+    return;
 }
 
 // Obtener los parÃƒÂ¡metros de la URL
@@ -31,7 +33,9 @@ $cod_seccion = isset($_GET['cod_seccion']) && $_GET['cod_seccion'] !== 'NULL' ? 
 $asignacion = obtenerAsignacion($cod_cliente, $cod_zona, $cod_seccion);
 
 if (!$asignacion) {
-    die("Error: No se encontrÃƒÂ³ la asignaciÃƒÂ³n solicitada.");
+    error_log("Error: No se encontrÃƒÂ³ la asignaciÃƒÂ³n solicitada.");
+    echo 'Error interno';
+    return;
 }
 
 
@@ -180,3 +184,6 @@ $zonas = obtenerZonasVisitaService();
 </div>
 </body>
 </html>
+
+
+

@@ -26,10 +26,14 @@ if ($esAjaxLineas) {
 
 if (!$esAjaxLineas) {
     if (!isset($_GET['cod_cliente']) || $_GET['cod_cliente'] === '') {
-        die("Falta cod_cliente");
+        error_log("Falta cod_cliente");
+        echo 'Error interno';
+        return;
     }
     if (!isset($_GET['cod_seccion']) || $_GET['cod_seccion'] === '') {
-        die("Falta cod_seccion");
+        error_log("Falta cod_seccion");
+        echo 'Error interno';
+        return;
     }
 }
 
@@ -400,7 +404,9 @@ $sql_seccion = "
 ";
 $result_seccion = odbc_exec($conn, $sql_seccion);
 if (!$result_seccion) {
-    die("Error al consultar la secciÃƒÂ³n: " . odbc_errormsg($conn));
+    error_log("Error al consultar la secciÃƒÂ³n: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
 }
 $seccion_data = odbc_fetch_array($result_seccion);
 $nombre_seccion = $seccion_data ? $seccion_data['nombre'] : "SecciÃƒÂ³n desconocida";
@@ -428,7 +434,9 @@ WHERE c.cod_cliente = '" . addslashes($cod_cliente) . "'
 ";
 $result = odbc_exec($conn, $sql);
 if (!$result) {
-    die("Error al ejecutar la consulta de datos de la secciÃƒÂ³n: " . odbc_errormsg($conn));
+    error_log("Error al ejecutar la consulta de datos de la secciÃƒÂ³n: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
 }
 $data = odbc_fetch_array($result);
 
@@ -471,7 +479,9 @@ ORDER BY v.fecha_visita DESC
 ";
 $result_visitas = odbc_exec($conn, $sql_visitas);
 if (!$result_visitas) {
-    die("Error al ejecutar la consulta de visitas: " . odbc_errormsg($conn));
+    error_log("Error al ejecutar la consulta de visitas: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
 }
 
 $visitas = array();
@@ -2236,3 +2246,6 @@ function actualizarOrigen(cod_pedido, nuevo_origen, event) {
 <script src="<?= BASE_URL ?>/assets/js/app-ui.js"></script>
 </body>
 </html>
+
+
+

@@ -23,7 +23,9 @@ $pageTitle = "Editar Evento No Laborable";
 // Obtener ID del no laborable a editar
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 if ($id <= 0) {
-    die("ID no vlido.");
+    error_log("ID no vlido.");
+    echo 'Error interno';
+    return;
 }
 
 $error = "";
@@ -92,11 +94,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 $sql_select = "SELECT * FROM [integral].[dbo].[cmf_dias_no_laborables] WHERE id = ?";
 $result_select = editarNoLaborablePrepareExecute($conn, $sql_select, [$id]);
 if (!$result_select) {
-    die("Error al consultar el registro.");
+    error_log("Error al consultar el registro.");
+    echo 'Error interno';
+    return;
 }
 $row = odbc_fetch_array($result_select);
 if (!$row) {
-    die("No se encontr el evento con ID: $id");
+    error_log("No se encontr el evento con ID: $id");
+    echo 'Error interno';
+    return;
 }
 
 // Tomar los valores de la BD
@@ -165,3 +171,6 @@ $descripcion_db = trim($row['descripcion']);
 </div>
 </body>
 </html>
+
+
+

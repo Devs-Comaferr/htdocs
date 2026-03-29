@@ -16,7 +16,9 @@ require_once BASE_PATH . '/app/Support/functions.php'; // Se incluyen todas las 
 
 // Verificar que venga cod_cliente
 if (empty($_GET['cod_cliente'])) {
-    die("El parÃƒÂ¡metro 'cod_cliente' es obligatorio.");
+    error_log("El parÃƒÂ¡metro 'cod_cliente' es obligatorio.");
+    echo 'Error interno';
+    return;
 }
 $cod_cliente = $_GET['cod_cliente'];
 $cod_seccion = $_GET['cod_seccion'] ?? null;
@@ -93,11 +95,15 @@ if ($cod_seccion !== null) {
 }
 $res_cli_sec = odbc_exec($conn, $sql_cli_sec);
 if (!$res_cli_sec) {
-    die("Error al obtener datos del cliente y secciÃƒÂ³n: " . odbc_errormsg($conn));
+    error_log("Error al obtener datos del cliente y secciÃƒÂ³n: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
 }
 $cli_sec = odbc_fetch_array($res_cli_sec);
 if (!$cli_sec) {
-    die("No se encontraron datos para el cliente o la secciÃƒÂ³n.");
+    error_log("No se encontraron datos para el cliente o la secciÃƒÂ³n.");
+    echo 'Error interno';
+    return;
 }
 $nombre_cliente = $cli_sec['nombre_cliente'] ?? 'Desconocido';
 $nombre_seccion = $cli_sec['nombre_seccion'] ?? 'Sin SecciÃƒÂ³n';
@@ -264,7 +270,9 @@ $sql_unificado .= " ORDER BY " . $orden . " " . $direccion;
 
 $result = odbc_exec($conn, $sql_unificado);
 if (!$result) {
-    die("Error al obtener ventas unificadas: " . odbc_errormsg($conn));
+    error_log("Error al obtener ventas unificadas: " . odbc_errormsg($conn));
+    echo 'Error interno';
+    return;
 }
 while ($row = odbc_fetch_array($result)) {
     $ventas_unificadas[] = $row;
@@ -673,3 +681,6 @@ $(function(){
 <?php
 // Cerrar conexiÃƒÂ³n
 ?>
+
+
+

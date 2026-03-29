@@ -37,7 +37,9 @@ function editarVisitaModernPrepareExecute($conn, string $sql, array $params = []
 
 $id_visita = isset($_GET['id_visita']) ? intval($_GET['id_visita']) : 0;
 if ($id_visita <= 0) {
-    die('ID de visita invÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lido.');
+    error_log('ID de visita invÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lido.');
+    echo 'Error interno';
+    return;
 }
 
 $error = '';
@@ -61,7 +63,9 @@ $sql = "
 $result = editarVisitaModernPrepareExecute($conn, $sql, [$id_visita]);
 if (!$result || !odbc_fetch_row($result)) {
     $error = "No se encontrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³ la visita especificada.";
-    die("<div class='alert alert-danger'>$error</div>");
+    error_log("<div class='alert alert-danger'>$error</div>");
+    echo 'Error interno';
+    return;
 }
 
 $cod_cliente = odbc_result($result, 'cod_cliente');
@@ -349,3 +353,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </html>
 <?php
 ?>
+
+
+

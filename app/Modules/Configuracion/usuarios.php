@@ -4,7 +4,9 @@ declare(strict_types=1);
 require_once BASE_PATH . '/bootstrap/auth.php';
 
 if (!esAdmin()) {
-    die('Acceso no autorizado.');
+    error_log('Acceso no autorizado.');
+    echo 'Error interno';
+    return;
 }
 
 require_once BASE_PATH . '/app/Support/functions.php';
@@ -179,3 +181,6 @@ if ($result) {
 
 </body>
 </html>
+
+
+
