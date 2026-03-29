@@ -42,42 +42,52 @@ if (!function_exists('openOdbcConnection')) {
         }
 
         $dsnOriginal = (string)$config['dsn'];
-        $dsnDriver17 = preg_replace(
-            '/Driver=\{ODBC Driver\s+(17|18)\s+for SQL Server\};/i',
-            'Driver={ODBC Driver 17 for SQL Server};',
-            $dsnOriginal,
-            1,
-            $replacements17
-        );
-        if (!is_string($dsnDriver17) || $dsnDriver17 === '') {
-            $dsnDriver17 = $dsnOriginal;
-        }
-        if ((int)$replacements17 === 0 && stripos($dsnDriver17, 'Driver={ODBC Driver') === false) {
-            $dsnDriver17 = 'Driver={ODBC Driver 17 for SQL Server};' . ltrim($dsnDriver17);
-        }
-
-        $attempts = [
-            ['driver' => '17', 'dsn' => $dsnDriver17],
-        ];
-
-        $dsnDriver18 = preg_replace(
-            '/Driver=\{ODBC Driver\s+17\s+for SQL Server\};/i',
-            'Driver={ODBC Driver 18 for SQL Server};',
-            $dsnDriver17,
-            1,
-            $replacements18
-        );
-        if (is_string($dsnDriver18) && $dsnDriver18 !== '' && $dsnDriver18 !== $dsnDriver17 && (int)$replacements18 > 0) {
-            $attempts[] = ['driver' => '18', 'dsn' => $dsnDriver18];
-        }
-
         $lastError = '';
-        foreach ($attempts as $attempt) {
-            $connection = @odbc_connect($attempt['dsn'], $config['username'], $config['password']);
+
+        if (strpos($dsnOriginal, 'Driver=') === false) {
+            $connection = @odbc_connect($dsnOriginal, $config['username'], $config['password']);
             $lastError = (string)odbc_errormsg();
-            dbLogOdbcAttempt($attempt['dsn'], $attempt['driver'], $connection ? 'OK' : 'ERROR', $lastError);
+            dbLogOdbcAttempt($dsnOriginal, 'DSN', $connection ? 'OK' : 'ERROR', $lastError);
             if ($connection) {
                 return $connection;
+            }
+        } else {
+            $dsnDriver17 = preg_replace(
+                '/Driver=\{ODBC Driver\s+(17|18)\s+for SQL Server\};/i',
+                'Driver={ODBC Driver 17 for SQL Server};',
+                $dsnOriginal,
+                1,
+                $replacements17
+            );
+            if (!is_string($dsnDriver17) || $dsnDriver17 === '') {
+                $dsnDriver17 = $dsnOriginal;
+            }
+            if ((int)$replacements17 === 0 && stripos($dsnDriver17, 'Driver={ODBC Driver') === false) {
+                $dsnDriver17 = 'Driver={ODBC Driver 17 for SQL Server};' . ltrim($dsnDriver17);
+            }
+
+            $attempts = [
+                ['driver' => '17', 'dsn' => $dsnDriver17],
+            ];
+
+            $dsnDriver18 = preg_replace(
+                '/Driver=\{ODBC Driver\s+17\s+for SQL Server\};/i',
+                'Driver={ODBC Driver 18 for SQL Server};',
+                $dsnDriver17,
+                1,
+                $replacements18
+            );
+            if (is_string($dsnDriver18) && $dsnDriver18 !== '' && $dsnDriver18 !== $dsnDriver17 && (int)$replacements18 > 0) {
+                $attempts[] = ['driver' => '18', 'dsn' => $dsnDriver18];
+            }
+
+            foreach ($attempts as $attempt) {
+                $connection = @odbc_connect($attempt['dsn'], $config['username'], $config['password']);
+                $lastError = (string)odbc_errormsg();
+                dbLogOdbcAttempt($attempt['dsn'], $attempt['driver'], $connection ? 'OK' : 'ERROR', $lastError);
+                if ($connection) {
+                    return $connection;
+                }
             }
         }
 
