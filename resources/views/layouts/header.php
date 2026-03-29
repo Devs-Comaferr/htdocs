@@ -18,6 +18,17 @@ require_once BASE_PATH . '/app/Support/header.php';
 <script>
   window.APP_BASE_URL = <?= json_encode(BASE_URL, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
 </script>
+<?php
+// UI stack selector: bs3 by default, bs5 opt-in per view.
+if ($ui_version === 'bs5'):
+?>
+<link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/bootstrap/css/bootstrap.min.css">
+<script src="<?= BASE_URL ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<?php else: ?>
+<link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
+<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
+<script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+<?php endif; ?>
 
 <style>
   /* HEADER fijo siempre */

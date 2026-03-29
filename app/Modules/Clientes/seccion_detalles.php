@@ -815,8 +815,7 @@ include_once BASE_PATH . '/resources/views/layouts/header.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Bootstrap 3 CSS -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
-
+    
     <!-- Font Awesome 4.7 (para iconos) -->
     
     <!-- Estilos unificados con cliente_detalles.php -->
@@ -1620,9 +1619,7 @@ include_once BASE_PATH . '/resources/views/layouts/header.php';
 </div>
 
 <!-- jQuery -->
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
 <!-- Bootstrap JS (opcional si necesitas modals de Bootstrap, etc.) -->
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/vendor/chartjs/chart.umd.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/vendor/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js"></script>
 

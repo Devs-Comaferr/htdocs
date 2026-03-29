@@ -69,8 +69,7 @@ if (isset($_GET['cod_zona'])) {
     <title><?php echo isset($cod_zona) ? "Gestionar Rutas de la Zona: " . htmlspecialchars($zona_actual['nombre_zona']) : "Zonas Disponibles"; ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap 3.3.7 -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
-    
+        
     <style>
         /* Estilos mejorados para dispositivos tctiles */
         body {
@@ -263,7 +262,5 @@ if (isset($_GET['cod_zona'])) {
     </div>
     
     <!-- jQuery + Bootstrap JS -->
-    <script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
-    <script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-</body>
+        </body>
 </html>

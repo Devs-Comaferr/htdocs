@@ -59,8 +59,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Buscar Cliente para Visita Manual</title>
-            <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
-            <style>
+                        <style>
                 body {
                     background-color: #f8f9fa;
                     padding: 20px;
@@ -152,8 +151,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Buscar Cliente para Visita Manual</title>
-            <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
-            <style>
+                        <style>
                 body {
                     background-color: #f8f9fa;
                     padding: 20px;
@@ -496,10 +494,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Registrar Visita Manual</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- jQuery -->
-    <script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
-    <style>
+        <!-- Bootstrap CSS -->
+        <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;

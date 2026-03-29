@@ -419,8 +419,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?php echo $pageTitle; ?></title>
   <!-- Bootstrap CSS -->
-  <link href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
-  <!-- noUiSlider CSS -->
+    <!-- noUiSlider CSS -->
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.css" />
   
   <style type="text/css">
@@ -621,8 +620,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
   </style>
   
   <!-- jQuery, noUiSlider y wNumb -->
-  <script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
-  <script src="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.js"></script>
+    <script src="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.js"></script>
   <script src="<?= BASE_URL ?>/assets/vendor/wnumb/wNumb.min.js"></script>
   
   <script type="text/javascript">
@@ -1016,8 +1014,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
     
   </div>
   <!-- Bootstrap JS (opcional) -->
-  <script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-<script src="<?= BASE_URL ?>/assets/js/app-navigation.js"></script>
+  <script src="<?= BASE_URL ?>/assets/js/app-navigation.js"></script>
 </body>
 </html>
 <?php

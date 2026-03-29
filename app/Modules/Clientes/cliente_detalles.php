@@ -660,7 +660,6 @@ $pageTitle = toUTF8($cliente['nombre_comercial']);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <!-- Bootstrap 5 CSS (local via Composer assets) -->
-<link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
 
     <!-- Se asume que en header.php se incluye Font Awesome 6.4 -->
     <style>
@@ -2048,9 +2047,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
 </div>
 
 <!-- jQuery (local via Composer assets) -->
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
 <!-- Bootstrap 5 JS Bundle (includes Popper, local via Composer assets) -->
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 <?php
 // Comentario reparado
 ?>

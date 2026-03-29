@@ -1781,7 +1781,6 @@ if ($isJcasado) {
 </div>
 
 <!-- ===================== SCRIPTS ===================== -->
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
 <script>
 // ================ Pedidos ================
 function abrirModalPedido(codVenta, codCliente) {

@@ -27,8 +27,7 @@ $zonas = obtenerZonasVisitaService();
     <title>Gestión de Zonas</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap 3.3.7 -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
-    <!-- Font Awesome para los conos -->
+        <!-- Font Awesome para los conos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
@@ -196,8 +195,6 @@ $zonas = obtenerZonasVisitaService();
     </div>
     
     <!-- jQuery + Bootstrap JS -->
-    <script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
-    <script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-</body>
+        </body>
 </html>
 

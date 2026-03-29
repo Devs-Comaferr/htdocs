@@ -239,8 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Registrar Día No Laborable</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap CSS (compatible con PHP 5.2.3) -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
-    <style>
+        <style>
         body {
             background-color: #f8f9fa;
             font-family: Arial, sans-serif;
@@ -275,8 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             display: none;
         }
     </style>
-    <script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
-    <script>
+        <script>
     $(document).ready(function(){
         // Ocultar inicialmente todos los bloques
         $("#vacaciones_fields").addClass("hidden");

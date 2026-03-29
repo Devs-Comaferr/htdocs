@@ -872,7 +872,6 @@ $query_string = http_build_query($params);
   <title><?php echo htmlspecialchars($pageTitle); ?></title>
 
   <!-- Bootstrap 5 CSS (local via Composer) -->
-<link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
   
   <!-- Font Awesome CSS (local via Composer) -->
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/fontawesome/css/all.min.css">
@@ -1446,8 +1445,6 @@ $query_string = http_build_query($params);
 </div> <!-- /.page-content -->
 
 <!-- Bootstrap 5 JS Bundle (local via Composer) -->
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('tr.clickable-row[data-href]').forEach(function (row) {

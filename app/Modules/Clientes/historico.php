@@ -298,7 +298,6 @@ if (!$agrupar) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= htmlspecialchars($pageTitle); ?></title>
     <!-- Bootstrap CSS (local via Composer assets) -->
-<link href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <!-- noUiSlider CSS (local via Composer assets) -->
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.css" />
     <!-- Font Awesome (local via Composer assets) -->
@@ -639,7 +638,6 @@ if (!$agrupar) {
 </div>
 
 <!-- Scripts para el slider de fechas (local via Composer assets) -->
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/vendor/wnumb/wNumb.min.js"></script>
 <script>
@@ -674,7 +672,6 @@ $(function(){
 });
 </script>
 <!-- Bootstrap JS -->
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 </body>
 </html>
 
