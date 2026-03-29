@@ -1,25 +1,14 @@
 <?php
-if (!defined('BASE_PATH')) {
-    header('Location: /public/');
-    exit;
+
+function obtenerCodVendedorPlanificacionService() {
+    return isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
 }
-
-require_once BASE_PATH . '/bootstrap/init.php';
-require_once BASE_PATH . '/bootstrap/auth.php';
-requierePermiso('perm_planificador');
-
-// Verificar si 'codigo' estÃ¡ establecido en la sesiÃ³n
-if (!isset($_SESSION['codigo'])) {
-    die('Acceso no autorizado.');
-}
-
-$cod_vendedor = intval($_SESSION['codigo']);
 
 /**
  * Crear una nueva zona de visita
  */
 function crearZonaVisita($nombre_zona, $descripcion, $duracion_semanas, $orden) {
-    global $cod_vendedor;
+    $cod_vendedor = obtenerCodVendedorPlanificacionService();
     $conn = db();
     
     // Sanitizar entradas
@@ -42,7 +31,7 @@ function crearZonaVisita($nombre_zona, $descripcion, $duracion_semanas, $orden) 
  * Obtener todas las zonas de visita asignadas al vendedor
  */
 function obtenerZonasVisita() {
-    global $cod_vendedor;
+    $cod_vendedor = obtenerCodVendedorPlanificacionService();
     $conn = db();
     
     $query = "SELECT cod_zona, nombre_zona, descripcion, duracion_semanas, orden 
@@ -68,7 +57,7 @@ function obtenerZonasVisita() {
  * Obtener informaciÃ³n de una zona por su cÃ³digo
  */
 function obtenerZonaPorCodigo($cod_zona) {
-    global $cod_vendedor;
+    $cod_vendedor = obtenerCodVendedorPlanificacionService();
     $conn = db();
     
     // Sanitizar la entrada
@@ -215,7 +204,7 @@ function obtenerSeccionesPorCliente($cod_cliente) {
  * Obtener clientes disponibles para asignar a una zona especfica
  */
 function obtenerClientesDisponiblesParaAsignar($cod_zona, $rutas_asignadas) {
-    global $cod_vendedor;
+    $cod_vendedor = obtenerCodVendedorPlanificacionService();
     $conn = db();
     
     if (empty($rutas_asignadas)) {
@@ -662,4 +651,5 @@ if (!function_exists('asignarRutaZonaService')) {
         return asignarRutaZona($cod_zona, $cod_ruta);
     }
 }
+
 
