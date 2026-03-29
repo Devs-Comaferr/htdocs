@@ -1,5 +1,5 @@
 <?php
-// ⚠️ ARCHIVO LEGACY
+// âš ï¸ ARCHIVO LEGACY
 // Este archivo ya no debe usarse directamente.
 // Se mantiene por compatibilidad.
 // Usar /visitas.php?action=crear|editar|eliminar
@@ -13,6 +13,8 @@ requierePermiso('perm_planificador');
 $conn = db();
 
 $codigo_vendedor = isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
 
 function registrarVisitaManualPrepareExecute($conn, string $sql, array $params = [])
 {
@@ -31,10 +33,9 @@ function registrarVisitaManualPrepareExecute($conn, string $sql, array $params =
 }
 
 $pageTitle = "Registrar Visita";
-include(BASE_PATH . '/resources/views/layouts/header.php');
 
 /* ---------------------------------------------------------------------------
-   Sección de búsqueda de clientes (cuando aún no se ha seleccionado un cliente)
+   SecciÃ³n de bÃºsqueda de clientes (cuando aÃºn no se ha seleccionado un cliente)
 --------------------------------------------------------------------------- */
 if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
     if (isset($_GET['buscar']) && !empty($_GET['buscar'])) {
@@ -59,6 +60,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Buscar Cliente para Visita Manual</title>
+            <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
                         <style>
                 body {
                     background-color: #f8f9fa;
@@ -114,7 +116,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
 
         <body>
             <div class="container">
-                <h1>Resultados de la búsqueda</h1>
+                <h1>Resultados de la bÃºsqueda</h1>
                 <div class="list-group">
                     <?php
                     $hayResultados = false;
@@ -130,11 +132,11 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
                         echo "<a href='$link' class='list-group-item'>$displayName</a>";
                     }
                     if (!$hayResultados) {
-                        echo "<p class='text-center'>No se encontraron clientes que cumplan con la búsqueda.</p>";
+                        echo "<p class='text-center'>No se encontraron clientes que cumplan con la bÃºsqueda.</p>";
                     }
                     ?>
                 </div>
-                <a href="registrar_visita_manual.php" class="back-link">Realizar nueva búsqueda</a>
+                <a href="registrar_visita_manual.php" class="back-link">Realizar nueva bÃºsqueda</a>
             </div>
         </body>
 
@@ -142,7 +144,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
     <?php
         exit();
     } else {
-        // Mostrar formulario de búsqueda
+        // Mostrar formulario de bÃºsqueda
     ?>
         <!DOCTYPE html>
         <html lang="es">
@@ -151,6 +153,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Buscar Cliente para Visita Manual</title>
+            <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
                         <style>
                 body {
                     background-color: #f8f9fa;
@@ -207,7 +210,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
                 <h1>Buscar Cliente para Visita Manual</h1>
                 <form method="get" action="<?= BASE_URL ?>/visitas.php">
                     <input type="hidden" name="action" value="crear">
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="buscar">Nombre del Cliente:</label>
                         <input type="text" name="buscar" id="buscar" class="form-control" placeholder="Ingrese el nombre del cliente" required>
                     </div>
@@ -229,7 +232,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
 $cod_cliente = intval($_GET['cod_cliente']);
 $cod_seccion = (isset($_GET['cod_seccion']) && $_GET['cod_seccion'] !== '') ? intval($_GET['cod_seccion']) : null;
 
-// Recuperar la asignación del cliente filtrando por sección si procede.
+// Recuperar la asignaciÃ³n del cliente filtrando por secciÃ³n si procede.
 $sql_assignment = "SELECT * FROM [integral].[dbo].[cmf_asignacion_zonas_clientes] WHERE cod_cliente = ? AND activo = 1";
 $assignmentParams = [$cod_cliente];
 if ($cod_seccion !== null) {
@@ -246,7 +249,7 @@ if (!$result_assignment) {
 }
 $assignment = odbc_fetch_array($result_assignment);
 if (!$assignment) {
-    error_log("No se encontró asignación para este cliente" . ($cod_seccion !== null ? " (Sección: $cod_seccion)" : ""));
+    error_log("No se encontrÃ³ asignaciÃ³n para este cliente" . ($cod_seccion !== null ? " (SecciÃ³n: $cod_seccion)" : ""));
     echo 'Error interno';
     return;
 }
@@ -257,7 +260,7 @@ $result_cliente = registrarVisitaManualPrepareExecute($conn, $sql_cliente, [$cod
 $clienteData = odbc_fetch_array($result_cliente);
 $nombreCliente = $clienteData ? $clienteData['nombre_comercial'] : $cod_cliente;
 
-// Obtener nombre de la sección, si procede
+// Obtener nombre de la secciÃ³n, si procede
 if ($cod_seccion !== null) {
     $sql_seccion = "SELECT nombre FROM [integral].[dbo].[secciones_cliente] WHERE cod_cliente = ? AND cod_seccion = ?";
     $result_seccion = registrarVisitaManualPrepareExecute($conn, $sql_seccion, [$cod_cliente, $cod_seccion]);
@@ -287,7 +290,7 @@ $hora_fin_manana    = !empty($assignment['hora_fin_manana']) ? substr($assignmen
 $hora_inicio_tarde  = !empty($assignment['hora_inicio_tarde']) ? substr($assignment['hora_inicio_tarde'], 0, 5) : "";
 $hora_fin_tarde     = !empty($assignment['hora_fin_tarde']) ? substr($assignment['hora_fin_tarde'], 0, 5) : "";
 
-// Consultar visitas programadas o pendientes para este cliente y sección (o IS NULL)
+// Consultar visitas programadas o pendientes para este cliente y secciÃ³n (o IS NULL)
 $currentDate = date('Y-m-d');
 $sql_citas = "SELECT fecha_visita, hora_inicio_visita, hora_fin_visita, estado_visita 
               FROM [integral].[dbo].[cmf_visitas_comerciales]
@@ -352,11 +355,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             } else {
                 // Validar que la hora de fin no supere el cierre del slot
                 if ($slot == 'morning' && strtotime($hora_fin_visita) > strtotime($hora_fin_manana)) {
-                    $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la mañana ($hora_fin_manana).";
+                    $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la maÃ±ana ($hora_fin_manana).";
                 } elseif ($slot == 'afternoon' && strtotime($hora_fin_visita) > strtotime($hora_fin_tarde)) {
                     $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la tarde ($hora_fin_tarde).";
                 } else {
-                    // Validación adicional: No se debe solapar la nueva visita con ninguna ya registrada para este vendedor en el mismo día
+                    // ValidaciÃ³n adicional: No se debe solapar la nueva visita con ninguna ya registrada para este vendedor en el mismo dÃ­a
                     $overlap = false;
                     $overlapDetails = "";
                     $sql_overlap = "SELECT * FROM [integral].[dbo].[cmf_visitas_comerciales]
@@ -380,7 +383,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     $data_cliente_overlap = odbc_fetch_array($result_cliente_overlap);
                                     $overlapCliente = $data_cliente_overlap ? $data_cliente_overlap['nombre_comercial'] : "";
                                 }
-                                // Si la visita solapada tiene asignada una sección, se recupera su nombre
+                                // Si la visita solapada tiene asignada una secciÃ³n, se recupera su nombre
                                 $overlapSeccion = "";
                                 if ($row['cod_seccion'] !== null) {
                                     $overlap_seccion = intval($row['cod_seccion']);
@@ -493,8 +496,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <title>Registrar Visita Manual</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- jQuery -->
-        <!-- Bootstrap CSS -->
+    <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
         <style>
         body {
             font-family: Arial, sans-serif;
@@ -516,7 +518,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: #333;
         }
 
-        .form-group {
+        .mb-3 {
             margin-bottom: 15px;
         }
 
@@ -584,88 +586,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             cursor: pointer;
         }
     </style>
-    <script>
-        $(document).ready(function() {
-            // Si el campo de fecha est vaco, mostramos la alerta estilizada
-            if ($("#fecha_visita").val() === "") {
-                $("#visitas_del_dia").html("<div class='alert alert-info'>Seleccione una fecha para ver las visitas programadas.</div>");
-            }
-            // Calcular automticamente la hora de fin a partir de la hora de inicio y el tiempo promedio
-            $("#hora_inicio_visita").change(function() {
-                var startTime = $(this).val();
-                var promedio = <?php echo $tiempo_promedio_minutes; ?>; // Tiempo promedio en minutos
-                if (startTime) {
-                    var parts = startTime.split(":");
-                    var date = new Date();
-                    date.setHours(parseInt(parts[0], 10));
-                    date.setMinutes(parseInt(parts[1], 10) + promedio);
-                    var endHours = date.getHours();
-                    var endMinutes = date.getMinutes();
-                    if (endHours < 10) {
-                        endHours = "0" + endHours;
-                    }
-                    if (endMinutes < 10) {
-                        endMinutes = "0" + endMinutes;
-                    }
-                    var endTime = endHours + ":" + endMinutes;
-                    $("#hora_fin_visita").val(endTime);
-                }
-            });
-            $("#btnDefinirHorario").click(function() {
-                $("#modalDefinirHorario").fadeIn();
-            });
-            $("#modalDefinirHorario .close").click(function() {
-                $("#modalDefinirHorario").fadeOut();
-            });
-            // Cerrar el modal si se hace clic fuera del contenido
-            $(document).mouseup(function(e) {
-                var modal = $("#modalDefinirHorario");
-                if (modal.is(":visible") && !$(e.target).closest(".modal-content").length) {
-                    modal.fadeOut();
-                }
-            });
-            $("#formDefinirHorario").submit(function(e) {
-                e.preventDefault();
-                $.ajax({
-                    url: "<?= BASE_URL ?>/definir_horario.php",
-                    type: "POST",
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        if (response.indexOf("OK") === 0) {
-                            alert("Horario guardado correctamente.");
-                            location.reload();
-                        } else {
-                            alert("Error: " + response);
-                        }
-                    },
-                    error: function() {
-                        alert("Error en la petición AJAX.");
-                    }
-                });
-            });
-
-            $("#fecha_visita").change(function() {
-                var fecha = $(this).val();
-                if (fecha !== "") {
-                    $.ajax({
-                        url: "<?= BASE_URL ?>/get_visitas.php",
-                        type: "GET",
-                        data: {
-                            fecha: fecha
-                        },
-                        success: function(data) {
-                            $("#visitas_del_dia").html(data);
-                        },
-                        error: function() {
-                            $("#visitas_del_dia").html("<div class='alert alert-danger'>Error al cargar las visitas.</div>");
-                        }
-                    });
-                } else {
-                    $("#visitas_del_dia").html("<div class='alert alert-info'>Seleccione una fecha para ver las visitas programadas.</div>");
-                }
-            });
-        });
-    </script>
 </head>
 
 <body>
@@ -677,7 +597,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="alert alert-success"><?php echo $success; ?></div>
         <?php endif; ?>
 
-        <!-- Alertas de citas programadas o pendientes (filtradas por cliente y sección) -->
+        <!-- Alertas de citas programadas o pendientes (filtradas por cliente y secciÃ³n) -->
         <?php if (count($citas) > 0): ?>
             <?php foreach ($citas as $cita):
                 $estado = normalizarEstadoVisitaClave($cita['estado_visita']);
@@ -690,14 +610,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php endif;
 
         if (!empty($assignment['frecuencia_visita']) && strtolower($assignment['frecuencia_visita']) == 'nunca') {
-            echo '<div class="alert alert-danger">Atención: Este cliente no se visita habitualmente.</div>';
+            echo '<div class="alert alert-danger">AtenciÃ³n: Este cliente no se visita habitualmente.</div>';
         }
         ?>
 
         <h3>Datos del Cliente y Disponibilidad</h3>
         <p><strong>Cliente:</strong> <?php echo htmlspecialchars($nombreCliente); ?></p>
         <?php if (!empty($nombreSeccion)): ?>
-            <p><strong>Sección:</strong> <?php echo htmlspecialchars($nombreSeccion); ?></p>
+            <p><strong>SecciÃ³n:</strong> <?php echo htmlspecialchars($nombreSeccion); ?></p>
         <?php endif; ?>
         <p><strong>Tiempo Promedio de Visita:</strong>
             <?php
@@ -719,7 +639,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ?>
         </p>
         <p>
-            <strong>Disponibilidad Mañana:</strong>
+            <strong>Disponibilidad MaÃ±ana:</strong>
             <?php echo !empty($hora_inicio_manana) ? $hora_inicio_manana : 'No definido'; ?> a
             <?php echo !empty($hora_fin_manana) ? $hora_fin_manana : 'No definido'; ?>
         </p>
@@ -730,7 +650,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </p>
         <p>
             <strong>Preferencia Horaria:</strong>
-            <?php echo !empty($assignment['preferencia_horaria']) ? ($assignment['preferencia_horaria'] == 'M' ? 'Mañana' : ($assignment['preferencia_horaria'] == 'T' ? 'Tarde' : $assignment['preferencia_horaria'])) : 'No definida'; ?>
+            <?php echo !empty($assignment['preferencia_horaria']) ? ($assignment['preferencia_horaria'] == 'M' ? 'MaÃ±ana' : ($assignment['preferencia_horaria'] == 'T' ? 'Tarde' : $assignment['preferencia_horaria'])) : 'No definida'; ?>
         </p>
         <button id="btnDefinirHorario" type="button" class="btn btn-info" style="margin-bottom:15px;">Definir Horario</button>
 
@@ -744,19 +664,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <?php if ($cod_seccion !== null): ?>
                         <input type="hidden" name="cod_seccion" value="<?php echo $cod_seccion; ?>" />
                     <?php endif; ?>
-                    <div class="form-group">
-                        <label for="hora_inicio_manana">Hora Inicio Mañana:</label>
+                    <div class="mb-3">
+                        <label for="hora_inicio_manana">Hora Inicio MaÃ±ana:</label>
                         <input type="time" class="form-control" name="hora_inicio_manana" id="hora_inicio_manana" value="<?php echo !empty($hora_inicio_manana) ? $hora_inicio_manana : ''; ?>" required />
                     </div>
-                    <div class="form-group">
-                        <label for="hora_fin_manana">Hora Fin Mañana:</label>
+                    <div class="mb-3">
+                        <label for="hora_fin_manana">Hora Fin MaÃ±ana:</label>
                         <input type="time" class="form-control" name="hora_fin_manana" id="hora_fin_manana" value="<?php echo !empty($hora_fin_manana) ? $hora_fin_manana : ''; ?>" required />
                     </div>
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="hora_inicio_tarde">Hora Inicio Tarde:</label>
                         <input type="time" class="form-control" name="hora_inicio_tarde" id="hora_inicio_tarde" value="<?php echo !empty($hora_inicio_tarde) ? $hora_inicio_tarde : ''; ?>" required />
                     </div>
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="hora_fin_tarde">Hora Fin Tarde:</label>
                         <input type="time" class="form-control" name="hora_fin_tarde" id="hora_fin_tarde" value="<?php echo !empty($hora_fin_tarde) ? $hora_fin_tarde : ''; ?>" required />
                     </div>
@@ -770,19 +690,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php if ($requiereConfirmacion): ?>
                 <input type="hidden" name="forzar" value="1" />
             <?php endif; ?>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="fecha_visita">Fecha de la Visita:</label>
                 <input type="date" class="form-control" name="fecha_visita" id="fecha_visita" value="<?php echo isset($_POST['fecha_visita']) ? htmlspecialchars($_POST['fecha_visita']) : ''; ?>" />
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="hora_inicio_visita">Hora de Inicio:</label>
                 <input type="time" class="form-control" name="hora_inicio_visita" id="hora_inicio_visita" value="<?php echo isset($_POST['hora_inicio_visita']) ? htmlspecialchars($_POST['hora_inicio_visita']) : ''; ?>" />
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="hora_fin_visita">Hora de Fin:</label>
                 <input type="time" class="form-control" name="hora_fin_visita" id="hora_fin_visita" value="<?php echo isset($_POST['hora_fin_visita']) ? htmlspecialchars($_POST['hora_fin_visita']) : ''; ?>" />
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="zona_seleccionada">Zona de Visita:</label>
                 <select name="zona_seleccionada" id="zona_seleccionada" class="form-control">
                     <?php foreach ($zonas as $zona): ?>
@@ -792,7 +712,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="estado_visita">Estado de la Visita:</label>
                 <select name="estado_visita" id="estado_visita" class="form-control">
                     <option value="Pendiente" <?php if (isset($_POST['estado_visita']) && normalizarEstadoVisita($_POST['estado_visita']) == 'Pendiente') echo 'selected'; ?>>Pendiente</option>
@@ -802,7 +722,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <option value="Descartada" <?php if (isset($_POST['estado_visita']) && normalizarEstadoVisita($_POST['estado_visita']) == 'Descartada') echo 'selected'; ?>>Descartada</option>
                 </select>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="observaciones">Observaciones (opcional):</label>
                 <textarea name="observaciones" id="observaciones" class="form-control" rows="4"><?php echo isset($_POST['observaciones']) ? htmlspecialchars($_POST['observaciones']) : ''; ?></textarea>
             </div>
@@ -819,50 +739,153 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
     <script>
-        $(document).ready(function() {
-            // Cuando se cambia la fecha, se carga el div con las visitas programadas
-            $("#fecha_visita").change(function() {
-                var fecha = $(this).val();
-                if (fecha !== "") {
-                    $.ajax({
-                        url: "<?= BASE_URL ?>/get_visitas.php",
-                        type: "GET",
-                        data: {
-                            fecha: fecha
-                        },
-                        success: function(data) {
-                            $("#visitas_del_dia").html(data);
-                        },
-                        error: function() {
-                            $("#visitas_del_dia").html("<div class='alert alert-danger'>Error al cargar las visitas.</div>");
+        document.addEventListener('DOMContentLoaded', function() {
+            var fechaInput = document.querySelector('#fecha_visita');
+            var horaInicioInput = document.querySelector('#hora_inicio_visita');
+            var horaFinInput = document.querySelector('#hora_fin_visita');
+            var visitasDelDia = document.querySelector('#visitas_del_dia');
+            var btnDefinirHorario = document.querySelector('#btnDefinirHorario');
+            var modalDefinirHorario = document.querySelector('#modalDefinirHorario');
+            var modalClose = modalDefinirHorario ? modalDefinirHorario.querySelector('.close') : null;
+            var formDefinirHorario = document.querySelector('#formDefinirHorario');
+            var promedio = <?php echo $tiempo_promedio_minutes; ?>;
+            var emptyStateHtml = "<div class='alert alert-info'>Seleccione una fecha para ver las visitas programadas.</div>";
+            var errorStateHtml = "<div class='alert alert-danger'>Error al cargar las visitas.</div>";
+
+            function setVisitasContent(html) {
+                if (visitasDelDia) {
+                    visitasDelDia.innerHTML = html;
+                }
+            }
+
+            function calcularHoraFin() {
+                if (!horaInicioInput || !horaFinInput || !horaInicioInput.value) {
+                    return;
+                }
+
+                var parts = horaInicioInput.value.split(':');
+                var date = new Date();
+                date.setHours(parseInt(parts[0], 10));
+                date.setMinutes(parseInt(parts[1], 10) + promedio);
+
+                var endHours = String(date.getHours()).padStart(2, '0');
+                var endMinutes = String(date.getMinutes()).padStart(2, '0');
+                horaFinInput.value = endHours + ':' + endMinutes;
+            }
+
+            function cargarVisitasDelDia() {
+                if (!fechaInput) {
+                    return;
+                }
+
+                var fecha = fechaInput.value;
+                if (!fecha) {
+                    setVisitasContent(emptyStateHtml);
+                    return;
+                }
+
+                var url = new URL("<?= BASE_URL ?>/get_visitas.php", window.location.origin);
+                url.searchParams.set('fecha', fecha);
+
+                fetch(url.toString(), {
+                    credentials: 'same-origin'
+                })
+                    .then(function(response) {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
                         }
+                        return response.text();
+                    })
+                    .then(function(data) {
+                        setVisitasContent(data);
+                    })
+                    .catch(function(error) {
+                        console.error('Error cargando visitas:', error);
+                        setVisitasContent(errorStateHtml);
                     });
-                } else {
-                    $("#visitas_del_dia").html("<div class='alert alert-info'>Seleccione una fecha para ver las visitas programadas.</div>");
+            }
+
+            function abrirModalHorario() {
+                if (modalDefinirHorario) {
+                    modalDefinirHorario.style.display = 'block';
+                }
+            }
+
+            function cerrarModalHorario() {
+                if (modalDefinirHorario) {
+                    modalDefinirHorario.style.display = 'none';
+                }
+            }
+
+            if (fechaInput && fechaInput.value === '') {
+                setVisitasContent(emptyStateHtml);
+            }
+
+            if (horaInicioInput) {
+                horaInicioInput.addEventListener('change', calcularHoraFin);
+            }
+
+            if (fechaInput) {
+                fechaInput.addEventListener('change', cargarVisitasDelDia);
+            }
+
+            if (btnDefinirHorario) {
+                btnDefinirHorario.addEventListener('click', abrirModalHorario);
+            }
+
+            if (modalClose) {
+                modalClose.addEventListener('click', cerrarModalHorario);
+            }
+
+            document.addEventListener('mouseup', function(event) {
+                if (!modalDefinirHorario || modalDefinirHorario.style.display !== 'block') {
+                    return;
+                }
+
+                var modalContent = modalDefinirHorario.querySelector('.modal-content');
+                if (modalContent && !modalContent.contains(event.target)) {
+                    cerrarModalHorario();
                 }
             });
 
-            // Calcular automticamente la hora de fin a partir de la hora de inicio y el tiempo promedio
-            $("#hora_inicio_visita").change(function() {
-                var startTime = $(this).val();
-                var promedio = <?php echo $tiempo_promedio_minutes; ?>; // Tiempo promedio en minutos
-                if (startTime) {
-                    var parts = startTime.split(":");
-                    var date = new Date();
-                    date.setHours(parseInt(parts[0], 10));
-                    date.setMinutes(parseInt(parts[1], 10) + promedio);
-                    var endHours = date.getHours();
-                    var endMinutes = date.getMinutes();
-                    if (endHours < 10) {
-                        endHours = "0" + endHours;
-                    }
-                    if (endMinutes < 10) {
-                        endMinutes = "0" + endMinutes;
-                    }
-                    var endTime = endHours + ":" + endMinutes;
-                    $("#hora_fin_visita").val(endTime);
-                }
-            });
+            if (formDefinirHorario) {
+                formDefinirHorario.addEventListener('submit', function(event) {
+                    event.preventDefault();
+
+                    var formData = new FormData(formDefinirHorario);
+                    var payload = new URLSearchParams();
+                    formData.forEach(function(value, key) {
+                        payload.append(key, value);
+                    });
+
+                    fetch("<?= BASE_URL ?>/definir_horario.php", {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        },
+                        body: payload.toString()
+                    })
+                        .then(function(response) {
+                            if (!response.ok) {
+                                throw new Error('HTTP ' + response.status);
+                            }
+                            return response.text();
+                        })
+                        .then(function(responseText) {
+                            if (responseText.indexOf('OK') === 0) {
+                                alert('Horario guardado correctamente.');
+                                window.location.reload();
+                            } else {
+                                alert('Error: ' + responseText);
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('Error guardando horario:', error);
+                            alert('Error en la petición.');
+                        });
+                });
+            }
         });
     </script>
 </body>
