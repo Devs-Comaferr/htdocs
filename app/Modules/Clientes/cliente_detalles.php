@@ -6,7 +6,7 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 unset($_SESSION['origen']);
 
 
-// Obtener el código del cliente desde la URL
+// Obtener el cÃ³digo del cliente desde la URL
 if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
     header("Location: clientes.php");
     exit();
@@ -15,11 +15,13 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
 require_once BASE_PATH . '/app/Support/functions.php';
 require_once BASE_PATH . '/app/Support/db.php';
 
+$ui_version = 'bs5';
+
 $conn = db();
 
 $cod_cliente = trim((string) $_GET['cod_cliente']);
 $cod_seccion = isset($_GET['cod_seccion']) ? trim((string) $_GET['cod_seccion']) : null;
-// Código del comisionista (para filtrar datos a las operaciones realizadas por él)
+// CÃ³digo del comisionista (para filtrar datos a las operaciones realizadas por Ã©l)
 $cod_comercial = $_SESSION['codigo'] ?? null;
 
 function execPrepared($conn, string $sql, array $params = [])
@@ -866,10 +868,10 @@ window.onclick = function(event) {
             }
         }
 
-        // Función para quitar pedido y actualizar origen
+        // FunciÃ³n para quitar pedido y actualizar origen
         function quitarPedido(codPedido, e) {
     e.stopPropagation();
-    if (!confirm("¿Deseas quitar este pedido de la visita?")) {
+    if (!confirm("Â¿Deseas quitar este pedido de la visita?")) {
         return;
     }
     $.ajax({
@@ -989,7 +991,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                 '<div class="modal-table-container">' +
                 '<table class="modal-table">' +
                 '<thead><tr>' +
-                '<th>Artículo</th><th>Descripción</th>' +
+                '<th>ArtÃ­culo</th><th>DescripciÃ³n</th>' +
                 '<th>Cant. Pedido</th><th>Importe Pedido</th>' +
                 '<th>Cant. Albaran</th><th>Importe Albaran</th>' +
                 '</tr></thead>' +
@@ -1306,7 +1308,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                     responsive: true,
                     plugins: {
                         legend: { display: false },
-                        title: { display: true, text: 'Artículos (Top 10)' },
+                        title: { display: true, text: 'ArtÃ­culos (Top 10)' },
                         datalabels: {
                             formatter: function (value, context) {
                                 var idx = context.dataIndex;
@@ -1490,7 +1492,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         }
 
         $pref = strtolower((string)($asignacion['preferencia_horaria'] ?? ''));
-        $estiloManana = ($pref === 'm' || $pref === 'mañana' || $pref === 'manana') ? 'background-color: #ffc107; padding:2px 4px;' : '';
+        $estiloManana = ($pref === 'm' || $pref === 'maÃ±ana' || $pref === 'manana') ? 'background-color: #ffc107; padding:2px 4px;' : '';
         $estiloTarde  = ($pref === 't' || $pref === 'tarde') ? 'background-color: #007bff; color:#fff; padding:2px 4px;' : '';
 
         $tp = (float)($asignacion['tiempo_promedio_visita'] ?? 0);
@@ -1554,12 +1556,12 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
     <?php endif; ?>
 
     <?php
-    // Contactos: ver qué campos tienen algún dato
+    // Contactos: ver quÃ© campos tienen algÃºn dato
     $campos = [
         'nombre'           => 'Nombre',
         'cargo'            => 'Cargo',
-        'telefono'         => 'Teléfono',
-        'telefono_movil'   => 'Móvil',
+        'telefono'         => 'TelÃ©fono',
+        'telefono_movil'   => 'MÃ³vil',
         'e_mail'           => 'Email',
         'observaciones'    => 'Observaciones'
     ];
@@ -2054,6 +2056,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
 <script src="<?= BASE_URL ?>/assets/js/app-ui.js"></script>
 </body>
 </html>
+
 
 
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once BASE_PATH . '/app/Support/header.php';
 ?>
 <!-- Frontend policy: version oficial del proyecto = jQuery 1.12.4 y Bootstrap 3.3.7. Cualquier otra version en vendor queda como legacy y no debe cargarse desde vistas activas. -->
-<!-- Font Awesome local (instalado vía Composer/npm-asset) -->
+<!-- Font Awesome local (instalado vÃ­a Composer/npm-asset) -->
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/fontawesome/css/all.min.css">
 <link rel="icon" href="<?= BASE_URL ?>/imagenes/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= BASE_URL ?>/imagenes/favicon-32.png">
@@ -23,6 +23,7 @@ require_once BASE_PATH . '/app/Support/header.php';
 if ($ui_version === 'bs5'):
 ?>
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/bootstrap/css/bootstrap.min.css">
+<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <?php else: ?>
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
@@ -126,7 +127,7 @@ if ($ui_version === 'bs5'):
     display: none;
   }
 
-  /* Móvil: en index-header, ocultar el pageTitle */
+  /* MÃ³vil: en index-header, ocultar el pageTitle */
   @media (max-width: 1024px) {
     html, body {
       overflow-x: hidden;
@@ -260,11 +261,11 @@ if ($ui_version === 'bs5'):
     </a>
   <?php endif; ?>
   <?php if ($puedeVerEstadisticasBar): ?>
-    <a href="<?= BASE_URL ?>/estadisticas.php" class="app-btn app-estadisticas" title="Estadísticas">
+    <a href="<?= BASE_URL ?>/estadisticas.php" class="app-btn app-estadisticas" title="EstadÃ­sticas">
       <i class="fa fa-bar-chart"></i>
     </a>
   <?php endif; ?>
-  <a href="<?= BASE_URL ?>/altaClientes/alta_cliente.php" class="app-btn app-nuevo" title="Añadir cliente">
+  <a href="<?= BASE_URL ?>/altaClientes/alta_cliente.php" class="app-btn app-nuevo" title="AÃ±adir cliente">
     <i class="fa fa-user-plus"></i>
   </a>
 </div>
@@ -320,3 +321,4 @@ window.addEventListener('load', syncGlobalBars);
 window.addEventListener('resize', syncGlobalBars);
 window.addEventListener('orientationchange', syncGlobalBars);
 </script>
+
