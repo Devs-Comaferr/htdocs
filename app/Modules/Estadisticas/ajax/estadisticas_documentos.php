@@ -42,5 +42,4 @@ $response = [
 echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 if (isset($conn)) {
-    odbc_close($conn);
 }

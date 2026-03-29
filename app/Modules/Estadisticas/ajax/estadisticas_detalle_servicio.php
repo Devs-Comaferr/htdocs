@@ -512,6 +512,5 @@ $renderPaginacion = static function (int $pageActual, int $total, callable $urlB
 </div>
 <?php
 if (isset($conn)) {
-    odbc_close($conn);
 }
 ?>

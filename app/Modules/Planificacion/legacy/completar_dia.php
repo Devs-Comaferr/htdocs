@@ -202,5 +202,4 @@ if (!defined('BASE_PATH')) {
     exit;
 }
 
-odbc_close($conn);
 ?>

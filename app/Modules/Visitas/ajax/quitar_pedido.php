@@ -72,4 +72,3 @@ try {
     echo 'ERROR: ' . $e->getMessage();
 }
 
-odbc_close($conn);

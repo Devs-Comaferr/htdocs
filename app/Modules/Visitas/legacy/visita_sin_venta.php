@@ -76,7 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         odbc_free_result($stmt);
     }
-    odbc_close($conn);
 }
 ?>
 <!DOCTYPE html>

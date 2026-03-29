@@ -480,6 +480,5 @@ if (isset($_SESSION['codigo'])) {
 </html>
 <?php
 // Cerrar la conexiÃƒÂ³n al final del script
-odbc_close($conn);
 ?>
 

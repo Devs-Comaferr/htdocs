@@ -302,6 +302,5 @@ if (!defined('BASE_PATH')) {
 }
 
 if ($conn) {
-    odbc_close($conn);
 }
 ?>

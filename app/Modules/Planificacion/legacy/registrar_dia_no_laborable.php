@@ -384,5 +384,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </body>
 </html>
 <?php
-odbc_close($conn);
 ?>

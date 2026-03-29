@@ -566,5 +566,4 @@ JOIN articulos a ON h.cod_articulo = a.cod_articulo
     echo "Nivel de drilldown no implementado o parÃƒÂ¡metros insuficientes.";
 }
 
-odbc_close($conn);
 ?>

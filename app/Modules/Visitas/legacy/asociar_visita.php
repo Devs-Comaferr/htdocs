@@ -100,4 +100,3 @@ if ($visita) {
     echo 'Nueva visita creada y asociada al pedido: ' . $origen;
 }
 
-odbc_close($conn);

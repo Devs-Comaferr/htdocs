@@ -2687,7 +2687,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <?php
 if (isset($conn)) {
-    odbc_close($conn);
 }
 ?>
 

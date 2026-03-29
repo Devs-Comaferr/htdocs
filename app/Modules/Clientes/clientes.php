@@ -1459,7 +1459,6 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 <?php
-odbc_close($conn);
 ?>
 </body>
 </html>

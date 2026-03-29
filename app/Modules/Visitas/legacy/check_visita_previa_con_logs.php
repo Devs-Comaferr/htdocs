@@ -146,7 +146,6 @@ if ($row = odbc_fetch_array($stmt)) {
 }
 
 odbc_free_result($stmt);
-odbc_close($conn);
 
 // Limpiar cualquier otro output
 ob_end_clean();

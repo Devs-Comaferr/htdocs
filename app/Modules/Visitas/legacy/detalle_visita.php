@@ -43,5 +43,4 @@ if ($result && $row = odbc_fetch_array($result)) {
     echo "No se encontraron detalles para la visita.";
 }
 
-odbc_close($conn);
 ?>

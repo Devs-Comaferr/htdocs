@@ -51,5 +51,4 @@ include BASE_PATH . '/resources/views/layouts/header.php';
 require BASE_PATH . '/app/Modules/Pedidos/pedidos_todos.php';
 
 if ($conn) {
-    odbc_close($conn);
 }

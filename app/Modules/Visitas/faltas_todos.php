@@ -1016,7 +1016,6 @@ include BASE_PATH . '/resources/views/layouts/header.php';
 </html>
 <?php
 if ($conn) {
-    odbc_close($conn);
 }
 ?>
 

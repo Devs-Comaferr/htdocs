@@ -795,8 +795,6 @@ if ($resultArt) {
 }
 $datosArticulosMensualJson = json_encode($datosArticulosMensual);
 
-odbc_close($conn_aux);
-odbc_close($conn_aux2);
 include_once BASE_PATH . '/resources/views/layouts/header.php';
 ?>
 <!DOCTYPE html>
@@ -2235,7 +2233,6 @@ function actualizarOrigen(cod_pedido, nuevo_origen, event) {
 }
 </script>
 
-<?php odbc_close($conn); ?>
 <script src="<?= BASE_URL ?>/assets/js/app-ui.js"></script>
 </body>
 </html>

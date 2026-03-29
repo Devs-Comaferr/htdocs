@@ -114,7 +114,6 @@ if (!empty($cod_ventas)) {
   odbc_free_result($res_lineas);
 }
 
-odbc_close($conn);
 
 // Funciones para formatear fecha/hora al estÃ¡ndar HTML (YYYY-MM-DD y HH:MM)
 function formatoFecha($fechaSql)

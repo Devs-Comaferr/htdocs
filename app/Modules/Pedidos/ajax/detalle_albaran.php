@@ -130,5 +130,4 @@ if ($result) {
       ?>
     </table>
   <?php } ?>
-  <?php odbc_close($conn); ?>
 </div>

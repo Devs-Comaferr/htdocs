@@ -177,6 +177,5 @@ if ($result) {
     </div>
   </div>
 
-  <?php odbc_close($conn); ?>
 </body>
 </html>

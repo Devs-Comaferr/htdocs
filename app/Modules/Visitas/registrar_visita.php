@@ -102,5 +102,4 @@ try {
     header('Location: pedidos_visitas.php?msg=error');
     exit();
 } finally {
-    odbc_close($conn);
 }

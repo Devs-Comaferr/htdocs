@@ -81,4 +81,3 @@ if ($json === false) {
 }
 
 echo $json;
-odbc_close($conn);

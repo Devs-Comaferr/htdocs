@@ -672,5 +672,4 @@ $(function(){
 
 <?php
 // Cerrar conexiÃƒÂ³n
-odbc_close($conn);
 ?>

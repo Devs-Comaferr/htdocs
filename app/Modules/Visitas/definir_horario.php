@@ -53,4 +53,3 @@ if (!$result) {
 }
 
 echo 'OK - Horario actualizado';
-odbc_close($conn);

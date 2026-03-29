@@ -15,7 +15,6 @@ $tipoVenta = 1;
 if ($codVenta === '') {
     echo '<p style="margin:0;color:#6b7280;">Pedido no especificado.</p>';
     if (isset($conn)) {
-        odbc_close($conn);
     }
     return;
 }
@@ -45,7 +44,6 @@ if (!$rsCabecera) {
     registrarErrorSqlEstadisticas('detalle_pedido.cabecera', $conn, $sqlCabecera, $paramsCabecera);
     echo '<p style="margin:0;color:#b91c1c;">No se pudo cargar la cabecera del pedido.</p>';
     if (isset($conn)) {
-        odbc_close($conn);
     }
     return;
 }
@@ -54,7 +52,6 @@ $cabecera = odbc_fetch_array_utf8($rsCabecera);
 if (!$cabecera) {
     echo '<p style="margin:0;color:#6b7280;">No se encontraron datos para el pedido solicitado.</p>';
     if (isset($conn)) {
-        odbc_close($conn);
     }
     return;
 }
@@ -471,6 +468,5 @@ if (!$rsAlbaranesAplicados) {
 </div>
 <?php
 if (isset($conn)) {
-    odbc_close($conn);
 }
 ?>

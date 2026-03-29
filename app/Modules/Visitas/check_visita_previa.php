@@ -110,7 +110,6 @@ if ($row = odbc_fetch_array($stmt)) {
 }
 
 odbc_free_result($stmt);
-odbc_close($conn);
 
 // Respuesta
 if ($id_visita !== null && $id_visita > 0) {

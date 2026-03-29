@@ -107,7 +107,6 @@ $tipo_evento_db = trim($row['tipo_evento']);
 $descripcion_db = trim($row['descripcion']);
 
 // Cerrar la conexion si lo deseas aqui (depende de tu flujo)
-odbc_close($conn);
 ?>
 <!DOCTYPE html>
 <html lang="es">

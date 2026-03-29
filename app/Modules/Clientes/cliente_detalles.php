@@ -2038,7 +2038,6 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
 <script src="<?= BASE_URL ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <?php
 // Comentario reparado
-odbc_close($conn);
 ?>
 <script src="<?= BASE_URL ?>/assets/js/app-ui.js"></script>
 </body>

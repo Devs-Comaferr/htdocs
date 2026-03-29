@@ -45,7 +45,6 @@ function responderDocumento(array $payload, int $statusCode = 200): void
     echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     $conn = db();
     if (isset($conn)) {
-        odbc_close($conn);
     }
     exit;
 }

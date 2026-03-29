@@ -87,5 +87,4 @@ if (odbc_execute($stmt, array($searchTerm))) {
 }
 
 odbc_free_result($stmt);
-odbc_close($conn);
 ?>

@@ -36,18 +36,15 @@ if ($idVisita === false || $codVendedorSesion <= 0) {
 }
 
 if (!puedeEliminarVisita($idVisita, $codVendedorSesion)) {
-    odbc_close($conn);
     eliminarVisitaRedirectError();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar']) && $_POST['confirmar'] === '1') {
     if (eliminarVisita($idVisita, $codVendedorSesion)) {
-        odbc_close($conn);
         header('Location: index.php?msg=visita_eliminada');
         exit;
     }
 
-    odbc_close($conn);
     eliminarVisitaRedirectError();
 }
 ?>
@@ -84,5 +81,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar']) && $_POS
 </body>
 </html>
 <?php
-odbc_close($conn);
 ?>

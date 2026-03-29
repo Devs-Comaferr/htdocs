@@ -47,7 +47,6 @@ class PedidosTodosController
         echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
 
         if (!empty($resultadoPedidosTodos['conn'])) {
-            odbc_close($resultadoPedidosTodos['conn']);
         }
 
         exit;

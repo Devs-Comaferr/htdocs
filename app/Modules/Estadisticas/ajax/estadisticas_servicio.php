@@ -101,5 +101,4 @@ error_log('[ESTADISTICAS] servicio_kpis_calculados ' . json_encode([
 ]));
 
 if (isset($conn)) {
-    odbc_close($conn);
 }

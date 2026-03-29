@@ -1887,7 +1887,6 @@ if (window.matchMedia('(max-width: 1024px)').matches) {
 
 <?php
 // Cerrar la conexiÃ³n ODBC
-odbc_close($conn);
 ?>
 <script src="<?= BASE_URL ?>/assets/js/app-ui.js"></script>
 <?php require BASE_PATH . '/modales/modal_documento.php'; ?>
