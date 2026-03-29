@@ -10,12 +10,13 @@ require_once BASE_PATH . '/app/Support/functions.php';
 require_once BASE_PATH . '/app/Support/db.php';
 
 $ui_version = isset($ui_version) && $ui_version === 'bs5' ? 'bs5' : 'bs3';
+$ui_requires_jquery = isset($ui_requires_jquery) ? (bool)$ui_requires_jquery : ($ui_version === 'bs5');
 
 if (!defined('MOBILE_APPBAR_RENDERED')) {
     define('MOBILE_APPBAR_RENDERED', true);
 }
 
-// Asume que la sesiÃƒÂ³n ya estÃƒÂ¡ iniciada y que $pageTitle existe (y si es index, $fechaConsulta).
+// Asume que la sesiÃƒÆ’Ã‚Â³n ya estÃƒÆ’Ã‚Â¡ iniciada y que $pageTitle existe (y si es index, $fechaConsulta).
 $isIndex = (basename($_SERVER['PHP_SELF']) === 'index.php');
 
 $conn = $conn ?? (function_exists('db') ? db() : null);

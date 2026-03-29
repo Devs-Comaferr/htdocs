@@ -6,7 +6,7 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 unset($_SESSION['origen']);
 
 
-// Obtener el cÃ³digo del cliente desde la URL
+// Obtener el cÃƒÂ³digo del cliente desde la URL
 if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
     header("Location: clientes.php");
     exit();
@@ -16,12 +16,13 @@ require_once BASE_PATH . '/app/Support/functions.php';
 require_once BASE_PATH . '/app/Support/db.php';
 
 $ui_version = 'bs5';
+$ui_requires_jquery = false;
 
 $conn = db();
 
 $cod_cliente = trim((string) $_GET['cod_cliente']);
 $cod_seccion = isset($_GET['cod_seccion']) ? trim((string) $_GET['cod_seccion']) : null;
-// CÃ³digo del comisionista (para filtrar datos a las operaciones realizadas por Ã©l)
+// CÃƒÂ³digo del comisionista (para filtrar datos a las operaciones realizadas por ÃƒÂ©l)
 $cod_comercial = $_SESSION['codigo'] ?? null;
 
 function execPrepared($conn, string $sql, array $params = [])
@@ -868,46 +869,56 @@ window.onclick = function(event) {
             }
         }
 
-        // FunciÃ³n para quitar pedido y actualizar origen
+        // FunciÃƒÂ³n para quitar pedido y actualizar origen
         function quitarPedido(codPedido, e) {
     e.stopPropagation();
-    if (!confirm("Â¿Deseas quitar este pedido de la visita?")) {
+    if (!confirm("Ã‚Â¿Deseas quitar este pedido de la visita?")) {
         return;
     }
-    $.ajax({
-        url: '<?= BASE_URL ?>/ajax/quitar_pedido.php',
-        type: 'POST',
-        data: { cod_pedido: codPedido },
-        success: function(response) {
-            if (response.indexOf("OK") === 0) {
+    fetch('<?= BASE_URL ?>/ajax/quitar_pedido.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        body: 'cod_pedido=' + encodeURIComponent(codPedido)
+    })
+        .then(function(response) {
+            return response.text();
+        })
+        .then(function(responseText) {
+            if (responseText.indexOf("OK") === 0) {
                 location.reload();
             } else {
-                alert("Error al eliminar el pedido: " + response);
+                alert("Error al eliminar el pedido: " + responseText);
             }
-        },
-        error: function() {
+        })
+        .catch(function() {
             alert("Error al eliminar el pedido (AJAX).");
-        }
-    });
+        });
 }
 
 function actualizarOrigen(codPedido, nuevoOrigen, e) {
     e.stopPropagation();
-    $.ajax({
-        url: '<?= BASE_URL ?>/ajax/actualizar_origen.php',
-        type: 'POST',
-        data: { cod_pedido: codPedido, origen: nuevoOrigen },
-        success: function(response) {
-            if (response.indexOf("OK") === 0) {
+    fetch('<?= BASE_URL ?>/ajax/actualizar_origen.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        body: 'cod_pedido=' + encodeURIComponent(codPedido) + '&origen=' + encodeURIComponent(nuevoOrigen)
+    })
+        .then(function(response) {
+            return response.text();
+        })
+        .then(function(responseText) {
+            if (responseText.indexOf("OK") === 0) {
                 location.reload();
             } else {
-                alert("Error al actualizar el origen: " + response);
+                alert("Error al actualizar el origen: " + responseText);
             }
-        },
-        error: function() {
+        })
+        .catch(function() {
             alert("Error al actualizar el origen (AJAX).");
-        }
-    });
+        });
 }
 
         var graficoComparativa = null;
@@ -991,7 +1002,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                 '<div class="modal-table-container">' +
                 '<table class="modal-table">' +
                 '<thead><tr>' +
-                '<th>ArtÃ­culo</th><th>DescripciÃ³n</th>' +
+                '<th>ArtÃƒÂ­culo</th><th>DescripciÃƒÂ³n</th>' +
                 '<th>Cant. Pedido</th><th>Importe Pedido</th>' +
                 '<th>Cant. Albaran</th><th>Importe Albaran</th>' +
                 '</tr></thead>' +
@@ -1308,7 +1319,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                     responsive: true,
                     plugins: {
                         legend: { display: false },
-                        title: { display: true, text: 'ArtÃ­culos (Top 10)' },
+                        title: { display: true, text: 'ArtÃƒÂ­culos (Top 10)' },
                         datalabels: {
                             formatter: function (value, context) {
                                 var idx = context.dataIndex;
@@ -1492,7 +1503,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         }
 
         $pref = strtolower((string)($asignacion['preferencia_horaria'] ?? ''));
-        $estiloManana = ($pref === 'm' || $pref === 'maÃ±ana' || $pref === 'manana') ? 'background-color: #ffc107; padding:2px 4px;' : '';
+        $estiloManana = ($pref === 'm' || $pref === 'maÃƒÂ±ana' || $pref === 'manana') ? 'background-color: #ffc107; padding:2px 4px;' : '';
         $estiloTarde  = ($pref === 't' || $pref === 'tarde') ? 'background-color: #007bff; color:#fff; padding:2px 4px;' : '';
 
         $tp = (float)($asignacion['tiempo_promedio_visita'] ?? 0);
@@ -1556,12 +1567,12 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
     <?php endif; ?>
 
     <?php
-    // Contactos: ver quÃ© campos tienen algÃºn dato
+    // Contactos: ver quÃƒÂ© campos tienen algÃƒÂºn dato
     $campos = [
         'nombre'           => 'Nombre',
         'cargo'            => 'Cargo',
-        'telefono'         => 'TelÃ©fono',
-        'telefono_movil'   => 'MÃ³vil',
+        'telefono'         => 'TelÃƒÂ©fono',
+        'telefono_movil'   => 'MÃƒÂ³vil',
         'e_mail'           => 'Email',
         'observaciones'    => 'Observaciones'
     ];
@@ -2048,7 +2059,6 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
     <?php endif; ?>
 </div>
 
-<!-- jQuery (local via Composer assets) -->
 <!-- Bootstrap 5 JS Bundle (includes Popper, local via Composer assets) -->
 <?php
 // Comentario reparado

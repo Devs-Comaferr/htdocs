@@ -23,7 +23,9 @@ require_once BASE_PATH . '/app/Support/header.php';
 if ($ui_version === 'bs5'):
 ?>
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/bootstrap/css/bootstrap.min.css">
+<?php if ($ui_requires_jquery): ?>
 <script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
+<?php endif; ?>
 <script src="<?= BASE_URL ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <?php else: ?>
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
