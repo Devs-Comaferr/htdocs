@@ -16,18 +16,18 @@ header('Content-Type: text/html; charset=utf-8');
 // Verificar que el usuario est autenticado
 
 
-// Verificar que se haya enviado el parÃ¡metro combinado
+// Verificar que se haya enviado el parámetro combinado
 if (!isset($_GET['cod_venta_tipo'])) {
-    echo "No se ha especificado un cÃ³digo de venta.";
+    echo "No se ha especificado un código de venta.";
     exit;
 }
 
-// Separar el parÃ¡metro en cod_venta y tipo_venta
+// Separar el parámetro en cod_venta y tipo_venta
 list($cod_venta, $tipo_venta) = explode('_', $_GET['cod_venta_tipo'], 2);
 $cod_venta = intval($cod_venta);
 $tipo_venta = intval($tipo_venta);
 
-// ConexiÃ³n a la base de datos
+// Conexión a la base de datos
 
 $conn = db();
 
@@ -94,12 +94,12 @@ if ($result) {
 
 <div class="detail-container">
   <?php if (empty($rows)) { ?>
-    <p>No se encontraron detalles para el albarn/ticket.</p>
+    <p>No se encontraron detalles para el albar�n/ticket.</p>
   <?php } else { ?>
     <table class="detail-table">
       <tr>
-        <th>CÃ³d. ArtÃ­culo</th>
-        <th>DescripciÃ³n</th>
+        <th>C�d. Art�culo</th>
+        <th>Descripci�n</th>
         <th>Cantidad</th>
         <th>Precio</th>
         <?php if ($showDto1) { echo "<th>Dto1</th>"; } ?>

@@ -15,10 +15,10 @@ require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 require_once BASE_PATH . '/app/Support/functions.php';
 $pageTitle = "Gestionar Rutas de la Zona";
 include BASE_PATH . '/resources/views/layouts/header.php';
-// Iniciar sesiÃ³n si no estÃ¡ ya iniciada
+// Iniciar sesión si no está ya iniciada
 
 
-// Verificar si el usuario ha iniciado sesiÃ³n
+// Verificar si el usuario ha iniciado sesión
 
 
 // Verificar si el usuario est autenticado
@@ -28,14 +28,14 @@ if (!isset($_SESSION['codigo'])) {
 }
     return;
 
-// Obtener el cÃ³digo del vendedor desde la sesiÃ³n
+// Obtener el código del vendedor desde la sesión
 $cod_vendedor = intval($_SESSION['codigo']);
 
 // Verificar si 'cod_zona' est presente en la URL
 if (isset($_GET['cod_zona'])) {
     $cod_zona = intval($_GET['cod_zona']);
     
-    // Obtener informaciÃ³n de la zona
+    // Obtener información de la zona
     $zonas = obtenerZonasVisitaService();
     $zona_actual = null;
     foreach ($zonas as $zona) {
@@ -186,13 +186,13 @@ if (isset($_GET['cod_zona'])) {
 <body>
     <div class="container">
         <?php if (isset($cod_zona)): ?>
-            <!-- Mostrar informaciÃ³n de la zona especÃ­fica -->
+            <!-- Mostrar información de la zona específica -->
             <h1><?php echo htmlspecialchars($zona_actual['nombre_zona']); ?></h1>
             
             <h2>Rutas Asignadas</h2>
             <table>
                 <tr>
-                    <th>CÃ³digo de Ruta</th>
+                    <th>C�digo de Ruta</th>
                     <th>Nombre de Ruta</th>
                 </tr>
                 <?php if (!empty($rutas_asignadas)): ?>

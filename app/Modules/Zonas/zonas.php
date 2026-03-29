@@ -13,18 +13,18 @@ requierePermiso('perm_planificador');
 // zonas.php
 require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 require_once BASE_PATH . '/app/Support/functions.php';
-$pageTitle = 'GestiÃ³n de Zonas';
+$pageTitle = 'Gesti�n de Zonas';
 include BASE_PATH . '/resources/views/layouts/header.php';
 $zonas = obtenerZonasVisitaService();
 
-// Verificar si el usuario ha iniciado sesiÃ³n
+// Verificar si el usuario ha iniciado sesión
 
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>GestiÃ³n de Zonas</title>
+    <title>Gesti�n de Zonas</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap 3.3.7 -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
@@ -128,7 +128,7 @@ $zonas = obtenerZonasVisitaService();
         .back-button:hover {
             background-color: #5a6268;
         }
-        /* Estilos para dispositivos mÃ³viles */
+        /* Estilos para dispositivos móviles */
         @media (max-width: 1024px) {
             .btn-zona {
                 width: 150px;
@@ -157,7 +157,7 @@ $zonas = obtenerZonasVisitaService();
     <div class="container">
         
         
-        <!-- SecciÃ³n 1: Listado de Zonas como Botones -->
+        <!-- Sección 1: Listado de Zonas como Botones -->
         
         <?php if (!empty($zonas)): ?>
             <div class="buttons-container">
@@ -172,17 +172,17 @@ $zonas = obtenerZonasVisitaService();
             <div class="no-data">No tienes zonas disponibles.</div>
         <?php endif; ?>
         
-        <!-- SecciÃ³n 2: Formulario para Crear Nueva Zona -->
+        <!-- Sección 2: Formulario para Crear Nueva Zona -->
         <div class="create-form">
             <h2>Crear Nueva Zona</h2>
             <form action="procesar_crear_zona.php" method="post">
                 <label for="nombre_zona">Nombre de la Zona:</label>
                 <input type="text" id="nombre_zona" name="nombre_zona" required>
                 
-                <label for="descripcion">DescripciÃ³n:</label>
+                <label for="descripcion">Descripci�n:</label>
                 <textarea id="descripcion" name="descripcion"></textarea>
                 
-                <label for="duracion_semanas">DuraciÃ³n (semanas):</label>
+                <label for="duracion_semanas">Duraci�n (semanas):</label>
                 <input type="number" id="duracion_semanas" name="duracion_semanas" min="1" required>
                 
                 <label for="orden">Orden en el Ciclo:</label>

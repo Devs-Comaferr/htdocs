@@ -12,7 +12,7 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
     header('Location: ' . BASE_URL . '/');
     exit;
 }
-// Mensaje de ÃƒÂ©xito si se pasÃƒÂ³ correctamente
+// Mensaje de Ã©xito si se pasÃ³ correctamente
 $mensaje = 'Tu visita y pedido han sido registrados correctamente.';
 ?>
 
@@ -21,7 +21,7 @@ $mensaje = 'Tu visita y pedido han sido registrados correctamente.';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ConfirmaciÃƒÂ³n</title>
+    <title>Confirmaci�n</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
     <style>
         .confirmation-container {
@@ -44,13 +44,13 @@ $mensaje = 'Tu visita y pedido han sido registrados correctamente.';
             <?php echo $mensaje; ?>
         </div>
         
-        <!-- Esto serÃƒÂ¡ visible durante los 2 segundos antes de la redirecciÃƒÂ³n -->
+        <!-- Esto serÃ¡ visible durante los 2 segundos antes de la redirecciÃ³n -->
         <div>
             <p>Sers redirigido automticamente...</p>
         </div>
     </div>
 
-    <!-- RedirecciÃƒÂ³n con JavaScript despuÃƒÂ©s de 2 segundos -->
+    <!-- RedirecciÃ³n con JavaScript despuÃ©s de 2 segundos -->
     <script>
         setTimeout(function() {
             window.location.href = "index.php"; // Redirige a index.php
