@@ -10,11 +10,6 @@ if (is_file($controlAccesoPath)) {
     require_once $controlAccesoPath;
 }
 
-$permisosPath = $projectRoot . '/includes/permisos.php';
-if (is_file($permisosPath)) {
-    require_once $permisosPath;
-}
-
 if (function_exists('requiereLogin')) {
     requiereLogin();
 }
