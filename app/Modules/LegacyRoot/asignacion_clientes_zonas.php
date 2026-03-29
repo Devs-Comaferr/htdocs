@@ -16,7 +16,7 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 // asignacion_clientes_zonas.php
-include_once BASE_PATH . '/app/Modules/Planificacion/funciones_planificacion_rutas.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 require_once BASE_PATH . '/app/Support/functions.php';
 $pageTitle = "Asignar Clientes a Zonas";
 include BASE_PATH . '/resources/views/layouts/header.php';
@@ -24,7 +24,7 @@ include BASE_PATH . '/resources/views/layouts/header.php';
 // Verificar si el usuario ha iniciado sesiÃƒÂ³n
 
 // Obtener todas las zonas asignadas al vendedor
-$zonas = obtenerZonasVisita();
+$zonas = obtenerZonasVisitaService();
 $zonas_alertas = array();
 $clientes_desalineados = array();
 
@@ -59,7 +59,7 @@ if (isset($_GET['cod_zona'])) {
     }
     
     // Obtener rutas asignadas a la zona
-    $rutas_asignadas = obtenerRutasPorZona($cod_zona);
+    $rutas_asignadas = obtenerRutasPorZonaService($cod_zona);
     
     // Obtener clientes filtrados por rutas asignadas y no ya asignados a la zona
     $clientes_disponibles = obtenerClientesDisponiblesParaAsignar($cod_zona, $rutas_asignadas);

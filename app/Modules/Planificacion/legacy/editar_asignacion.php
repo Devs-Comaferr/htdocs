@@ -13,7 +13,6 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
     exit;
 }
 // editar_asignacion.php
-include_once BASE_PATH . '/app/Modules/Planificacion/funciones_planificacion_rutas.php';
 require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 $pageTitle = "Editar AsignaciÃƒÂ³n";
 include BASE_PATH . '/resources/views/layouts/header.php';

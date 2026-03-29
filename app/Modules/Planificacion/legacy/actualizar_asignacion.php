@@ -15,7 +15,7 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
-include_once BASE_PATH . '/app/Modules/Planificacion/funciones_planificacion_rutas.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 
 if (!isset($_POST['cod_cliente'], $_POST['cod_zona'], $_POST['cod_seccion'], $_POST['frecuencia_visita'], $_POST['tiempo_promedio_visita'], $_POST['preferencia_horaria'])) {
     appExitTextError('Error: Datos insuficientes para actualizar la asignacion.', 400);

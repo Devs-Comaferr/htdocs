@@ -16,7 +16,7 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
 // procesar_asignar_ruta_zona.php
-include_once BASE_PATH . '/app/Modules/Planificacion/funciones_planificacion_rutas.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 header('Content-Type: text/html; charset=UTF-8');
 
 // Verificar que se ha enviado el formulario
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     
     // Asignar la ruta a la zona
-    if (asignarRutaZona($cod_zona, $cod_ruta)) {
+    if (asignarRutaZonaService($cod_zona, $cod_ruta)) {
         echo "<!DOCTYPE html>
         <html>
         <head>

@@ -17,7 +17,7 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/db.php';
 
 // obtener_secciones.php
-include_once BASE_PATH . '/app/Modules/Planificacion/funciones_planificacion_rutas.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 
 if (isset($_GET['cod_cliente'])) {
     $cod_cliente = intval($_GET['cod_cliente']);

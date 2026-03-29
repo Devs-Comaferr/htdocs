@@ -16,7 +16,6 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
 // procesar_asignar_cliente_zona.php
-include_once BASE_PATH . '/app/Modules/Planificacion/funciones_planificacion_rutas.php';
 require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

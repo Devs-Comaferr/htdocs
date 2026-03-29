@@ -16,7 +16,6 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
 // procesar_asignar_ruta_zona.php
-include_once BASE_PATH . '/app/Modules/Planificacion/funciones_planificacion_rutas.php';
 require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 header('Content-Type: text/html; charset=UTF-8');
 

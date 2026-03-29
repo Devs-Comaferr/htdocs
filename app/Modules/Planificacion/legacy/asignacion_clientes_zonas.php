@@ -16,7 +16,6 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 // asignacion_clientes_zonas.php
-include_once BASE_PATH . '/app/Modules/Planificacion/funciones_planificacion_rutas.php';
 require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 require_once BASE_PATH . '/app/Support/functions.php';
 $pageTitle = "Asignar Clientes a Zonas";

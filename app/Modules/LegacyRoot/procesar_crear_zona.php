@@ -16,7 +16,7 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
 // procesar_crear_zona.php
-include_once BASE_PATH . '/app/Modules/Planificacion/funciones_planificacion_rutas.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 header('Content-Type: text/html; charset=UTF-8');
 
 // Verificar que se ha enviado el formulario
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     
     // Crear la zona
-    if (crearZonaVisita($nombre_zona, $descripcion, $duracion_semanas, $orden)) {
+    if (crearZonaVisitaService($nombre_zona, $descripcion, $duracion_semanas, $orden)) {
         echo "<!DOCTYPE html>
         <html>
         <head>

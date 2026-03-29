@@ -16,7 +16,7 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
 // procesar_asignar_cliente_zona.php
-include_once BASE_PATH . '/app/Modules/Planificacion/funciones_planificacion_rutas.php';
+require_once BASE_PATH . '/app/Modules/Planificacion/PlanificacionService.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Obtener y sanitizar los datos del formulario
@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     // Asignar el cliente a la zona
-    $resultado = asignarClienteZona($cod_cliente, $cod_seccion, $cod_zona, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones);
+    $resultado = asignarClienteZonaService($cod_cliente, $cod_seccion, $cod_zona, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones);
     
     if ($resultado) {
         // Redirigir de vuelta a la pÃ¡gina de asignaciÃ³n con un mensaje de Ã©xito
