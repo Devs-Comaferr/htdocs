@@ -24,6 +24,24 @@ if (!function_exists('appConfigEnvValue')) {
     }
 }
 
+if (!function_exists('appConfigAllowLocalSecretsFallback')) {
+    function appConfigAllowLocalSecretsFallback(): bool
+    {
+        $explicitAllow = appConfigEnvValue('APP_ALLOW_LOCAL_SECRETS');
+        if ($explicitAllow !== null) {
+            return in_array(strtolower($explicitAllow), ['1', 'true', 'on', 'yes', 'si'], true);
+        }
+
+        $declaredEnv = appConfigEnvValue('APP_ENV');
+        if ($declaredEnv !== null) {
+            $normalizedEnv = appConfigNormalizeEnv($declaredEnv);
+            return in_array($normalizedEnv, ['local', 'development', 'testing'], true);
+        }
+
+        return true;
+    }
+}
+
 if (!function_exists('appConfigLoadExternalSecrets')) {
     function appConfigLoadExternalSecrets(): array
     {
@@ -51,7 +69,7 @@ if (!function_exists('appConfigLoadExternalSecrets')) {
         $envConfigFile = appConfigEnvValue('APP_CONFIG_FILE');
         if ($envConfigFile !== null && is_file($envConfigFile) && is_readable($envConfigFile)) {
             $candidateFile = $envConfigFile;
-        } elseif ($envConfigFile === null) {
+        } elseif ($envConfigFile === null && appConfigAllowLocalSecretsFallback()) {
             $localFallbackFile = __DIR__ . '/runtime_secrets.local.php';
             if (is_file($localFallbackFile) && is_readable($localFallbackFile)) {
                 $candidateFile = $localFallbackFile;

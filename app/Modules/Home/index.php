@@ -9,7 +9,7 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
     header('Location: ' . BASE_URL . '/');
     exit;
 }
-ini_set('error_log', BASE_PATH . '/logs/php_debug.log');
+ini_set('error_log', BASE_PATH . '/storage/logs/php_debug.log');
 
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
