@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_estadisticas');
 require_once BASE_PATH . '/app/Support/statistics.php';
-require_once BASE_PATH . '/includes/funciones_estadisticas.php';
+require_once BASE_PATH . '/app/Support/statistics.php';
 require_once BASE_PATH . '/app/Support/db.php';
 
 $conn = db();

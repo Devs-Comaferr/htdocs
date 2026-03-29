@@ -5,7 +5,7 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_estadisticas');
 require_once BASE_PATH . '/app/Support/statistics.php';
-require_once BASE_PATH . '/includes/funciones_estadisticas.php';
+require_once BASE_PATH . '/app/Support/statistics.php';
 
 header('Content-Type: application/json; charset=UTF-8');
 

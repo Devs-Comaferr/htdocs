@@ -5,7 +5,7 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_estadisticas');
 require_once BASE_PATH . '/app/Support/statistics.php';
-require_once BASE_PATH . '/includes/funciones_estadisticas.php';
+require_once BASE_PATH . '/app/Support/statistics.php';
 
 $fDesde = normalizarFechaIso((string)($_GET['f_desde'] ?? ''), date('Y-01-01'));
 $fHasta = normalizarFechaIso((string)($_GET['f_hasta'] ?? ''), date('Y-m-d'));
