@@ -1,0 +1,13 @@
+AltaCliente
+Anterior2024
+.DS_Store
+Thumbs.db
+vendor/*
+.env
+.git/
+logs/
+storage/logs/
+config/runtime_secrets.local.php
+storage/logs/*.log
+logs/*.log
+/php_debug.log

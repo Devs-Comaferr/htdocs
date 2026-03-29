@@ -1,0 +1,33 @@
+# 1) No permitir listar carpetas
+Options -Indexes
+
+RewriteEngine On
+
+# 1.1) Forzar /public como unico punto de entrada web
+RewriteRule ^$ /public/ [R=302,L]
+RewriteCond %{REQUEST_URI} !^/public(?:/|$)
+RewriteCond %{DOCUMENT_ROOT}/public/$1 -e
+RewriteRule ^(.+)$ /public/$1 [R=302,L]
+
+# 1.2) Bloquear PHP directo fuera de /public cuando no exista equivalente publico
+RewriteCond %{REQUEST_URI} !^/public(?:/|$)
+RewriteRule ^.+\.php$ - [F,L]
+
+# 2) Bloquear acceso a la carpeta .git (aunque exista)
+RedirectMatch 404 /\.git
+
+# 3) Bloquear acceso directo a carpetas documentales, legacy y logs operativos
+RedirectMatch 404 ^/(?:docs|SQL|legacy_archivo|google-api-php-client|config|includes|app|bootstrap|resources|legacy|configuracion|modales|vendor)(?:/.*)?$
+RedirectMatch 404 ^/(?:logs|storage|storage/logs)(?:/.*)?$
+RedirectMatch 404 ^/(?:debug_phpinfo\.php|test_conexion\.php|test_iconos\.php)$
+RedirectMatch 404 ^/et%20--hard%205751971$
+
+# 4) Bloquear archivos sensibles tipicos y metadatos operativos
+<FilesMatch "(?i)(^\.env(?:\..*)?$|^composer\.(json|lock|phar)$|^package(-lock)?\.json$|^yarn\.lock$|^README\.md$|^phpunit\.xml(?:\.dist)?$)">
+  Require all denied
+</FilesMatch>
+
+# 5) Bloquear acceso directo a logs, SQL, backups y temporales
+<FilesMatch "(?i)\.(log|sql|bak|old|dist|tmp|swp|md)$">
+  Require all denied
+</FilesMatch>

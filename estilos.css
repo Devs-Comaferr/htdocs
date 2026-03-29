@@ -1,0 +1,423 @@
+/* Archivo estilos.css */
+
+/* Aplicar box-sizing a todos los elementos */
+* {
+    box-sizing: border-box;
+}
+
+/* ---------- Header comn ---------- */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px !important;
+    line-height: 60px !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #007BFF;
+    padding: 0 20px !important;
+    margin: 0 !important;
+    z-index: 1000;
+}
+.header-left,
+.header-center,
+.header-right {
+    margin: 0;
+    padding: 0;
+}
+.header-left .inicio {
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
+}
+.header-center .page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    margin: 0;
+}
+.header-center input[type="date"] {
+    padding: 5px 8px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+}
+.header-right a {
+    font-size: 16px;
+    color: #fff;
+    margin-left: 15px;
+    text-decoration: none;
+}
+.header-right a:hover {
+    opacity: 0.8;
+}
+
+/* ---------- Reglas generales ---------- */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding-top: 60px;  /* Para que el contenido no quede tapado por el header fijo */
+}
+.header a {
+    text-decoration: none !important;
+}
+
+/* ---------- Estructura de la pgina ---------- */
+.page-container {
+    width: 100%;
+    margin-top: 0;
+    min-height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+.column {
+    padding: 15px;
+    background: #f4f4f4;
+    border-right: 1px solid #ddd;
+    flex: 1;
+}
+.column:last-child {
+    border-right: none;
+}
+.sidebar h2 {
+    text-align: center;
+    margin: 0 0 20px;
+}
+
+/* ---------- Botones ---------- */
+.btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 96px;
+    text-align: center;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #fff;
+    background-color: #007bff;
+    margin-bottom: 15px;
+    text-decoration: none;
+}
+.btn:hover {
+    opacity: 0.9;
+}
+.btn i {
+    font-size: 40px;
+    margin-bottom: 4px;
+}
+.btn-clientes {
+    background-color: #6c757d;
+}
+.btn-faltas {
+    background-color: #dc3545;
+}
+.btn-pedidos {
+    background-color: #ffc107;
+}
+.btn-planificador {
+    background-color: #28a745;
+}
+.btn-estadisticas {
+    background-color: #3fb8af;
+}
+
+/* ---------- Agrupaciones ---------- */
+.group-header {
+    background-color: #eee;
+    padding: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    border: 1px solid #ccc;
+    margin-bottom: 5px;
+}
+.group-content {
+    padding-left: 10px;
+    margin-bottom: 10px;
+}
+.content-column h3 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* ---------- Estilos de Items ---------- */
+.item-box {
+    position: relative;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #fff;
+    cursor: pointer;
+}
+.item-box:hover {
+    background: #f1f1f1;
+}
+.item-box i {
+    margin-right: 6px;
+}
+.item-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+.item-subtitle {
+    font-size: 12px;
+    color: #666;
+}
+.no-data {
+    text-align: center;
+    font-style: italic;
+    color: #999;
+}
+
+/* ---------- Estilos de Formularios ---------- */
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    background-color: #fff;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin: 20px 0;
+    width: 100%;
+}
+.filter-form select,
+.filter-form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    min-width: 150px;
+}
+.filter-form button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.btn-search {
+    background-color: #007BFF;
+    color: #fff;
+}
+.btn-search:hover {
+    background-color: #0056b3;
+}
+.btn-clear {
+    background-color: #FF4D4D;
+    color: #fff;
+}
+.btn-clear:hover {
+    background-color: #cc0000;
+}
+
+/* ---------- Estilos para Tablas ---------- */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    max-width: 100%;
+    margin: 20px 0;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+}
+th, td {
+    padding: 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+th {
+    background-color: #007BFF;
+    color: #fff;
+    white-space: nowrap;
+}
+th a {
+    color: #fff;
+    text-decoration: none;
+}
+td a {
+    color: #000;
+    text-decoration: none;
+}
+td a:hover {
+    color: #007BFF;
+}
+
+/* ---------- Paginacin ---------- */
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+.pagination a, .pagination span {
+    margin: 0 5px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    color: #007BFF;
+    text-decoration: none;
+    border-radius: 4px;
+}
+.pagination a:hover {
+    background-color: #f0f0f0;
+}
+.pagination .current {
+    background-color: #007BFF;
+    color: #fff;
+    border-color: #007BFF;
+}
+
+/* ---------- Modales ---------- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    overflow: auto;
+}
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 8px;
+    position: relative;
+}
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.btn-client {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #f00f28;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+}
+.btn-client i {
+    margin-right: 5px;
+}
+
+/* ---------- Responsive ---------- */
+/* Para pantallas medianas (tablets y escritorio pequeo) */
+@media (max-width: 992px) {
+    .filter-form {
+        flex-direction: column;
+    }
+    .filter-form select,
+    .filter-form input,
+    .filter-form button {
+        width: 100%;
+        font-size: 18px;
+    }
+    table {
+        font-size: 15px;
+    }
+}
+
+/* Para mviles */
+@media (max-width: 1024px) {
+    /* Header: evitar que se envuelva en varias filas */
+    .header {
+        position: relative;
+        height: auto !important;
+        line-height: normal !important;
+        flex-direction: row;
+        flex-wrap: nowrap; /* Forzamos una sola lnea */
+        overflow-x: auto;  /* Permite scroll horizontal si es necesario */
+        padding: 10px 10px !important;
+    }
+    .header-left, .header-center, .header-right {
+        flex: 1;
+        min-width: 0;
+        margin: 5px 0;
+    }
+    .header-left .inicio {
+        font-size: 18px;
+    }
+    .header-center .page-title {
+        font-size: 20px;
+    }
+    .header-center input[type="date"] {
+        font-size: 14px;
+        padding: 4px 6px;
+    }
+    .header-right a {
+        font-size: 14px;
+        margin-left: 10px;
+    }
+    /* Las columnas se apilan verticalmente */
+    .page-container {
+        display: block;
+        position: relative;
+        top: 0;
+        margin-top: 0;
+        padding: 0 10px;
+        width: 100%;
+    }
+    .column {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+        padding: 10px;
+    }
+    .column:last-child {
+        border-bottom: none;
+    }
+    /* Reducir botones */
+    .btn {
+        height: auto;
+        padding: 10px;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+    .btn i {
+        font-size: 30px;
+        margin-bottom: 2px;
+    }
+    /* Ajustar tablas */
+    .table-container {
+        margin: 10px 0;
+        padding: 0 5px;
+        width: 100%;
+    }
+    /* Asegurarse de que html y body ocupen el 100% del ancho sin desbordar */
+    html, body {
+        width: 100%;
+        overflow-x: hidden;
+    }
+}
+
