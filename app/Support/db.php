@@ -41,13 +41,70 @@ if (!function_exists('openOdbcConnection')) {
             throw new Exception('Error de conexión a BD: ' . print_r($config, true));
         }
 
-        $connection = @odbc_connect($config['dsn'], $config['username'], $config['password']);
-        if (!$connection) {
-            error_log('ODBC connection error: ' . odbc_errormsg());
-            throw new Exception('Error de conexión a BD');
+        $dsnOriginal = (string)$config['dsn'];
+        $dsnDriver17 = preg_replace(
+            '/Driver=\{ODBC Driver\s+(17|18)\s+for SQL Server\};/i',
+            'Driver={ODBC Driver 17 for SQL Server};',
+            $dsnOriginal,
+            1,
+            $replacements17
+        );
+        if (!is_string($dsnDriver17) || $dsnDriver17 === '') {
+            $dsnDriver17 = $dsnOriginal;
+        }
+        if ((int)$replacements17 === 0 && stripos($dsnDriver17, 'Driver={ODBC Driver') === false) {
+            $dsnDriver17 = 'Driver={ODBC Driver 17 for SQL Server};' . ltrim($dsnDriver17);
         }
 
-        return $connection;
+        $attempts = [
+            ['driver' => '17', 'dsn' => $dsnDriver17],
+        ];
+
+        $dsnDriver18 = preg_replace(
+            '/Driver=\{ODBC Driver\s+17\s+for SQL Server\};/i',
+            'Driver={ODBC Driver 18 for SQL Server};',
+            $dsnDriver17,
+            1,
+            $replacements18
+        );
+        if (is_string($dsnDriver18) && $dsnDriver18 !== '' && $dsnDriver18 !== $dsnDriver17 && (int)$replacements18 > 0) {
+            $attempts[] = ['driver' => '18', 'dsn' => $dsnDriver18];
+        }
+
+        $lastError = '';
+        foreach ($attempts as $attempt) {
+            $connection = @odbc_connect($attempt['dsn'], $config['username'], $config['password']);
+            $lastError = (string)odbc_errormsg();
+            dbLogOdbcAttempt($attempt['dsn'], $attempt['driver'], $connection ? 'OK' : 'ERROR', $lastError);
+            if ($connection) {
+                return $connection;
+            }
+        }
+        error_log('ODBC connection error: ' . $lastError);
+        throw new Exception('Error de conexión a BD: ' . $lastError);
+    }
+}
+
+if (!function_exists('dbLogOdbcAttempt')) {
+    function dbLogOdbcAttempt(string $dsn, string $driver, string $result, string $errorMessage = ''): void
+    {
+        $logPath = BASE_PATH . '/storage/logs/php_debug.log';
+        $safeDsn = preg_replace('/(Pwd|Password)\s*=\s*[^;]*/i', '$1=***', $dsn);
+        if (!is_string($safeDsn) || $safeDsn === '') {
+            $safeDsn = $dsn;
+        }
+
+        $line = sprintf(
+            "[%s] ODBC driver=%s result=%s dsn=%s%s%s",
+            date('Y-m-d H:i:s'),
+            $driver,
+            $result,
+            $safeDsn,
+            $errorMessage !== '' ? ' error=' : '',
+            $errorMessage !== '' ? $errorMessage : ''
+        );
+
+        @file_put_contents($logPath, $line . PHP_EOL, FILE_APPEND);
     }
 }
 
