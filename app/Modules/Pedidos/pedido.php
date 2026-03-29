@@ -262,6 +262,9 @@ if ($numero_pedido) {
     $pageTitle .= " - #" . htmlspecialchars($numero_pedido);
 }
 
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
+
 $url_faltas = 'faltas.php?cod_cliente=' . urlencode($cod_cliente);
 // FIX cod_seccion: 0 es valor válido, no usar empty()
 if (isset($cod_seccion) && tieneValor($cod_seccion)) {
@@ -282,7 +285,6 @@ if ($numero_pedido) {
     }
 }
 
-include BASE_PATH . '/resources/views/layouts/header.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -290,8 +292,8 @@ include BASE_PATH . '/resources/views/layouts/header.php';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?php echo htmlspecialchars(toUTF8($pageTitle)); ?></title>
-   <!-- Bootstrap CSS -->
-    <!-- noUiSlider CSS -->
+  <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
+     <!-- noUiSlider CSS -->
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.css" />
 
   <style>
