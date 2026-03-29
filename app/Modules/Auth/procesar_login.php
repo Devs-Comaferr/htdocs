@@ -26,19 +26,18 @@ if ($email === '' || $password === '') {
 
 $sql = "
     SELECT
+        cod_vendedor,
+        nombre,
         email,
         clave,
-        nombre,
-        cod_vendedor,
-        es_admin,
         rol,
-        activo,
         tipo_plan,
+        activo,
         perm_productos,
-        perm_estadisticas,
-        perm_planificador,
         perm_costes,
-        perm_comisiones
+        perm_estadisticas,
+        perm_comisiones,
+        perm_planificador
     FROM cmf_vendedores_user
     WHERE email = ?
 ";
@@ -74,7 +73,6 @@ if ($row = odbc_fetch_array($stmt)) {
         $_SESSION['email'] = isset($row['email']) ? (string)$row['email'] : $email;
         $_SESSION['nombre'] = isset($row['nombre']) ? (string)$row['nombre'] : '';
         $_SESSION['codigo'] = isset($row['cod_vendedor']) ? (string)$row['cod_vendedor'] : '';
-        $_SESSION['es_admin'] = isset($row['es_admin']) && (int)$row['es_admin'] === 1;
         $_SESSION['rol'] = isset($row['rol']) ? (string)$row['rol'] : '';
         $_SESSION['activo'] = isset($row['activo']) ? (string)$row['activo'] : '1';
         $_SESSION['tipo_plan'] = isset($row['tipo_plan']) ? (string)$row['tipo_plan'] : 'free';
