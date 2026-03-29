@@ -38,7 +38,7 @@ if (!function_exists('openOdbcConnection')) {
             || empty($config['password'])
         ) {
             error_log('ODBC connection config incomplete. Define DB_HOST/DB_NAME/DB_USER/DB_PASS o DB_DSN/DB_USER/DB_PASS en entorno o config local.');
-            throw new Exception('Error de conexión a BD');
+            throw new Exception('Error de conexión a BD: ' . print_r($config, true));
         }
 
         $connection = @odbc_connect($config['dsn'], $config['username'], $config['password']);
