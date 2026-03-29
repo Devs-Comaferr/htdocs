@@ -7,10 +7,9 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
     header('Location: ' . BASE_URL . '/');
     exit;
 }
-session_start();
 session_unset();
 session_destroy();
 
-header("Location: login.php");
+header('Location: ' . BASE_URL . '/login.php');
 exit();
 ?>

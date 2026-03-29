@@ -24,12 +24,37 @@ if ($email === '' || $password === '') {
     exit();
 }
 
-$sql = "SELECT * FROM cmf_vendedores_user WHERE email = ?";
+$sql = "
+    SELECT
+        email,
+        clave,
+        nombre,
+        cod_vendedor,
+        es_admin,
+        rol,
+        activo,
+        tipo_plan,
+        perm_productos,
+        perm_estadisticas,
+        perm_planificador,
+        perm_costes,
+        perm_comisiones
+    FROM cmf_vendedores_user
+    WHERE email = ?
+";
 $stmt = odbc_prepare($conn, $sql);
+if (!$stmt) {
+    error_log('Login ODBC prepare error: ' . odbc_errormsg($conn));
+    echo 'No se pudo iniciar sesión. Inténtalo de nuevo.';
+    exit();
+}
+
 $execResult = odbc_execute($stmt, array($email));
 
 if (!$execResult) {
-    die('Error al ejecutar la consulta: ' . odbc_errormsg($conn));
+    error_log('Login ODBC execute error: ' . odbc_errormsg($conn));
+    echo 'No se pudo iniciar sesión. Inténtalo de nuevo.';
+    exit();
 }
 
 if ($row = odbc_fetch_array($stmt)) {
@@ -46,7 +71,6 @@ if ($row = odbc_fetch_array($stmt)) {
     }
 
     if ($passwordOk) {
-        session_start();
         $_SESSION['email'] = isset($row['email']) ? (string)$row['email'] : $email;
         $_SESSION['nombre'] = isset($row['nombre']) ? (string)$row['nombre'] : '';
         $_SESSION['codigo'] = isset($row['cod_vendedor']) ? (string)$row['cod_vendedor'] : '';
@@ -60,14 +84,12 @@ if ($row = odbc_fetch_array($stmt)) {
         $_SESSION['perm_costes'] = isset($row['perm_costes']) ? (int)$row['perm_costes'] : 0;
         $_SESSION['perm_comisiones'] = isset($row['perm_comisiones']) ? (int)$row['perm_comisiones'] : 0;
 
-        header('Location: index.php');
+        header('Location: ' . BASE_URL . '/index.php');
         exit();
     }
 
-    echo 'Contrasea incorrecta.';
+    echo 'Contraseña incorrecta.';
 } else {
-    echo 'Correo electrnico no encontrado.';
+    echo 'Correo electrónico no encontrado.';
 }
-
-odbc_close($conn);
 ?>
