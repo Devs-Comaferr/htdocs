@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require_once BASE_PATH . '/app/Support/header.php';
 ?>
-<!-- Frontend policy: bs3 carga Bootstrap 3.3.7 con jQuery 1.12.4; bs5 carga Bootstrap 5 y solo jQuery si la vista lo solicita expresamente. Las vistas activas deben apoyarse en este header y usar assets locales de /public/assets/vendor/. -->
+<!-- Frontend policy: el stack UI global es Bootstrap 5. Las vistas activas deben apoyarse en este header y usar assets locales de /public/assets/vendor/. -->
 <!-- Font Awesome local (instalado vía Composer/npm-asset) -->
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/fontawesome/css/all.min.css">
 <link rel="icon" href="<?= BASE_URL ?>/imagenes/favicon.ico" sizes="any">
@@ -19,20 +19,11 @@ require_once BASE_PATH . '/app/Support/header.php';
   const BASE_URL = "<?= BASE_URL ?>";
   window.APP_BASE_URL = <?= json_encode(BASE_URL, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
 </script>
-<?php
-// UI stack selector: bs3 by default, bs5 opt-in per view.
-if ($ui_version === 'bs5'):
-?>
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/bootstrap/css/bootstrap.min.css">
 <?php if ($ui_requires_jquery): ?>
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
+<script src="<?= BASE_URL ?>/assets/vendor/jquery/jquery.min.js"></script>
 <?php endif; ?>
 <script src="<?= BASE_URL ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<?php else: ?>
-<link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/css/bootstrap.min.css">
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/jquery-1.12.4.min.js"></script>
-<script src="<?= BASE_URL ?>/assets/vendor/legacy/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-<?php endif; ?>
 
 <style>
   /* HEADER fijo siempre */

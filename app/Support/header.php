@@ -9,8 +9,8 @@ if (!defined('BASE_PATH')) {
 require_once BASE_PATH . '/app/Support/functions.php';
 require_once BASE_PATH . '/app/Support/db.php';
 
-$ui_version = isset($ui_version) && $ui_version === 'bs5' ? 'bs5' : 'bs3';
-$ui_requires_jquery = isset($ui_requires_jquery) ? (bool)$ui_requires_jquery : ($ui_version === 'bs5');
+$ui_version = 'bs5';
+$ui_requires_jquery = isset($ui_requires_jquery) ? (bool)$ui_requires_jquery : false;
 
 if (!defined('MOBILE_APPBAR_RENDERED')) {
     define('MOBILE_APPBAR_RENDERED', true);
