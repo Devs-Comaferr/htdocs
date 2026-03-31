@@ -1,4 +1,4 @@
-﻿# Preparación SaaS del proyecto APP Comerciales
+# Preparación SaaS del proyecto APP Comerciales
 
 Analisis arquitectonico orientado a evolucion SaaS para empresas que usen Control Integral.
 Alcance: solo revision de codigo y estructura actual. Sin cambios de codigo ni de base de datos.
@@ -36,7 +36,7 @@ Alcance: solo revision de codigo y estructura actual. Sin cambios de codigo ni d
 ### Modelo de permisos/planes parcialmente hardcodeado
 
 - Permisos fijados por claves concretas de sesion: `perm_productos`, `perm_estadisticas`, `perm_planificador`, etc.
-- Planes fijos `free` / `premium` y validacion especial de `perm_planificador` en `includes/control_acceso.php`.
+- Planes fijos `free` / `premium` y validacion especial de `perm_planificador` en `includes (legacy)/control_acceso.php`.
 - Dependencia directa de `rol = admin` en varias pantallas de configuracion.
 
 ### Acoplamiento a estructuras de datos concretas
@@ -51,7 +51,7 @@ Alcance: solo revision de codigo y estructura actual. Sin cambios de codigo ni d
 ### Autenticacion y control de acceso
 
 - Flujo base reusable:
-  - `login.php` -> `procesar_login.php` -> sesion -> `includes/auth_bootstrap.php` -> `includes/control_acceso.php`.
+  - `login.php` -> `procesar_login.php` -> sesion -> `includes (legacy)/auth_bootstrap.php` -> `includes (legacy)/control_acceso.php`.
 - API de control de acceso clara (`requiereLogin`, `requiereActivo`, `requierePermiso`, `requierePremium`).
 
 ### Navegacion y layout modular
@@ -61,8 +61,8 @@ Alcance: solo revision de codigo y estructura actual. Sin cambios de codigo ni d
 
 ### Capa funcional reutilizable por dominio
 
-- `includes/funciones.php` concentra utilidades comunes.
-- `includes/funciones_estadisticas.php` concentra logica estadistica especializada.
+- `includes (legacy)/funciones.php` concentra utilidades comunes.
+- `includes (legacy)/funciones_estadisticas.php` concentra logica estadistica especializada.
 - `funciones_planificacion_rutas.php` concentra reglas de planificacion/asignacion.
 
 ### Configuracion de aplicacion (inicio de multi-tenant basico)

@@ -1,4 +1,4 @@
-﻿# Arquitectura de datasets — módulo estadísticas
+# Arquitectura de datasets — módulo estadísticas
 
 ## Principio arquitectónico
 
@@ -32,7 +32,7 @@ Función:
 
 Ubicación:
 
-`includes/funciones_estadisticas.php`
+`includes (legacy)/funciones_estadisticas.php`
 
 ### Columnas generadas (salida actual)
 
@@ -80,7 +80,7 @@ Ubicación:
 ### `obtenerDatasetServicioPedidos()`
 
 - Granularidad: 1 fila = 1 pedido (agrega líneas).
-- Ubicación: `includes/funciones_estadisticas.php`.
+- Ubicación: `includes (legacy)/funciones_estadisticas.php`.
 - Estado respecto al dataset base:
   - **No deriva del dataset base en memoria**.
   - Recalcula con SQL propio (CTE propia, joins y agregaciones propios).
@@ -88,7 +88,7 @@ Ubicación:
 ### `obtenerDatasetLineasPendientes()`
 
 - Granularidad: 1 fila = 1 línea pendiente.
-- Ubicación: `includes/funciones_estadisticas.php`.
+- Ubicación: `includes (legacy)/funciones_estadisticas.php`.
 - Estado respecto al dataset base:
   - **No deriva del dataset base**.
   - Repite consulta independiente similar a la base, con filtro adicional de pendiente (`vl.cantidad > servida`).

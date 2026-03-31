@@ -1,10 +1,10 @@
-﻿# Dependencias del dataset servicio
+# Dependencias del dataset servicio
 
 Función base analizada:
 `obtenerDatasetServicioLineas()`
 
 Ubicación:
-`includes/funciones_estadisticas.php`
+`includes (legacy)/funciones_estadisticas.php`
 
 ## 1) Funciones que llaman a obtenerDatasetServicioLineas()
 

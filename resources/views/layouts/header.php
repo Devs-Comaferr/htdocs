@@ -16,6 +16,7 @@ require_once BASE_PATH . '/app/Support/header.php';
   }
 </style>
 <script>
+  const BASE_URL = "<?= BASE_URL ?>";
   window.APP_BASE_URL = <?= json_encode(BASE_URL, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
 </script>
 <?php

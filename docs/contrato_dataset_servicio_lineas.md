@@ -1,4 +1,4 @@
-﻿# Contrato base del dataset de servicio
+# Contrato base del dataset de servicio
 
 ## 1. Dataset base actual
 
@@ -6,7 +6,7 @@ Función:
 `obtenerDatasetServicioLineas()`
 
 Ubicación:
-`includes/funciones_estadisticas.php`
+`includes (legacy)/funciones_estadisticas.php`
 
 ### Tablas utilizadas
 

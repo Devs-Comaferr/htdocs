@@ -642,7 +642,9 @@ if ($isJcasado) {
     }
 
     /* ======= MODALES ======= */
-    .modal {
+    #modal-pedido,
+    #modal-albaran,
+    #modal-visita {
       display: none;
       position: fixed;
       z-index: 9999;
@@ -653,7 +655,9 @@ if ($isJcasado) {
       background-color: rgba(0,0,0,0.5);
       overflow: auto;
     }
-    .modal-content {
+    #modal-pedido .modal-content,
+    #modal-albaran .modal-content,
+    #modal-visita .modal-content {
       background-color: #fff;
       margin: 5% auto;
       padding: 20px;
@@ -662,14 +666,18 @@ if ($isJcasado) {
       border-radius: 8px;
       position: relative;
     }
-    .close-modal {
+    #modal-pedido .close-modal,
+    #modal-albaran .close-modal,
+    #modal-visita .close-modal {
       position: absolute;
       top: 10px;
       right: 15px;
       font-size: 24px;
       cursor: pointer;
     }
-    .modal-header {
+    #modal-pedido .modal-header,
+    #modal-albaran .modal-header,
+    #modal-visita .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -686,6 +694,17 @@ if ($isJcasado) {
     }
     .btn-client i {
       margin-right: 5px;
+    }
+
+    .sidebar .buttons-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar .buttons-container > .btn {
+      width: 100%;
+      margin-bottom: 0;
     }
 
     /* ==== Tablas ==== */
@@ -1400,13 +1419,17 @@ if ($isJcasado) {
                 $observacion_interna = $ped['observacion_interna'] ?? '';
 
                 // Render
-                echo '<div class="item-box" style="border-left: 6px solid ' . $color . '; ' . $bgColor
+                echo '<div class="item-box js-documento-card" style="border-left: 6px solid ' . $color . '; ' . $bgColor
                      . ';" onclick="abrirDocumento('
                      . json_encode($tipoVentaDocumento) . ', '
                      . json_encode($codEmpresaDocumento) . ', '
                      . json_encode($codCajaDocumento) . ', '
                      . json_encode((int)$codVenta)
-                     . ')">';
+                     . ')"'
+                     . ' data-cod-venta="' . htmlspecialchars((string)$codVenta) . '"'
+                     . ' data-tipo-venta="' . htmlspecialchars((string)$tipoVentaDocumento) . '"'
+                     . ' data-cod-empresa="' . htmlspecialchars((string)$codEmpresaDocumento) . '"'
+                     . ' data-cod-caja="' . htmlspecialchars((string)$codCajaDocumento) . '">';
                 echo '  <div class="item-title">'
                      . '    <span>' . $icono . $icono_origen . " Pedido #" . $codVenta . '</span>'
                      . '    <span><i class="fa fa-clock"></i> ' . htmlspecialchars($horaVenta) . '</span>'
@@ -1523,13 +1546,17 @@ if ($isJcasado) {
                 // Identificador único
                 $uniqueId = $codAlb . "_" . $alb['tipo_venta'];
 
-                echo '<div class="item-box" style="border-left:6px solid ' . $colorAlbaran . ';' . $bgAlbaran
+                echo '<div class="item-box js-documento-card" style="border-left:6px solid ' . $colorAlbaran . ';' . $bgAlbaran
                      . ';" onclick="abrirDocumento('
                      . json_encode((int)$alb['tipo_venta']) . ', '
                      . json_encode($codEmpresaAlb) . ', '
                      . json_encode($codCajaAlb) . ', '
                      . json_encode((int)$codAlb)
-                     . ')">';
+                     . ')"'
+                     . ' data-cod-venta="' . htmlspecialchars((string)$codAlb) . '"'
+                     . ' data-tipo-venta="' . htmlspecialchars((string)$alb['tipo_venta']) . '"'
+                     . ' data-cod-empresa="' . htmlspecialchars((string)$codEmpresaAlb) . '"'
+                     . ' data-cod-caja="' . htmlspecialchars((string)$codCajaAlb) . '">';
                 echo '  <div class="item-title">'
                      . '    <span><i class="fa fa-file"></i> ' . $prefijo . " #" . $codAlb . '</span>'
                      . '    <span><i class="fa fa-clock"></i> ' . htmlspecialchars($horaVentaAlb) . '</span>'
@@ -1747,6 +1774,8 @@ if ($isJcasado) {
 <?php endif; ?>
 
 <!-- ===================== MODALES ===================== -->
+<div id="modalContainer"></div>
+
 <!-- MODAL: Pedido -->
 <div class="modal" id="modal-pedido">
   <div class="modal-content">
@@ -1882,13 +1911,71 @@ if (window.matchMedia('(max-width: 1024px)').matches) {
     });
   }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('[data-cod-venta]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var codVenta = this.getAttribute('data-cod-venta');
+      var tipoVenta = this.getAttribute('data-tipo-venta');
+      var codEmpresa = this.getAttribute('data-cod-empresa');
+      var codCaja = this.getAttribute('data-cod-caja');
+      var modal = (typeof obtenerInstanciaDocumentoModal === 'function') ? obtenerInstanciaDocumentoModal() : null;
+      var titulo = document.getElementById('modalDocumentoLabel');
+      var contenedor = document.getElementById('contenidoDocumento');
+      var query;
+
+      if (!codVenta || !tipoVenta || !codEmpresa || !codCaja || !modal || !contenedor) {
+        return;
+      }
+
+      if (titulo) {
+        titulo.textContent = String(tipoVenta) === '1' ? 'Pedido' : 'Albarán';
+      }
+
+      query = new URLSearchParams({
+        tipo_venta: tipoVenta,
+        cod_empresa: codEmpresa,
+        cod_caja: codCaja,
+        cod_venta: codVenta
+      });
+
+      contenedor.innerHTML = '<p class="documento-cargando">Cargando documento...</p>';
+      modal.show();
+
+      fetch(BASE_URL + '/ajax/detalle_documento.php?' + query.toString(), {
+        credentials: 'same-origin'
+      })
+      .then(function (response) {
+        return response.json().then(function (data) {
+          return {
+            ok: response.ok,
+            data: data
+          };
+        });
+      })
+      .then(function (result) {
+        if (!result.ok || (result.data && result.data.error)) {
+          throw new Error((result.data && result.data.error) ? result.data.error : 'No se pudo cargar el documento.');
+        }
+
+        if (typeof renderizarDocumento === 'function') {
+          renderizarDocumento(result.data || {});
+        }
+      })
+      .catch(function (err) {
+        console.error(err);
+        contenedor.innerHTML = '<p class="documento-error">' + String(err && err.message ? err.message : 'No se pudo cargar el documento.') + '</p>';
+      });
+    });
+  });
+});
 </script>
 
 <?php
 // Cerrar la conexión ODBC
 ?>
 <script src="<?= BASE_URL ?>/assets/js/app-ui.js"></script>
-<?php require BASE_PATH . '/modales/modal_documento.php'; ?>
+<?php require_once BASE_PATH . '/app/Modules/Pedidos/Views/modal_documento.php'; ?>
 </body>
 </html>
 

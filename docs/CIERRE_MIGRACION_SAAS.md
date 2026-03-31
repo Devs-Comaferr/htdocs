@@ -180,7 +180,7 @@ Notas sobre "residuos detectados":
 - 20 modulos que siguen incluyendo `config/db_connection.php`
 - 18 modulos que siguen incluyendo `header.php` desde raiz
 - 3 modulos que siguen dependiendo de `funciones_planificacion_rutas.php`
-- 7 modulos que siguen dependiendo de `includes/funciones_estadisticas.php`
+- 7 modulos que siguen dependiendo de `includes (legacy)/funciones_estadisticas.php`
 
 ### PHP en raiz que siguen siendo implementacion viva
 
@@ -244,7 +244,7 @@ Acoplamientos impropios aun activos:
   - `app/Modules/Zonas/zonas.php`
   - `app/Modules/Zonas/zonas_rutas.php`
   - `app/Modules/Visitas/obtener_secciones_pedidos_visitas.php`
-- 7 archivos en `app/Modules` siguen dependiendo de `includes/funciones_estadisticas.php`:
+- 7 archivos en `app/Modules` siguen dependiendo de `includes (legacy)/funciones_estadisticas.php`:
   - `app/Modules/Estadisticas/estadisticas_ventas_comerciales.php`
   - `app/Modules/Estadisticas/ajax/estadisticas_servicio.php`
   - `app/Modules/Estadisticas/ajax/estadisticas_kpis.php`
@@ -286,7 +286,7 @@ Deuda tecnica real y no cosmetica:
 - `Visitas`: mayor volumen de endpoints, formularios y residuos de raiz.
 - `Zonas` y `Planificacion`: dependencia directa de `funciones_planificacion_rutas.php`.
 - `Clientes`: varias pantallas ya modularizadas pero aun con dependencia de `header.php` y `config/db_connection.php`.
-- `Estadisticas` y `Pedidos`: AJAX ya normalizado, pero siguen dependiendo de `includes/funciones_estadisticas.php`.
+- `Estadisticas` y `Pedidos`: AJAX ya normalizado, pero siguen dependiendo de `includes (legacy)/funciones_estadisticas.php`.
 - `Configuracion`: no esta cerrada como modulo SaaS consistente.
 
 ## 4. Veredicto honesto

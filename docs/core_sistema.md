@@ -1,4 +1,4 @@
-﻿# Nucleo tecnico del sistema (CORE)
+# Nucleo tecnico del sistema (CORE)
 
 Este documento define los archivos que forman el nucleo estable del proyecto.
 Estos archivos no deben eliminarse ni modificarse estructuralmente sin revision.
@@ -9,8 +9,8 @@ Estos archivos no deben eliminarse ni modificarse estructuralmente sin revision.
 
 Archivos responsables de control de acceso y sesiones.
 
-- includes/auth_bootstrap.php
-- includes/control_acceso.php
+- includes (legacy)/auth_bootstrap.php
+- includes (legacy)/control_acceso.php
 - login.php
 - procesar_login.php
 - logout.php
@@ -25,7 +25,7 @@ Archivos responsables de control de acceso y sesiones.
 
 ## 3. Funciones globales
 
-- includes/funciones.php
+- includes (legacy)/funciones.php
 - funciones.php (wrapper de compatibilidad)
 
 ---
@@ -40,7 +40,7 @@ Archivos responsables de control de acceso y sesiones.
 
 Funciones utilizadas por varios modulos del sistema.
 
-- includes/funciones_estadisticas.php
+- includes (legacy)/funciones_estadisticas.php
 - funciones_planificacion_rutas.php
 
 ---
@@ -52,8 +52,8 @@ Archivos que no forman parte del nucleo estructural:
 - carpetas legacy/*
 - backups/*
 - storage/_manual_tests/*
-- includes/bootstrap/*
-- includes/db.php (capa DB alternativa no adoptada)
+- includes (legacy)/bootstrap/*
+- includes (legacy)/db.php (capa DB alternativa no adoptada)
 
 ---
 

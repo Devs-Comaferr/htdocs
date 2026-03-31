@@ -1,4 +1,4 @@
-﻿# Auditoria de codigo muerto
+# Auditoria de codigo muerto
 
 Analisis estatico del repositorio (PHP) sin modificar codigo.
 Criterio: referencias detectadas por `include/require`, enlaces (`href`/`Location`), `action` de formularios y llamadas AJAX en PHP/JS.
@@ -29,11 +29,11 @@ Sin ninguna referencia entrante detectada desde otros archivos del proyecto (pue
 - `altaClientes/mailchimp_sdk_subscribe.php`
 - `ajax/detalle_pedido.php`
 - `ajax/estadisticas_kpis.php`
-- `includes/bootstrap/app.php`
-- `includes/bootstrap/auth.php`
-- `includes/bootstrap/db.php`
-- `includes/db.php`
-- `includes/logs.php`
+- `includes (legacy)/bootstrap/app.php`
+- `includes (legacy)/bootstrap/auth.php`
+- `includes (legacy)/bootstrap/db.php`
+- `includes (legacy)/db.php`
+- `includes (legacy)/logs.php`
 
 ## Endpoints AJAX no utilizados
 
@@ -104,18 +104,18 @@ Criterio: funcion declarada con 0 o 1 coincidencia estatica de llamada global (1
 - `header.php::adaptTitleFont`
 - `header.php::cambiarFecha`
 - `header.php::syncGlobalBars`
-- `includes/control_acceso.php::requierePremium`
-- `includes/db.php::dbScalar`
-- `includes/db.php::dbSelectIndexed`
-- `includes/db.php::dbSelectPairs`
-- `includes/funciones.php::cmpGrupo`
-- `includes/funciones.php::cmpStart`
-- `includes/funciones.php::compararClientes`
-- `includes/funciones.php::getSliderDates`
-- `includes/funciones.php::normalizarArrayUtf8`
-- `includes/funciones.php::renderDateSlider`
-- `includes/funciones.php::sqlSliderDateFilter`
-- `includes/funciones_estadisticas.php::obtenerOpcionesMarcaVentas`
+- `includes (legacy)/control_acceso.php::requierePremium`
+- `includes (legacy)/db.php::dbScalar`
+- `includes (legacy)/db.php::dbSelectIndexed`
+- `includes (legacy)/db.php::dbSelectPairs`
+- `includes (legacy)/funciones.php::cmpGrupo`
+- `includes (legacy)/funciones.php::cmpStart`
+- `includes (legacy)/funciones.php::compararClientes`
+- `includes (legacy)/funciones.php::getSliderDates`
+- `includes (legacy)/funciones.php::normalizarArrayUtf8`
+- `includes (legacy)/funciones.php::renderDateSlider`
+- `includes (legacy)/funciones.php::sqlSliderDateFilter`
+- `includes (legacy)/funciones_estadisticas.php::obtenerOpcionesMarcaVentas`
 - `legacy/backups/estadisticas_checkpoint_20260301_1939.php::obtenerAlbaranesSinRelacion`
 - `legacy/backups/estadisticas_checkpoint_20260301_1939.php::obtenerDetalleDiferenciaDocumentalLineas`
 - `legacy/backups/estadisticas_checkpoint_20260301_1939.php::obtenerKpiAlbaranesEjecutanPedidosPeriodo`

@@ -1,4 +1,4 @@
-﻿# Arquitectura del proyecto APP Comerciales
+# Arquitectura del proyecto APP Comerciales
 
 Documento de auditoria tecnica (Fase 1). Alcance: inventario estructural de archivos PHP y relaciones estaticas (navegacion, endpoints, includes).
 
@@ -86,22 +86,22 @@ Documento de auditoria tecnica (Fase 1). Alcance: inventario estructural de arch
 ## 4. Helpers y librerias
 
 - `funciones.php` (wrapper de compatibilidad)
-- `includes/funciones.php`
-- `includes/funciones_estadisticas.php`
+- `includes (legacy)/funciones.php`
+- `includes (legacy)/funciones_estadisticas.php`
 - `funciones_planificacion_rutas.php`
 - `config/db_connection.php`
 - `config/app_config.php`
-- `includes/db.php`
-- `includes/logs.php`
+- `includes (legacy)/db.php`
+- `includes (legacy)/logs.php`
 - `header.php`
-- `includes/bootstrap/app.php`
-- `includes/bootstrap/db.php`
-- `includes/bootstrap/auth.php`
+- `includes (legacy)/bootstrap/app.php`
+- `includes (legacy)/bootstrap/db.php`
+- `includes (legacy)/bootstrap/auth.php`
 
 ## 5. Bootstrap y autenticacion
 
-- `includes/auth_bootstrap.php`
-- `includes/control_acceso.php`
+- `includes (legacy)/auth_bootstrap.php`
+- `includes (legacy)/control_acceso.php`
 - `login.php`
 - `procesar_login.php`
 - `logout.php`
@@ -140,14 +140,14 @@ Documento de auditoria tecnica (Fase 1). Alcance: inventario estructural de arch
   - `estadisticas*.php`
   - `drilldown.php`
   - `ajax/estadisticas_*.php`
-  - `includes/funciones_estadisticas.php`
+  - `includes (legacy)/funciones_estadisticas.php`
 - Productos:
   - `productos.php`
   - `get_marcas.php`
 - Configuracion:
   - `configuracion/*`
-  - `includes/auth_bootstrap.php`
-  - `includes/control_acceso.php`
+  - `includes (legacy)/auth_bootstrap.php`
+  - `includes (legacy)/control_acceso.php`
   - `login.php`, `logout.php`
 
 ## 7. Archivos legacy o sospechosos
@@ -197,11 +197,11 @@ Documento de auditoria tecnica (Fase 1). Alcance: inventario estructural de arch
 
 ## 11. Mapa de dependencias (includes)
 
-- `includes/auth_bootstrap.php` -> `config/app_config.php`, `includes/control_acceso.php`, `includes/funciones.php`
-- `funciones.php` -> `includes/funciones.php`
-- `funciones_planificacion_rutas.php` -> `config/db_connection.php`, `includes/auth_bootstrap.php`
-- `ajax/estadisticas_*.php` -> `includes/auth_bootstrap.php`, `config/db_connection.php`, `includes/funciones.php`, `includes/funciones_estadisticas.php`
-- Patron general de paginas principales -> `includes/auth_bootstrap.php`, `config/db_connection.php`, `funciones.php`, `header.php`
+- `includes (legacy)/auth_bootstrap.php` -> `config/app_config.php`, `includes (legacy)/control_acceso.php`, `includes (legacy)/funciones.php`
+- `funciones.php` -> `includes (legacy)/funciones.php`
+- `funciones_planificacion_rutas.php` -> `config/db_connection.php`, `includes (legacy)/auth_bootstrap.php`
+- `ajax/estadisticas_*.php` -> `includes (legacy)/auth_bootstrap.php`, `config/db_connection.php`, `includes (legacy)/funciones.php`, `includes (legacy)/funciones_estadisticas.php`
+- Patron general de paginas principales -> `includes (legacy)/auth_bootstrap.php`, `config/db_connection.php`, `funciones.php`, `header.php`
 
 ---
 

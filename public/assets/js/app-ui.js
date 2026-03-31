@@ -188,22 +188,29 @@ function abrirModalDocumento(codVenta, tipoVenta) {
 function inicializarEnlacesDocumento() {
     var contenedorDocumento;
 
-    if (!window.jQuery || window.__documentoEnlacesInicializados) {
+    if (window.__documentoEnlacesInicializados) {
         return;
     }
 
-    contenedorDocumento = window.jQuery("#contenidoDocumento");
-    if (!contenedorDocumento.length) {
+    contenedorDocumento = document.getElementById("contenidoDocumento");
+    if (!contenedorDocumento) {
         return;
     }
 
     window.__documentoEnlacesInicializados = true;
 
-    contenedorDocumento.on("click", ".abrir-documento", function (e) {
-        var codVenta = window.jQuery(this).data("codventa");
-        var tipoVenta = window.jQuery(this).data("tipo");
+    contenedorDocumento.addEventListener("click", function (e) {
+        var enlace = e.target.closest(".abrir-documento");
+        var codVenta;
+        var tipoVenta;
+
+        if (!enlace || !contenedorDocumento.contains(enlace)) {
+            return;
+        }
 
         e.preventDefault();
+        codVenta = enlace.getAttribute("data-codventa");
+        tipoVenta = enlace.getAttribute("data-tipo");
         abrirModalDocumento(codVenta, tipoVenta);
     });
 }
@@ -327,8 +334,15 @@ function abrirDocumento(tipo_venta, cod_empresa, cod_caja, cod_venta) {
     var contenedor = document.getElementById("contenidoDocumento");
     var titulo = document.getElementById("modalDocumentoLabel");
     var tipoNumero = Number(tipo_venta);
+    const url = appBaseUrl() + "/ajax/detalle_documento.php?" + new URLSearchParams({
+        tipo_venta,
+        cod_empresa,
+        cod_caja,
+        cod_venta
+    });
 
-    if (!modal || !contenedor || !titulo || !window.jQuery) {
+    console.log("abrirDocumento START", { tipo_venta, cod_empresa, cod_caja, cod_venta });
+    if (!modal || !contenedor || !titulo) {
         return;
     }
 
@@ -338,30 +352,33 @@ function abrirDocumento(tipo_venta, cod_empresa, cod_caja, cod_venta) {
     inicializarEnlacesDocumento();
 
     contenedor.innerHTML = '<p class="documento-cargando">Cargando documento...</p>';
-    modal.show();
 
-    window.jQuery.ajax({
-        url: appBaseUrl() + "/ajax/detalle_documento.php",
-        type: "GET",
-        dataType: "json",
-        data: {
-            tipo_venta: tipo_venta,
-            cod_empresa: cod_empresa,
-            cod_caja: cod_caja,
-            cod_venta: cod_venta
+    const modalEl = document.getElementById("modalDocumento");
+
+    if (!modalEl) {
+        console.error("modalDocumento NO EXISTE");
+        return;
+    }
+
+    console.log("FETCH URL:", url);
+
+    fetch(url, { credentials: "same-origin" })
+    .then(function (response) {
+        return response.json();
+    })
+    .then(function (data) {
+        renderizarDocumento(data);
+
+        let modalInstance = bootstrap.Modal.getInstance(modalEl);
+
+        if (!modalInstance) {
+            modalInstance = new bootstrap.Modal(modalEl);
         }
-    }).done(function (response) {
-        if (response && response.error) {
-            contenedor.innerHTML = '<p class="documento-error">' + escapeHtml(response.error) + "</p>";
-            return;
-        }
-        renderizarDocumento(response || {});
-    }).fail(function (xhr) {
-        var mensaje = "No se pudo cargar el documento.";
-        if (xhr && xhr.responseJSON && xhr.responseJSON.error) {
-            mensaje = xhr.responseJSON.error;
-        }
-        contenedor.innerHTML = '<p class="documento-error">' + escapeHtml(mensaje) + "</p>";
+
+        modalInstance.show();
+    })
+    .catch(function (error) {
+        console.error("FETCH ERROR:", error);
     });
 }
 

@@ -1,4 +1,4 @@
-﻿# Mapa de arquitectura real del proyecto APP Comerciales
+# Mapa de arquitectura real del proyecto APP Comerciales
 
 Documento de analisis arquitectonico (estado actual del repositorio).
 No incluye cambios de codigo.
@@ -9,19 +9,19 @@ No incluye cambios de codigo.
 
 - `login.php`: formulario de acceso.
 - `procesar_login.php`: valida credenciales contra `cmf_vendedores_user`, crea sesion y redirige a `index.php`.
-- `includes/auth_bootstrap.php`: punto comun de inicializacion (carga config, inicia sesion, carga control de acceso y funciones compartidas).
-- `includes/control_acceso.php`: reglas de acceso (`requiereLogin`, `requiereActivo`, `requierePermiso`, `requierePremium`).
+- `includes (legacy)/auth_bootstrap.php`: punto comun de inicializacion (carga config, inicia sesion, carga control de acceso y funciones compartidas).
+- `includes (legacy)/control_acceso.php`: reglas de acceso (`requiereLogin`, `requiereActivo`, `requierePermiso`, `requierePremium`).
 - `logout.php`: destruye sesion y redirige a login.
 
 ### Conexion base de datos
 
 - `config/db_connection.php`: conexion ODBC principal usada por casi todo el sistema.
-- Capa alternativa parcial: `includes/db.php` (helpers de query), actualmente sin adopcion general.
+- Capa alternativa parcial: `includes (legacy)/db.php` (helpers de query), actualmente sin adopcion general.
 
 ### Funciones globales
 
-- `includes/funciones.php`: utilidades transversales (formato, filtros, normalizacion, consultas auxiliares).
-- `funciones.php`: wrapper de compatibilidad que reexporta `includes/funciones.php`.
+- `includes (legacy)/funciones.php`: utilidades transversales (formato, filtros, normalizacion, consultas auxiliares).
+- `funciones.php`: wrapper de compatibilidad que reexporta `includes (legacy)/funciones.php`.
 
 ### Layout compartido
 
@@ -29,8 +29,8 @@ No incluye cambios de codigo.
 
 ### Bootstrap
 
-- Ruta activa: `includes/auth_bootstrap.php`.
-- Ruta alternativa no consolidada: `includes/bootstrap/app.php`, `includes/bootstrap/auth.php`, `includes/bootstrap/db.php`.
+- Ruta activa: `includes (legacy)/auth_bootstrap.php`.
+- Ruta alternativa no consolidada: `includes (legacy)/bootstrap/app.php`, `includes (legacy)/bootstrap/auth.php`, `includes (legacy)/bootstrap/db.php`.
 
 ---
 
@@ -53,7 +53,7 @@ No incluye cambios de codigo.
   - `buscar_cliente.php`
   - `obtener_secciones_pedidos_visitas.php`
 - Funciones relacionadas:
-  - `includes/funciones.php`
+  - `includes (legacy)/funciones.php`
   - partes de `funciones_planificacion_rutas.php` para asignacion de cliente/seccion.
 
 ### Calendario
@@ -70,7 +70,7 @@ No incluye cambios de codigo.
   - `get_eventos.php`
   - `obtener_eventos.php`
 - Funciones relacionadas:
-  - `includes/funciones.php`
+  - `includes (legacy)/funciones.php`
 
 ### Rutas
 
@@ -98,7 +98,7 @@ No incluye cambios de codigo.
 - Endpoints asociados:
   - `calcular_promedio_visita.php`
 - Funciones relacionadas:
-  - `includes/funciones.php`
+  - `includes (legacy)/funciones.php`
   - `altaClientes/mail_config.php`
 
 ### Productos
@@ -108,7 +108,7 @@ No incluye cambios de codigo.
 - Endpoints asociados:
   - `get_marcas.php`
 - Funciones relacionadas:
-  - `includes/funciones.php`
+  - `includes (legacy)/funciones.php`
 
 ### Estadisticas
 
@@ -125,8 +125,8 @@ No incluye cambios de codigo.
   - `ajax/detalle_pedido.php`
   - `ajax/detalle_albaran.php`
 - Funciones relacionadas:
-  - `includes/funciones_estadisticas.php`
-  - `includes/funciones.php`
+  - `includes (legacy)/funciones_estadisticas.php`
+  - `includes (legacy)/funciones.php`
 
 ### Configuracion
 
@@ -137,8 +137,8 @@ No incluye cambios de codigo.
 - Endpoints/procesadores asociados:
   - `configuracion/guardar_usuario.php`
 - Funciones relacionadas:
-  - `includes/logs.php`
-  - `includes/control_acceso.php`
+  - `includes (legacy)/logs.php`
+  - `includes (legacy)/control_acceso.php`
 
 ---
 
@@ -171,8 +171,8 @@ No incluye cambios de codigo.
 
 ### Datasets/funciones habituales
 
-- Estadisticas: `includes/funciones_estadisticas.php` para agregaciones y KPIs.
-- Resto de endpoints: consultas directas ODBC o helpers de `includes/funciones.php` / `funciones_planificacion_rutas.php`.
+- Estadisticas: `includes (legacy)/funciones_estadisticas.php` para agregaciones y KPIs.
+- Resto de endpoints: consultas directas ODBC o helpers de `includes (legacy)/funciones.php` / `funciones_planificacion_rutas.php`.
 
 ---
 
@@ -182,8 +182,8 @@ Flujo real observado:
 
 1. `login.php` envia formulario por POST a `procesar_login.php`.
 2. `procesar_login.php` consulta `cmf_vendedores_user` en ERP, valida password (hash moderno o texto plano legado), setea variables de sesion y redirige a `index.php`.
-3. Las paginas protegidas cargan `includes/auth_bootstrap.php`.
-4. `auth_bootstrap.php` inicia sesion, carga `includes/control_acceso.php` y `includes/funciones.php`.
+3. Las paginas protegidas cargan `includes (legacy)/auth_bootstrap.php`.
+4. `auth_bootstrap.php` inicia sesion, carga `includes (legacy)/control_acceso.php` y `includes (legacy)/funciones.php`.
 5. Las paginas invocan `requiereLogin()` y/o `requiereActivo()` (y en casos concretos `requierePermiso()`), aplicando redireccion a `/login.php` o `/index.php`.
 
 ---
@@ -193,8 +193,8 @@ Flujo real observado:
 Archivos responsables:
 
 - `config/db_connection.php`: conexion ODBC base.
-- `includes/funciones.php`: funciones de acceso/transformacion usadas por modulos generales.
-- `includes/funciones_estadisticas.php`: consultas y agregaciones especificas de estadisticas.
+- `includes (legacy)/funciones.php`: funciones de acceso/transformacion usadas por modulos generales.
+- `includes (legacy)/funciones_estadisticas.php`: consultas y agregaciones especificas de estadisticas.
 - `funciones_planificacion_rutas.php`: capa SQL del dominio rutas/asignacion.
 - Endpoints y paginas con SQL embebido adicional (`procesar_login.php`, `get_*`, `obtener_*`, etc.).
 
@@ -210,16 +210,16 @@ Datasets/tabla de trabajo destacada (por uso observable):
 
 Patron dominante por pagina de negocio:
 
-- `require_once includes/auth_bootstrap.php`
+- `require_once includes (legacy)/auth_bootstrap.php`
 - `require/include config/db_connection.php`
-- `require/include funciones.php` (wrapper o `includes/funciones.php`)
+- `require/include funciones.php` (wrapper o `includes (legacy)/funciones.php`)
 - `include header.php` (cuando corresponde vista completa)
 
 Patrones por dominio:
 
-- Estadisticas: suma `includes/funciones_estadisticas.php`.
+- Estadisticas: suma `includes (legacy)/funciones_estadisticas.php`.
 - Rutas: usa `funciones_planificacion_rutas.php`.
-- Configuracion: usa `includes/logs.php` en guardado de usuarios.
+- Configuracion: usa `includes (legacy)/logs.php` en guardado de usuarios.
 
 ---
 
@@ -233,8 +233,8 @@ Patrones por dominio:
 
 ### Intentos de arquitectura parcialmente adoptados
 
-- `includes/bootstrap/app.php`, `includes/bootstrap/auth.php`, `includes/bootstrap/db.php` existen pero no son el flujo principal.
-- `includes/db.php` define una capa de acceso de mayor nivel, pero no esta integrada de forma transversal.
+- `includes (legacy)/bootstrap/app.php`, `includes (legacy)/bootstrap/auth.php`, `includes (legacy)/bootstrap/db.php` existen pero no son el flujo principal.
+- `includes (legacy)/db.php` define una capa de acceso de mayor nivel, pero no esta integrada de forma transversal.
 
 ### Refactors incompletos / referencias rotas
 

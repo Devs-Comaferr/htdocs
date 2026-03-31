@@ -7,7 +7,7 @@ Alcance inspeccionado:
 - `public/`: 79 PHP
 - raiz del proyecto: 58 PHP
 - `app/Modules/`: 20 PHP
-- `bootstrap/`, `config/`, `includes/`: 11 PHP
+- `bootstrap/`, `config/`, `includes (legacy)/`: 11 PHP
 - `resources/views/`: sin PHP
 
 ## Resumen ejecutivo
@@ -329,7 +329,7 @@ Cruces `app/Modules` -> raiz/legacy:
 
 - `app/Modules/Visitas/obtener_secciones_pedidos_visitas.php` incluye `funciones_planificacion_rutas.php`
 - `app/Modules/Visitas/pedidos_visitas.php`, `app/Modules/Clientes/clientes.php`, `app/Modules/Clientes/cliente_detalles.php`, `app/Modules/Pedidos/pedido.php`, `app/Modules/Visitas/registrar_visita_manual.php` incluyen `BASE_PATH . '/header.php'`
-- `app/Modules/Pedidos/ajax/detalle_documento.php` y `app/Modules/Pedidos/ajax/detalle_pedido.php` dependen de `includes/funciones_estadisticas.php`
+- `app/Modules/Pedidos/ajax/detalle_documento.php` y `app/Modules/Pedidos/ajax/detalle_pedido.php` dependen de `includes (legacy)/funciones_estadisticas.php`
 
 Cruces con rutas incorrectas dentro de `app/Modules/Visitas`:
 
@@ -371,7 +371,7 @@ Uso explicito de `global $conn` detectado en:
 
 - `borrar_asignacion.php`
 - `obtener_secciones.php`
-- `includes/logs.php`
+- `includes (legacy)/logs.php`
 - `funciones_planificacion_rutas.php`
 - `app/Support/functions.php`
 
@@ -524,10 +524,10 @@ Mapa final propuesto:
 - `funciones_planificacion_rutas.php`
   - consultas reutilizables: `app/Support/PlanificacionRutas.php`
   - cualquier control de acceso debe salir de aqui y quedarse en los entrypoints
-- `includes/funciones_estadisticas.php`
+- `includes (legacy)/funciones_estadisticas.php`
   - mantener temporalmente
   - destino final: `app/Support/Estadisticas.php`
-- `includes/logs.php`
+- `includes (legacy)/logs.php`
   - destino final: `app/Support/Logs.php`
 - `config/db_connection.php`
   - mantener en `config/`
@@ -634,7 +634,7 @@ Acciones:
 4. Mover:
    - `productos.php`
    - `get_marcas.php`
-5. Extraer `includes/funciones_estadisticas.php` a `app/Support/Estadisticas.php`
+5. Extraer `includes (legacy)/funciones_estadisticas.php` a `app/Support/Estadisticas.php`
 
 Resultado esperado:
 
@@ -672,7 +672,7 @@ Archivos analizados:
 - 79 PHP en `public/`
 - 58 PHP en raiz
 - 20 PHP en `app/Modules/`
-- 11 PHP en `bootstrap/`, `config/`, `includes/`
+- 11 PHP en `bootstrap/`, `config/`, `includes (legacy)/`
 - total alcance auditado: 168 PHP
 
 Hallazgos criticos de cierre:
