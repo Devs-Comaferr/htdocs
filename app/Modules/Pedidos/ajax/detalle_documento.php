@@ -11,7 +11,20 @@ $conn = db();
 
 $estadosLineaVenta = require BASE_PATH . '/app/Support/config_estados_linea_venta.php';
 
-header('Content-Type: application/json; charset=UTF-8');
+header('Content-Type: application/json; charset=utf-8');
+
+function normalize_utf8($data)
+{
+    if (is_array($data)) {
+        return array_map('normalize_utf8', $data);
+    }
+
+    if (is_string($data)) {
+        return mb_convert_encoding($data, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252');
+    }
+
+    return $data;
+}
 
 function obtenerIconoEstadoCI(string $estado): string
 {
@@ -42,7 +55,8 @@ function obtenerIconoEstadoCI(string $estado): string
 function responderDocumento(array $payload, int $statusCode = 200): void
 {
     http_response_code($statusCode);
-    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $response = normalize_utf8($payload);
+    echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
     $conn = db();
     if (isset($conn)) {
     }
