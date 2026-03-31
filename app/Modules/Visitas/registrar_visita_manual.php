@@ -214,7 +214,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
                         <label for="buscar">Nombre del Cliente:</label>
                         <input type="text" name="buscar" id="buscar" class="form-control" placeholder="Ingrese el nombre del cliente" required>
                     </div>
-                    <input type="submit" class="btn btn-primary btn-block" value="Buscar">
+                    <input type="submit" class="btn btn-primary w-100 btn-submit" value="Buscar">
                 </form>
                 <p class="text-center" style="margin-top:20px;">Solo se mostrarn clientes asignados a tu usuario.</p>
             </div>
@@ -535,7 +535,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         input[type="submit"],
-        .btn-block {
+        .btn-submit {
             margin-top: 15px;
             padding: 10px 20px;
         }
@@ -601,7 +601,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php if (count($citas) > 0): ?>
             <?php foreach ($citas as $cita):
                 $estado = normalizarEstadoVisitaClave($cita['estado_visita']);
-                $alertClass = ($estado == 'planificada') ? 'alert-info' : (($estado == 'pendiente') ? 'alert-warning' : 'alert-default');
+                $alertClass = ($estado == 'planificada') ? 'alert-info' : (($estado == 'pendiente') ? 'alert-warning' : 'alert-secondary');
             ?>
                 <div class="alert <?php echo $alertClass; ?>">
                     <strong><?php echo htmlspecialchars(normalizarEstadoVisita($cita['estado_visita'])); ?>:</strong> <?php echo htmlspecialchars(date("d/m/Y", strtotime($cita['fecha_visita']))); ?> de <?php echo htmlspecialchars(date("H:i", strtotime($cita['hora_inicio_visita']))); ?> a <?php echo htmlspecialchars(date("H:i", strtotime($cita['hora_fin_visita']))); ?>
@@ -680,7 +680,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <label for="hora_fin_tarde">Hora Fin Tarde:</label>
                         <input type="time" class="form-control" name="hora_fin_tarde" id="hora_fin_tarde" value="<?php echo !empty($hora_fin_tarde) ? $hora_fin_tarde : ''; ?>" required />
                     </div>
-                    <button type="submit" class="btn btn-success btn-block">Guardar Horario</button>
+                    <button type="submit" class="btn btn-success w-100 btn-submit">Guardar Horario</button>
                 </form>
             </div>
         </div>
@@ -704,7 +704,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
             <div class="mb-3">
                 <label for="zona_seleccionada">Zona de Visita:</label>
-                <select name="zona_seleccionada" id="zona_seleccionada" class="form-control">
+                <select name="zona_seleccionada" id="zona_seleccionada" class="form-select">
                     <?php foreach ($zonas as $zona): ?>
                         <option value="<?php echo $zona['codigo']; ?>" <?php if (isset($_POST['zona_seleccionada']) && $_POST['zona_seleccionada'] == $zona['codigo']) echo 'selected'; ?>>
                             <?php echo htmlspecialchars($zona['nombre']); ?>
@@ -714,7 +714,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
             <div class="mb-3">
                 <label for="estado_visita">Estado de la Visita:</label>
-                <select name="estado_visita" id="estado_visita" class="form-control">
+                <select name="estado_visita" id="estado_visita" class="form-select">
                     <option value="Pendiente" <?php if (isset($_POST['estado_visita']) && normalizarEstadoVisita($_POST['estado_visita']) == 'Pendiente') echo 'selected'; ?>>Pendiente</option>
                     <option value="Planificada" <?php if (isset($_POST['estado_visita']) && normalizarEstadoVisita($_POST['estado_visita']) == 'Planificada') echo 'selected'; ?>>Planificada</option>
                     <option value="Realizada" <?php if (isset($_POST['estado_visita']) && normalizarEstadoVisita($_POST['estado_visita']) == 'Realizada') echo 'selected'; ?>>Realizada</option>
@@ -727,9 +727,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <textarea name="observaciones" id="observaciones" class="form-control" rows="4"><?php echo isset($_POST['observaciones']) ? htmlspecialchars($_POST['observaciones']) : ''; ?></textarea>
             </div>
             <?php if ($requiereConfirmacion): ?>
-                <button type="submit" class="btn btn-warning btn-block">Guardar de todas formas</button>
+                <button type="submit" class="btn btn-warning w-100 btn-submit">Guardar de todas formas</button>
             <?php else: ?>
-                <button type="submit" class="btn btn-primary btn-block">Registrar Visita Manual</button>
+                <button type="submit" class="btn btn-primary w-100 btn-submit">Registrar Visita Manual</button>
             <?php endif; ?>
         </form>
 
