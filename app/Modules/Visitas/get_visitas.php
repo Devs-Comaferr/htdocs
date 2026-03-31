@@ -3,7 +3,8 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/db.php';
 
-$ui_version = 'bs3';
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
 
 $conn = db();
 
