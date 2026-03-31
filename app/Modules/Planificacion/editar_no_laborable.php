@@ -16,7 +16,8 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 
-$ui_version = 'bs3';
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
 
 $conn = db();
 
@@ -140,34 +141,34 @@ $descripcion_db = trim($row['descripcion']);
     <?php endif; ?>
 
     <form method="POST" action="editar_no_laborable.php?id=<?php echo intval($id); ?>">
-        <div class="form-group">
+        <div class="mb-3">
             <label>Fecha:</label>
             <input type="date" name="fecha" class="form-control" 
                    value="<?php echo htmlspecialchars($fecha_db); ?>">
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Hora Inicio (opcional):</label>
             <input type="time" name="hora_inicio" class="form-control" 
                    value="<?php echo htmlspecialchars(substr($hora_inicio_db, 0, 5)); ?>">
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Hora Fin (opcional):</label>
             <input type="time" name="hora_fin" class="form-control" 
                    value="<?php echo htmlspecialchars(substr($hora_fin_db, 0, 5)); ?>">
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Tipo de Evento:</label>
             <input type="text" name="tipo_evento" class="form-control" 
                    value="<?php echo htmlspecialchars($tipo_evento_db); ?>" required>
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Descripcion (opcional):</label>
             <textarea name="descripcion" class="form-control" rows="3"><?php 
                 echo htmlspecialchars($descripcion_db); 
             ?></textarea>
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Guardar Cambios</button>
-        <a href="calendario.php" class="btn btn-default btn-block">Cancelar</a>
+        <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
+        <a href="calendario.php" class="btn btn-secondary w-100 mt-2">Cancelar</a>
     </form>
 </div>
 </body>

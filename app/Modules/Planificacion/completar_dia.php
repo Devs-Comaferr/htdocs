@@ -12,7 +12,8 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 require_once BASE_PATH . '/app/Support/functions.php';
 
-$ui_version = 'bs3';
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
 
 $conn = db();
 
@@ -121,9 +122,6 @@ $factor = 480 / 720;
           text-align: center;
           margin-bottom: 20px;
       }
-      .fecha-form .form-inline .form-group {
-          margin: 0 5px;
-      }
       .fecha-form label {
           margin-right: 5px;
           font-size: 14px;
@@ -136,10 +134,17 @@ $factor = 480 / 720;
       }
     </style>
     <script>
-      $(document).ready(function(){
-          // Enviar el formulario automticamente al cambiar la fecha
-          $("#fecha").change(function(){
-              $(this).closest("form").submit();
+      document.addEventListener('DOMContentLoaded', function () {
+          var fechaInput = document.getElementById('fecha');
+          if (!fechaInput) {
+              return;
+          }
+
+          fechaInput.addEventListener('change', function () {
+              var form = fechaInput.closest('form');
+              if (form) {
+                  form.submit();
+              }
           });
       });
     </script>
@@ -148,9 +153,9 @@ $factor = 480 / 720;
 <div class="container">
     <h2 class="text-center">Vista de Da - <?php echo date('d/m/Y', strtotime($fecha)); ?></h2>
     <!-- Formulario inline y compacto para cambiar la fecha -->
-    <form method="GET" action="completar_dia.php" class="form-inline fecha-form">
-        <div class="form-group">
-            <label for="fecha">Cambiar Fecha:</label>
+    <form method="GET" action="completar_dia.php" class="fecha-form d-inline-block">
+        <div class="d-inline-flex align-items-center gap-2">
+            <label class="mb-0" for="fecha">Cambiar Fecha:</label>
             <input type="date" name="fecha" id="fecha" class="form-control" value="<?php echo htmlspecialchars($fecha); ?>" required>
         </div>
     </form>
@@ -192,7 +197,7 @@ $factor = 480 / 720;
         </div>
     </div>
     <br>
-    <a href="planificacion_rutas.php" class="btn btn-default">Volver al Panel</a>
+    <a href="planificacion_rutas.php" class="btn btn-secondary">Volver al Panel</a>
 </div>
 </body>
 </html>

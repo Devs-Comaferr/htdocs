@@ -17,6 +17,8 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 
 require_once BASE_PATH . '/app/Support/functions.php';
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
 $conn = db();
 $pageTitle = "Registrar Día No Laborable";
 include BASE_PATH . '/resources/views/layouts/header.php';
@@ -257,10 +259,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             text-align: center;
             margin-bottom: 20px;
         }
-        .form-group label {
+        .mb-3 label {
             font-size: 16px;
         }
         .form-control {
+            font-size: 16px;
+        }
+        .form-select {
             font-size: 16px;
         }
         .btn {
@@ -270,37 +275,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .alert {
             margin-top: 15px;
         }
-        .hidden {
-            display: none;
-        }
     </style>
-        <script>
-    $(document).ready(function(){
-        // Ocultar inicialmente todos los bloques
-        $("#vacaciones_fields").addClass("hidden");
-        $("#festivo_fields").addClass("hidden");
-        $("#otro_fields").addClass("hidden");
-        
-        $("#tipo_evento").change(function(){
-            var selected = $(this).val();
-            if(selected === "Vacaciones") {
-                $("#vacaciones_fields").removeClass("hidden");
-                $("#festivo_fields").addClass("hidden");
-                $("#otro_fields").addClass("hidden");
-            } else if(selected === "Festivo") {
-                $("#festivo_fields").removeClass("hidden");
-                $("#vacaciones_fields").addClass("hidden");
-                $("#otro_fields").addClass("hidden");
-            } else if(selected === "Otro") {
-                $("#otro_fields").removeClass("hidden");
-                $("#vacaciones_fields").addClass("hidden");
-                $("#festivo_fields").addClass("hidden");
-            } else {
-                $("#vacaciones_fields").addClass("hidden");
-                $("#festivo_fields").addClass("hidden");
-                $("#otro_fields").addClass("hidden");
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tipoEvento = document.getElementById('tipo_evento');
+        var vacaciones = document.getElementById('vacaciones_fields');
+        var festivo = document.getElementById('festivo_fields');
+        var otro = document.getElementById('otro_fields');
+
+        function actualizarBloques() {
+            var selected = tipoEvento ? tipoEvento.value : '';
+
+            if (vacaciones) {
+                vacaciones.classList.toggle('d-none', selected !== 'Vacaciones');
             }
-        });
+            if (festivo) {
+                festivo.classList.toggle('d-none', selected !== 'Festivo');
+            }
+            if (otro) {
+                otro.classList.toggle('d-none', selected !== 'Otro');
+            }
+        }
+
+        actualizarBloques();
+
+        if (tipoEvento) {
+            tipoEvento.addEventListener('change', actualizarBloques);
+        }
     });
     </script>
 </head>
@@ -316,9 +317,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     <form action="registrar_dia_no_laborable.php" method="POST">
         <!-- Selección del Tipo de Evento -->
-        <div class="form-group">
+        <div class="mb-3">
             <label for="tipo_evento">Tipo de Evento:</label>
-            <select name="tipo_evento" id="tipo_evento" class="form-control" required>
+            <select name="tipo_evento" id="tipo_evento" class="form-select" required>
                 <option value="">Seleccione...</option>
                 <option value="Vacaciones">Vacaciones</option>
                 <option value="Festivo">Festivo</option>
@@ -326,58 +327,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </select>
         </div>
         <!-- Bloque para Vacaciones -->
-        <div id="vacaciones_fields" class="hidden">
-            <div class="form-group">
+        <div id="vacaciones_fields" class="d-none">
+            <div class="mb-3">
                 <label for="fecha_inicio">Fecha de Inicio:</label>
                 <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control">
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="fecha_fin">Fecha de Fin:</label>
                 <input type="date" name="fecha_fin" id="fecha_fin" class="form-control">
             </div>
         </div>
         <!-- Bloque para Festivo -->
-        <div id="festivo_fields" class="hidden">
-            <div class="form-group">
+        <div id="festivo_fields" class="d-none">
+            <div class="mb-3">
                 <label for="fecha_festivo">Fecha del Festivo:</label>
                 <input type="date" name="fecha_festivo" id="fecha_festivo" class="form-control">
             </div>
             <!-- Checkbox para repetir anualmente -->
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" name="repetir_anualmente" value="1"> Repetir todos los aos
+            <div class="form-check mb-3">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="checkbox" name="repetir_anualmente" value="1"> Repetir todos los aos
                 </label>
             </div>
         </div>
         <!-- Bloque para Otro -->
-        <div id="otro_fields" class="hidden">
-            <div class="form-group">
+        <div id="otro_fields" class="d-none">
+            <div class="mb-3">
                 <label for="custom_event">Tipo de Evento (escriba):</label>
                 <input type="text" name="custom_event" id="custom_event" class="form-control">
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="fecha_evento">Fecha:</label>
                 <input type="date" name="fecha_evento" id="fecha_evento" class="form-control">
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="hora_inicio_otro">Hora de Inicio:</label>
                 <input type="time" name="hora_inicio_otro" id="hora_inicio_otro" class="form-control">
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label for="hora_fin_otro">Hora de Fin:</label>
                 <input type="time" name="hora_fin_otro" id="hora_fin_otro" class="form-control">
             </div>
         </div>
 
-        <div class="form-group">
+        <div class="mb-3">
             <label for="descripcion">Descripción (opcional):</label>
             <textarea name="descripcion" id="descripcion" class="form-control" rows="3" placeholder="Detalles adicionales"></textarea>
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Registrar</button>
+        <button type="submit" class="btn btn-primary w-100">Registrar</button>
     </form>
     
     <br>
-    <a href="planificacion_rutas.php" class="btn btn-default btn-block">Volver al Panel</a>
+    <a href="planificacion_rutas.php" class="btn btn-secondary w-100">Volver al Panel</a>
 </div>
 </body>
 </html>
