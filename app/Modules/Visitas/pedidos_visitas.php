@@ -474,7 +474,7 @@ function formatoHora($horaSql)
   <div class="modal fade" id="visitaModal" tabindex="-1" role="dialog" aria-labelledby="visitaModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <form action="<?= BASE_URL ?>/registrar_visita.php" method="POST">
+        <form action="<?= BASE_URL ?>/visitas.php?action=crear" method="POST">
           <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             <h5 class="modal-title" id="visitaModalLabel">Registrar Visita</h5>
@@ -483,6 +483,7 @@ function formatoHora($horaSql)
             <input type="hidden" name="cod_venta" id="v_cod_venta">
             <input type="hidden" name="cod_cliente" id="v_cod_cliente">
             <input type="hidden" name="cod_seccion" id="v_cod_seccion">
+            <input type="hidden" name="origen" value="visita">
             <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
             <input type="hidden" name="previous_id_visita" id="v_previous_id_visita"> <!-- Nuevo campo oculto -->
 
@@ -525,7 +526,7 @@ function formatoHora($horaSql)
   <div class="modal fade" id="telefonoModal" tabindex="-1" role="dialog" aria-labelledby="telefonoModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <form action="<?= BASE_URL ?>/registrar_telefono.php" method="POST">
+        <form action="<?= BASE_URL ?>/visitas.php?action=crear" method="POST">
           <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             <h5 class="modal-title" id="telefonoModalLabel">Registrar Llamada Telefónica</h5>
@@ -534,6 +535,7 @@ function formatoHora($horaSql)
             <input type="hidden" name="cod_venta" id="t_cod_venta">
             <input type="hidden" name="cod_cliente" id="t_cod_cliente">
             <input type="hidden" name="cod_seccion" id="t_cod_seccion">
+            <input type="hidden" name="origen" value="telefono">
             <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
             <input type="hidden" name="previous_id_visita" id="t_previous_id_visita"> <!-- Nuevo campo oculto -->
 
@@ -576,7 +578,7 @@ function formatoHora($horaSql)
   <div class="modal fade" id="whatsappModal" tabindex="-1" role="dialog" aria-labelledby="whatsappModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <form action="<?= BASE_URL ?>/registrar_whatsapp.php" method="POST">
+        <form action="<?= BASE_URL ?>/visitas.php?action=crear" method="POST">
           <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             <h5 class="modal-title" id="whatsappModalLabel">Registrar Pedido WhatsApp</h5>
@@ -585,6 +587,7 @@ function formatoHora($horaSql)
             <input type="hidden" name="cod_venta" id="w_cod_venta">
             <input type="hidden" name="cod_cliente" id="w_cod_cliente">
             <input type="hidden" name="cod_seccion" id="w_cod_seccion">
+            <input type="hidden" name="origen" value="whatsapp">
             <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
             <input type="hidden" name="previous_id_visita" id="w_previous_id_visita"> <!-- Nuevo campo oculto -->
 
@@ -627,7 +630,7 @@ function formatoHora($horaSql)
   <div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <form action="<?= BASE_URL ?>/registrar_email.php" method="POST">
+        <form action="<?= BASE_URL ?>/visitas.php?action=crear" method="POST">
           <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             <h5 class="modal-title" id="emailModalLabel">Registrar Pedido Email</h5>
@@ -636,6 +639,7 @@ function formatoHora($horaSql)
             <input type="hidden" name="cod_venta" id="e_cod_venta">
             <input type="hidden" name="cod_cliente" id="e_cod_cliente">
             <input type="hidden" name="cod_seccion" id="e_cod_seccion">
+            <input type="hidden" name="origen" value="email">
             <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
             <input type="hidden" name="previous_id_visita" id="e_previous_id_visita"> <!-- Nuevo campo oculto -->
 
@@ -678,7 +682,7 @@ function formatoHora($horaSql)
   <div class="modal fade" id="webModal" tabindex="-1" role="dialog" aria-labelledby="webModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <form action="<?= BASE_URL ?>/registrar_web.php" method="POST">
+        <form action="<?= BASE_URL ?>/visitas.php?action=crear" method="POST">
           <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             <h5 class="modal-title" id="webModalLabel">Registrar Pedido Web</h5>
@@ -687,6 +691,7 @@ function formatoHora($horaSql)
             <input type="hidden" name="cod_venta" id="w_cod_venta_web">
             <input type="hidden" name="cod_cliente" id="w_cod_cliente_web">
             <input type="hidden" name="cod_seccion" id="w_cod_seccion_web">
+            <input type="hidden" name="origen" value="web">
             <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
             <input type="hidden" name="previous_id_visita" id="w_previous_id_visita"> <!-- Nuevo campo oculto -->
 
