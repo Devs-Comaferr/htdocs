@@ -12,9 +12,9 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/db.php';
 
 // obtener_secciones_pedidos_visitas.php
-require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
+require_once BASE_PATH . '/app/Modules/Planificador/planificacion_service.php';
 
-// Función personalizada de JSON encoding para PHP 5.2.3
+// FunciÃ³n personalizada de JSON encoding para PHP 5.2.3
 function json_encode_custom($data) {
     if (is_null($data)) {
         return 'null';
@@ -77,7 +77,7 @@ if (isset($_GET['cod_cliente'])) {
 if ($cod_cliente > 0) {
     $conn = db();
     
-    // Obtener secciones que no están asignadas a ninguna zona
+    // Obtener secciones que no estÃ¡n asignadas a ninguna zona
     $query = "
         SELECT TOP 20 sc.cod_seccion, sc.nombre 
         FROM secciones_cliente sc
@@ -93,7 +93,7 @@ if ($cod_cliente > 0) {
     $resultado = odbc_exec($conn, $query);
     
     if (!$resultado) {
-        // Registrar el error para depuración (opcional)
+        // Registrar el error para depuraciÃ³n (opcional)
         error_log("Error en obtener_secciones_pedidos_visitas.php: " . odbc_errormsg($conn));
         echo json_encode_custom(array());
         exit();
@@ -112,3 +112,4 @@ if ($cod_cliente > 0) {
     echo json_encode_custom(array());
 }
 ?>
+

@@ -11,14 +11,14 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
-require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
+require_once BASE_PATH . '/app/Modules/Planificador/planificacion_service.php';
 require_once BASE_PATH . '/app/Support/functions.php';
 $pageTitle = "Gestionar Rutas de la Zona";
 include BASE_PATH . '/resources/views/layouts/header.php';
-// Iniciar sesión si no está ya iniciada
+// Iniciar sesiÃ³n si no estÃ¡ ya iniciada
 
 
-// Verificar si el usuario ha iniciado sesión
+// Verificar si el usuario ha iniciado sesiÃ³n
 
 
 // Verificar si el usuario est autenticado
@@ -28,14 +28,14 @@ if (!isset($_SESSION['codigo'])) {
 }
     return;
 
-// Obtener el código del vendedor desde la sesión
+// Obtener el cÃ³digo del vendedor desde la sesiÃ³n
 $cod_vendedor = intval($_SESSION['codigo']);
 
 // Verificar si 'cod_zona' est presente en la URL
 if (isset($_GET['cod_zona'])) {
     $cod_zona = intval($_GET['cod_zona']);
     
-    // Obtener información de la zona
+    // Obtener informaciÃ³n de la zona
     $zonas = obtenerZonasVisitaService();
     $zona_actual = null;
     foreach ($zonas as $zona) {
@@ -183,13 +183,13 @@ if (isset($_GET['cod_zona'])) {
 <body>
     <div class="container">
         <?php if (isset($cod_zona)): ?>
-            <!-- Mostrar información de la zona específica -->
+            <!-- Mostrar informaciÃ³n de la zona especÃ­fica -->
             <h1><?php echo htmlspecialchars($zona_actual['nombre_zona']); ?></h1>
             
             <h2>Rutas Asignadas</h2>
             <table>
                 <tr>
-                    <th>Código de Ruta</th>
+                    <th>CÃ³digo de Ruta</th>
                     <th>Nombre de Ruta</th>
                 </tr>
                 <?php if (!empty($rutas_asignadas)): ?>
@@ -262,3 +262,4 @@ if (isset($_GET['cod_zona'])) {
     <!-- jQuery + Bootstrap JS -->
         </body>
 </html>
+

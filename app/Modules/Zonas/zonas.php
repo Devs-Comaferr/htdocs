@@ -11,20 +11,20 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 // zonas.php
-require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
+require_once BASE_PATH . '/app/Modules/Planificador/planificacion_service.php';
 require_once BASE_PATH . '/app/Support/functions.php';
-$pageTitle = 'Gestión de Zonas';
+$pageTitle = 'GestiÃ³n de Zonas';
 include BASE_PATH . '/resources/views/layouts/header.php';
 $zonas = obtenerZonasVisitaService();
 
-// Verificar si el usuario ha iniciado sesión
+// Verificar si el usuario ha iniciado sesiÃ³n
 
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de Zonas</title>
+    <title>GestiÃ³n de Zonas</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         /* Estilos mejorados para dispositivos tctiles */
@@ -123,7 +123,7 @@ $zonas = obtenerZonasVisitaService();
         .back-button:hover {
             background-color: #5a6268;
         }
-        /* Estilos para dispositivos móviles */
+        /* Estilos para dispositivos mÃ³viles */
         @media (max-width: 1024px) {
             .btn-zona {
                 width: 150px;
@@ -152,7 +152,7 @@ $zonas = obtenerZonasVisitaService();
     <div class="container">
         
         
-        <!-- Sección 1: Listado de Zonas como Botones -->
+        <!-- SecciÃ³n 1: Listado de Zonas como Botones -->
         
         <?php if (!empty($zonas)): ?>
             <div class="buttons-container">
@@ -167,17 +167,17 @@ $zonas = obtenerZonasVisitaService();
             <div class="no-data">No tienes zonas disponibles.</div>
         <?php endif; ?>
         
-        <!-- Sección 2: Formulario para Crear Nueva Zona -->
+        <!-- SecciÃ³n 2: Formulario para Crear Nueva Zona -->
         <div class="create-form">
             <h2>Crear Nueva Zona</h2>
             <form action="procesar_crear_zona.php" method="post">
                 <label for="nombre_zona">Nombre de la Zona:</label>
                 <input type="text" id="nombre_zona" name="nombre_zona" required>
                 
-                <label for="descripcion">Descripción:</label>
+                <label for="descripcion">DescripciÃ³n:</label>
                 <textarea id="descripcion" name="descripcion"></textarea>
                 
-                <label for="duracion_semanas">Duración (semanas):</label>
+                <label for="duracion_semanas">DuraciÃ³n (semanas):</label>
                 <input type="number" id="duracion_semanas" name="duracion_semanas" min="1" required>
                 
                 <label for="orden">Orden en el Ciclo:</label>
@@ -187,10 +187,11 @@ $zonas = obtenerZonasVisitaService();
             </form>
         </div>
         
-        <a href="planificacion_rutas.php" class="back-button">Volver al Planificador de Visitas</a>
+        <a href="planificador_menu.php" class="back-button">Volver al Planificador de Visitas</a>
     </div>
     
     <!-- jQuery + Bootstrap JS -->
         </body>
 </html>
+
 

@@ -17,14 +17,14 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/db.php';
 
 // obtener_secciones.php
-require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
+require_once BASE_PATH . '/app/Modules/Planificador/planificacion_service.php';
 
 if (isset($_GET['cod_cliente'])) {
     $cod_cliente = intval($_GET['cod_cliente']);
     
     $conn = db();
     
-    // Obtener secciones que no están asignadas a ninguna zona
+    // Obtener secciones que no estÃ¡n asignadas a ninguna zona
     $query = "SELECT sc.cod_seccion, sc.nombre 
               FROM secciones_cliente sc
               WHERE sc.cod_cliente = '$cod_cliente' 
@@ -53,6 +53,7 @@ if (isset($_GET['cod_cliente'])) {
     echo json_encode(array());
 }
 ?>
+
 
 
 

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('BASE_PATH')) {
     header('Location: /public/');
     exit;
@@ -13,27 +13,27 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
     exit;
 }
 // editar_asignacion.php
-require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
-$pageTitle = "Editar Asignación";
+require_once BASE_PATH . '/app/Modules/Planificador/planificacion_service.php';
+$pageTitle = "Editar AsignaciÃ³n";
 include BASE_PATH . '/resources/views/layouts/header.php';
 
-// Verificar si los datos requeridos están en la URL
+// Verificar si los datos requeridos estÃ¡n en la URL
 if (!isset($_GET['cod_cliente'], $_GET['cod_zona'])) {
-    error_log("Error: Datos insuficientes para editar la asignación.");
+    error_log("Error: Datos insuficientes para editar la asignaciÃ³n.");
     echo 'Error interno';
     return;
 }
 
-// Obtener los parámetros de la URL
+// Obtener los parÃ¡metros de la URL
 $cod_cliente = intval($_GET['cod_cliente']);
 $cod_zona = intval($_GET['cod_zona']);
 $cod_seccion = isset($_GET['cod_seccion']) && $_GET['cod_seccion'] !== 'NULL' ? intval($_GET['cod_seccion']) : null;
 
-// Llamar a obtenerAsignacion con el parámetro correcto
+// Llamar a obtenerAsignacion con el parÃ¡metro correcto
 $asignacion = obtenerAsignacion($cod_cliente, $cod_zona, $cod_seccion);
 
 if (!$asignacion) {
-    error_log("Error: No se encontró la asignación solicitada.");
+    error_log("Error: No se encontrÃ³ la asignaciÃ³n solicitada.");
     echo 'Error interno';
     return;
 }
@@ -118,14 +118,14 @@ $zonas = obtenerZonasVisitaService();
         <input type="text" value="<?php echo htmlspecialchars($cliente['nombre_comercial']); ?>" disabled>
         <input type="hidden" name="cod_cliente" value="<?php echo htmlspecialchars($cod_cliente); ?>">
 
-        <!-- Sección -->
+        <!-- SecciÃ³n -->
         <?php if ($cod_seccion): ?>
-            <label>Sección:</label>
+            <label>SecciÃ³n:</label>
             <input type="text" value="<?php echo htmlspecialchars($asignacion['nombre_seccion']); ?>" disabled>
             <input type="hidden" name="cod_seccion" value="<?php echo htmlspecialchars($cod_seccion); ?>">
         <?php else: ?>
-            <label>Sección:</label>
-            <input type="text" value="Sin Sección" disabled>
+            <label>SecciÃ³n:</label>
+            <input type="text" value="Sin SecciÃ³n" disabled>
             <input type="hidden" name="cod_seccion" value="NULL">
         <?php endif; ?>
 
@@ -157,7 +157,7 @@ $zonas = obtenerZonasVisitaService();
         <label for="preferencia_horaria">Preferencia Horaria:</label>
         <select name="preferencia_horaria" id="preferencia_horaria">
             <option value="">--Selecciona una Preferencia--</option>
-            <option value="M" <?php echo $asignacion['preferencia_horaria'] == 'M' ? 'selected' : ''; ?>>Mañana</option>
+            <option value="M" <?php echo $asignacion['preferencia_horaria'] == 'M' ? 'selected' : ''; ?>>MaÃ±ana</option>
             <option value="T" <?php echo $asignacion['preferencia_horaria'] == 'T' ? 'selected' : ''; ?>>Tarde</option>
         </select>
 
@@ -176,12 +176,13 @@ $zonas = obtenerZonasVisitaService();
         <textarea name="observaciones" id="observaciones"><?php echo htmlspecialchars($asignacion['observaciones']); ?></textarea>
 
         <!-- Botones -->
-        <button type="submit" class="btn btn-primary">Actualizar Asignación</button>
+        <button type="submit" class="btn btn-primary">Actualizar AsignaciÃ³n</button>
         <a href="asignacion_clientes_zonas.php?cod_zona=<?php echo htmlspecialchars($cod_zona); ?>" class="btn btn-danger">Cancelar</a>
     </form>
 </div>
 </body>
 </html>
+
 
 
 

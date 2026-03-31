@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('BASE_PATH')) {
     header('Location: /public/');
     exit;
@@ -16,14 +16,14 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 // asignacion_clientes_zonas.php
-require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
+require_once BASE_PATH . '/app/Modules/Planificador/planificacion_service.php';
 require_once BASE_PATH . '/app/Support/functions.php';
 $pageTitle = "Asignar Clientes a Zonas";
 $ui_version = 'bs5';
 $ui_requires_jquery = false;
 include BASE_PATH . '/resources/views/layouts/header.php';
 
-// Verificar si el usuario ha iniciado sesión
+// Verificar si el usuario ha iniciado sesiÃ³n
 
 // Obtener todas las zonas asignadas al vendedor
 $zonas = obtenerZonasVisitaService();
@@ -34,7 +34,7 @@ $clientes_desalineados = array();
 if (isset($_GET['cod_zona'])) {
     $cod_zona = intval($_GET['cod_zona']);
     
-    // Obtener información de la zona
+    // Obtener informaciÃ³n de la zona
     $zona_actual = obtenerZonaPorCodigo($cod_zona);
     
     if (!$zona_actual) {
@@ -52,7 +52,7 @@ if (isset($_GET['cod_zona'])) {
     // Obtener asignaciones actuales de clientes a la zona
     $asignaciones_actuales = obtenerClientesPorZona($cod_zona);
 
-    // Clientes en la zona cuyo cod_vendedor no coincide con el vendedor en sesión
+    // Clientes en la zona cuyo cod_vendedor no coincide con el vendedor en sesiÃ³n
     $codigoSesion = isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
     if ($codigoSesion > 0 && !empty($asignaciones_actuales)) {
         $codigosClientes = array();
@@ -126,7 +126,7 @@ if (isset($_GET['cod_zona'])) {
     <meta charset="UTF-8">
     <title>Asignar Clientes a Zonas</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- Font Awesome para los íconos -->
+        <!-- Font Awesome para los Ã­conos -->
     <style>
         /* Estilos existentes... */
         body {
@@ -203,7 +203,7 @@ if (isset($_GET['cod_zona'])) {
             box-shadow: 0 1px 4px rgba(0,0,0,0.25);
         }
 
-        /* Responsividad para dispositivos móviles */
+        /* Responsividad para dispositivos mÃ³viles */
         @media (max-width: 1024px) {
             .btn-zona {
                 width: 150px;
@@ -328,7 +328,7 @@ if (isset($_GET['cod_zona'])) {
         .back-button:hover {
             background-color: #5a6268;
         }
-        /* Estilo para el campo de Sección oculto */
+        /* Estilo para el campo de SecciÃ³n oculto */
         .error-message {
             color: red;
             margin-bottom: 15px;
@@ -403,12 +403,12 @@ if (isset($_GET['cod_zona'])) {
                         <?php endif; ?>
                     </select>
                     
-                    <!-- Campo de Sección que se muestra dinámicamente -->
+                    <!-- Campo de SecciÃ³n que se muestra dinÃ¡micamente -->
                     <div id="seccion-container" class="d-none">
-                        <label for="cod_seccion">Selecciona la Sección:</label>
+                        <label for="cod_seccion">Selecciona la SecciÃ³n:</label>
                         <select id="cod_seccion" name="cod_seccion" class="form-select">
-                            <option value="">--Selecciona una Sección--</option>
-                            <!-- Las opciones se llenarán mediante AJAX -->
+                            <option value="">--Selecciona una SecciÃ³n--</option>
+                            <!-- Las opciones se llenarÃ¡n mediante AJAX -->
                         </select>
                     </div>
                     
@@ -430,7 +430,7 @@ if (isset($_GET['cod_zona'])) {
                     <label for="preferencia_horaria">Preferencia Horaria:</label>
                     <select id="preferencia_horaria" name="preferencia_horaria" class="form-select">
                         <option value="">--Selecciona una Preferencia--</option>
-                        <option value="M">Mañana</option>
+                        <option value="M">MaÃ±ana</option>
                         <option value="T">Tarde</option>
                     </select>
                     
@@ -484,7 +484,7 @@ if (isset($_GET['cod_zona'])) {
         ?>
         <?php foreach ($asignaciones_actuales as $asignacion): ?>
             <?php
-                // Determinar la clase CSS basada en el tipo de asignación
+                // Determinar la clase CSS basada en el tipo de asignaciÃ³n
                 $clase = '';
                 if ($asignacion['tipo_asignacion'] === 'secundaria') {
                     $clase = 'asignacion-secundaria';
@@ -524,23 +524,23 @@ if (isset($_GET['cod_zona'])) {
                 <?php if ($asignacion['tipo_asignacion'] === 'primaria') {?>
                     
                 
-    <!-- Botón de Editar -->
-    <!-- Botón de Editar -->
+    <!-- BotÃ³n de Editar -->
+    <!-- BotÃ³n de Editar -->
 <form action="editar_asignacion.php" method="get" style="display:inline;">
     <input type="hidden" name="cod_cliente" value="<?php echo htmlspecialchars($asignacion['cod_cliente']); ?>">
     <input type="hidden" name="cod_zona" value="<?php echo htmlspecialchars($cod_zona); ?>">
     <input type="hidden" name="cod_seccion" value="<?php echo isset($asignacion['cod_seccion']) ? htmlspecialchars($asignacion['cod_seccion']) : 'NULL'; ?>">
-    <button type="submit" class="btn btn-sm btn-warning" title="Editar Asignación">
+    <button type="submit" class="btn btn-sm btn-warning" title="Editar AsignaciÃ³n">
         <i class="fas fa-pencil"></i>
     </button>
 </form>
 
-    <!-- Botón de Eliminar -->
-    <form action="borrar_asignacion.php" method="post" style="display:inline;" onsubmit="return confirm('Estás seguro de que deseas eliminar esta asignación?');">
+    <!-- BotÃ³n de Eliminar -->
+    <form action="borrar_asignacion.php" method="post" style="display:inline;" onsubmit="return confirm('EstÃ¡s seguro de que deseas eliminar esta asignaciÃ³n?');">
         <input type="hidden" name="cod_cliente" value="<?php echo htmlspecialchars($asignacion['cod_cliente']); ?>">
         <input type="hidden" name="cod_zona" value="<?php echo htmlspecialchars($cod_zona); ?>">
         <input type="hidden" name="cod_seccion" value="<?php echo htmlspecialchars($asignacion['cod_seccion']); ?>">
-        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar Asignación">
+        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar AsignaciÃ³n">
             <i class="fas fa-trash"></i>
         </button>
     </form>
@@ -568,7 +568,7 @@ if (isset($_GET['cod_zona'])) {
         });
     });
 
-    // Inicialización: Ocultar filas si el checkbox está desmarcado
+    // InicializaciÃ³n: Ocultar filas si el checkbox estÃ¡ desmarcado
     document.addEventListener('DOMContentLoaded', function() {
         const mostrar = document.getElementById('mostrar-nunca').checked;
         const filas = document.querySelectorAll('.frecuencia-nunca');
@@ -583,7 +583,7 @@ if (isset($_GET['cod_zona'])) {
             <a href="asignacion_clientes_zonas.php" class="back-button">Volver a Zonas</a>
             
             <script>
-                // Función para verificar y cargar las secciones del cliente seleccionado
+                // FunciÃ³n para verificar y cargar las secciones del cliente seleccionado
                 function verificarSecciones(cod_cliente) {
                     var xhr = new XMLHttpRequest();
                     xhr.open('GET', 'obtener_secciones.php?cod_cliente=' + cod_cliente, true);
@@ -595,7 +595,7 @@ if (isset($_GET['cod_zona'])) {
                                 var seccionSelect = document.getElementById('cod_seccion');
                                 
                                 // Limpiar opciones existentes
-                                seccionSelect.innerHTML = '<option value="">--Selecciona una Sección--</option>';
+                                seccionSelect.innerHTML = '<option value="">--Selecciona una SecciÃ³n--</option>';
                                 
                                 // Determinar si el cliente tiene secciones disponibles
                                 if (secciones.length > 0) {
@@ -639,7 +639,7 @@ if (isset($_GET['cod_zona'])) {
                     }
                 });
 
-                // Validación del formulario antes de enviarlo
+                // ValidaciÃ³n del formulario antes de enviarlo
                 document.getElementById('assign-form').addEventListener('submit', function(event) {
                     var errorMessage = document.getElementById('error-message');
                     var cod_cliente = document.getElementById('cod_cliente').value;
@@ -663,7 +663,7 @@ if (isset($_GET['cod_zona'])) {
                     
                     if (!seccionContainer.classList.contains('d-none') && cod_seccion === '') {
                         errorMessage.classList.remove('d-none');
-                        errorMessage.textContent = 'Debes seleccionar una sección.';
+                        errorMessage.textContent = 'Debes seleccionar una secciÃ³n.';
                         event.preventDefault();
                         return;
                     }
@@ -689,7 +689,7 @@ if (isset($_GET['cod_zona'])) {
                         return;
                     }
                     
-                    // Si todas las validaciones pasan, el formulario se enviará
+                    // Si todas las validaciones pasan, el formulario se enviarÃ¡
                 });
             </script>
 <?php endif; ?>
@@ -698,3 +698,4 @@ if (isset($_GET['cod_zona'])) {
     <!-- jQuery + Bootstrap JS -->
         </body>
 </html>
+

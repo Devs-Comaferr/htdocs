@@ -15,23 +15,23 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 header('Content-Type: text/html; charset=utf-8');
 
-// Si el usuario no ha iniciado sesión
+// Si el usuario no ha iniciado sesiÃ³n
 
 
-// Definir el título de la página (usa el que se haya pasado, o uno por defecto)
+// Definir el tÃ­tulo de la pÃ¡gina (usa el que se haya pasado, o uno por defecto)
 if (!isset($pageTitle)) {
     $pageTitle = "Panel de " . ($_SESSION['nombre'] ?? 'Usuario');
 }
 
-// Conexión a la base de datos
+// ConexiÃ³n a la base de datos
 
 // Incluir funciones comunes
 require_once BASE_PATH . '/app/Support/functions.php';
 
 $conn = db();
 
-// Consulta para contar los pedidos abiertos (históricos)
-// Comentario saneado para evitar basura de encoding en esta sección.
+// Consulta para contar los pedidos abiertos (histÃ³ricos)
+// Comentario saneado para evitar basura de encoding en esta secciÃ³n.
 
 $codigoSesion = null;
 if (isset($_SESSION['codigo']) && $_SESSION['codigo'] !== '' && $_SESSION['codigo'] !== null) {
@@ -426,8 +426,8 @@ if ($isJcasado) {
   <!-- 
        ESTILOS: Mantiene la sidebar al 20%, y si es layout-normal => 2 columnas de 40%;
                 si es layout-jcasado => 3 columnas (c. 26.66%) para escritorio.
-       Además, se mantiene el comportamiento actual para escritorio.
-       Scroll normal en móvil.
+       AdemÃ¡s, se mantiene el comportamiento actual para escritorio.
+       Scroll normal en mÃ³vil.
   -->
   <style type="text/css">
     /* ==== Reseteo general ==== */
@@ -448,7 +448,7 @@ if ($isJcasado) {
       padding-right: 12px;
     }
 
-    /* ==== Header (o .header, según header.php) ==== */
+    /* ==== Header (o .header, segÃºn header.php) ==== */
     header, .header {
       background-color: #fff; 
       /* Ajusta si quieres un header fijo en escritorio (ver media query) */
@@ -468,42 +468,82 @@ if ($isJcasado) {
       background: #f4f4f4;
       border-right: 1px solid #ddd;
     }
+    .sidebar {
+      background: linear-gradient(180deg, #eef3f8 0%, #f6f8fb 100%);
+      border-right: 1px solid rgba(203, 213, 225, 0.75);
+    }
     .column:last-child {
       border-right: none;
     }
 
     /* ========== BOTONES, GROUPS, ETC. ========== */
     .btn {
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      justify-content: center; 
-      height: 85px; 
-      padding: 8px; 
-      font-size: 16px; 
-      font-weight: bold; 
-      border: none; 
-      border-radius: 8px; 
-      cursor: pointer; 
-      color: #fff; 
-      background-color: #007bff; 
-      margin-bottom: 8px; 
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      min-height: 68px;
+      padding: 14px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.25;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 16px;
+      cursor: pointer;
+      color: #0f172a;
+      background: rgba(255,255,255,0.98);
+      margin-bottom: 0;
       text-decoration: none;
+      text-align: left;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     }
-    .btn:hover {
+    .btn::before {
+      content: none;
+    }
+    .btn::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 12px;
+      bottom: 12px;
+      width: 4px;
+      border-radius: 999px;
+      background: var(--btn-accent, #3b82f6);
       opacity: 0.9;
     }
-    .btn i {
-      font-size: 40px;
-      margin-bottom: 4px;
+    .btn:hover {
+      color: #0f172a;
+      transform: translateX(3px);
+      border-color: rgba(148, 163, 184, 0.28);
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.11);
     }
-    .btn-productos    { background-color: #0374ff; }    
-    .btn-clientes     { background-color: #6c757d; }
-    .btn-faltas       { background-color: #dc3545; }
-    .btn-pedidos      { background-color: #ffc107; }
-    .btn-planificador { background-color: #28a745; }
-    .btn-estadisticas { background-color: #3fb8af; }
-    .btn-nuevocliente { background-color: #2980b9; }
+    .btn i {
+      font-size: 20px;
+      width: 24px;
+      min-width: 24px;
+      line-height: 1;
+      margin-bottom: 0;
+      text-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+    .btn-productos    { --btn-accent: #0374ff; }
+    .btn-clientes     { --btn-accent: #6c757d; }
+    .btn-faltas       { --btn-accent: #dc3545; }
+    .btn-pedidos      { --btn-accent: #d39e00; }
+    .btn-planificador { --btn-accent: #28a745; }
+    .btn-estadisticas { --btn-accent: #3fb8af; }
+    .btn-nuevocliente { --btn-accent: #2980b9; }
+    .btn-productos i    { color: #0374ff; }
+    .btn-clientes i     { color: #6c757d; }
+    .btn-faltas i       { color: #dc3545; }
+    .btn-pedidos i      { color: #d39e00; }
+    .btn-planificador i { color: #28a745; }
+    .btn-estadisticas i { color: #3fb8af; }
+    .btn-nuevocliente i { color: #2980b9; }
     .mobile-menu-toggle {
       display: none;
       width: 56px;
@@ -535,7 +575,7 @@ if ($isJcasado) {
     background-color: red;
     color: white;
     border-radius: 50%;
-    padding: 8px 12px; /* Tamaño consistente */
+    padding: 8px 12px; /* TamaÃ±o consistente */
     font-size: 14px;
     font-weight: bold;
     box-shadow: 0 0 5px rgba(0,0,0,0.3);
@@ -699,12 +739,31 @@ if ($isJcasado) {
     .sidebar .buttons-container {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
+      padding: 8px 4px 16px;
     }
 
     .sidebar .buttons-container > .btn {
       width: 100%;
       margin-bottom: 0;
+      padding-right: 40px;
+    }
+    .sidebar .buttons-container > .btn .badge {
+      top: 6px;
+      right: 6px;
+      z-index: 3;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 700;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      box-shadow: 0 8px 16px rgba(220, 38, 38, 0.28);
     }
 
     /* ==== Tablas ==== */
@@ -743,7 +802,7 @@ if ($isJcasado) {
       color: #007BFF;
     }
 
-    /* ==== Paginación ==== */
+    /* ==== PaginaciÃ³n ==== */
     .pagination {
       margin-top: 20px;
       text-align: center;
@@ -814,9 +873,9 @@ if ($isJcasado) {
     /* ======== MEDIA QUERIES ===== */
     /* ============================= */
 
-    /* === Móvil y tablet === */
+    /* === MÃ³vil y tablet === */
 @media (max-width: 1024px) {
-  /* Permitimos scroll normal en <body> o lo dejas oculto, según tu preferencia */
+  /* Permitimos scroll normal en <body> o lo dejas oculto, segÃºn tu preferencia */
   html, body {
     overflow-x: hidden;
     overflow-y: auto;
@@ -826,7 +885,7 @@ if ($isJcasado) {
   header, .header {
     position: fixed;
     top: 0; left: 0; right: 0;
-    height: 60px; /* Ajusta según tu header */
+    height: 60px; /* Ajusta segÃºn tu header */
     z-index: 9999;
   }
   .page-container {
@@ -1028,6 +1087,7 @@ if ($isJcasado) {
         height: calc(100vh - 60px);
         height: calc(100dvh - 60px);
         overflow: hidden;
+        padding: 12px 10px;
       }
       .page-container > .app-container {
         margin-left: 14%;
@@ -1230,7 +1290,7 @@ $ui_requires_jquery = false;
     <div class="mobile-menu-backdrop" onclick="toggleMobileMenu(false)"></div>
     <div class="buttons-container">
     <?php
-    // Mostrar el botón correspondiente si procede
+    // Mostrar el botÃ³n correspondiente si procede
     if ($puedeVerProductos) {
     ?>
       <a href="productos.php" class="btn btn-productos">
@@ -1256,7 +1316,7 @@ $ui_requires_jquery = false;
       </a>
 
       <?php if ($puedeVerPlanificador) { ?>
-        <a href="planificacion_rutas.php" class="btn btn-planificador" style="position: relative;">
+        <a href="planificador_menu.php" class="btn btn-planificador" style="position: relative;">
           <?php if ($count_pedidos_sin_visita > 0) { ?>
             <span class="badge"><?php echo $count_pedidos_sin_visita; ?></span>
           <?php } ?>
@@ -1300,7 +1360,7 @@ $ui_requires_jquery = false;
     <?php
 // echo "Zona horaria: " . ini_get("date.timezone") . "<br>";
 // echo "Hora actual: " . date("Y-m-d H:i:s") . "<br>";
-// Comentario de depuración saneado
+// Comentario de depuraciÃ³n saneado
 ?>
     <?php 
     if (empty($pedidosHoy)) {
@@ -1507,7 +1567,7 @@ $ui_requires_jquery = false;
                . '</div>';
             echo '<div class="group-content" id="grupoAlb_' . $codComisAlb . '" style="display:' . $displayAlb . ';">';
 
-            // Mostrar cada albarán
+            // Mostrar cada albarÃ¡n
             foreach ($grpA['registros'] as $alb) {
                 $colorAlbaran = '#17a2b8';
                 $obsExt = !empty($alb['observacion_externa']) ? toUTF8($alb['observacion_externa']) : '';
@@ -1547,7 +1607,7 @@ $ui_requires_jquery = false;
                 } else {
                     $prefijo = "Venta";
                 }
-                // Identificador único
+                // Identificador Ãºnico
                 $uniqueId = $codAlb . "_" . $alb['tipo_venta'];
 
                 echo '<div class="item-box js-documento-card" style="border-left:6px solid ' . $colorAlbaran . ';' . $bgAlbaran
@@ -1692,7 +1752,7 @@ $ui_requires_jquery = false;
                     $colorTexto = '#666';
                     $iconoNL = '<i class="fa fa-ban"></i>';
                     if (strpos($tipoEventoLower, 'medico') !== false 
-                        || strpos($tipoEventoLower, 'médico') !== false) {
+                        || strpos($tipoEventoLower, 'mÃ©dico') !== false) {
                         $iconoNL = '<i class="fa fa-user-md"></i>';
                     } else if (strpos($tipoEventoLower, 'comaferr') !== false) {
                         $iconoNL = '<i class="fa fa-building"></i>';
@@ -1759,7 +1819,7 @@ $ui_requires_jquery = false;
     <i class="fa fa-unlock-alt"></i><span>Abiertos</span>
   </a>
   <?php if ($puedeVerPlanificador) { ?>
-    <a href="planificacion_rutas.php" class="app-btn app-planificador">
+    <a href="planificador_menu.php" class="app-btn app-planificador">
       <?php if ($count_pedidos_sin_visita > 0) { ?>
         <span class="badge"><?php echo $count_pedidos_sin_visita; ?></span>
       <?php } ?>
@@ -1845,7 +1905,7 @@ function abrirModalAlbaran(codVentaTipo, codCliente) {
 
 // ================ Visitas ================
 function abrirModalVisita(idVisita) {
-  // Redirige a la página de edición de visita
+  // Redirige a la pÃ¡gina de ediciÃ³n de visita
   window.location.href = "editar_visita.php?id_visita=" + idVisita + "&origen=index";
 }
 
@@ -1918,12 +1978,13 @@ if (window.matchMedia('(max-width: 1024px)').matches) {
 </script>
 
 <?php
-// Cerrar la conexión ODBC
+// Cerrar la conexiÃ³n ODBC
 ?>
 <script src="<?= BASE_URL ?>/assets/js/app-ui.js"></script>
 <?php require_once BASE_PATH . '/app/Modules/Pedidos/Views/modal_documento.php'; ?>
 </body>
 </html>
+
 
 
 

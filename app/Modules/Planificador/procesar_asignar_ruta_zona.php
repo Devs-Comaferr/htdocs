@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('BASE_PATH')) {
     header('Location: /public/');
     exit;
@@ -16,7 +16,7 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
 // procesar_asignar_ruta_zona.php
-require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
+require_once BASE_PATH . '/app/Modules/Planificador/planificacion_service.php';
 header('Content-Type: text/html; charset=UTF-8');
 
 $ui_version = 'bs5';
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </style>
         </head>
         <body>
-            <div class='message'>Datos inválidos para la asignación de la ruta.</div><br>
+            <div class='message'>Datos invÃ¡lidos para la asignaciÃ³n de la ruta.</div><br>
             <a href='zonas_rutas.php?cod_zona=$cod_zona' class='back-button'>Volver</a>
         </body>
         </html>";
@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </style>
         </head>
         <body>
-            <div class='message'>Error al asignar la ruta a la zona. Inténtalo de nuevo.</div><br>
+            <div class='message'>Error al asignar la ruta a la zona. IntÃ©ntalo de nuevo.</div><br>
             <a href='zonas_rutas.php?cod_zona=$cod_zona' class='back-button'>Volver</a>
         </body>
         </html>";
@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     echo "<!DOCTYPE html>
     <html>
     <head>
-        <title>Método Inválido</title>
+        <title>MÃ©todo InvÃ¡lido</title>
         <meta charset='UTF-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
         {$globalHeaderHead}
@@ -112,9 +112,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </style>
     </head>
     <body>
-        <div class='message'>Método de solicitud no válido.</div><br>
+        <div class='message'>MÃ©todo de solicitud no vÃ¡lido.</div><br>
         <a href='zonas.php' class='back-button'>Volver</a>
     </body>
     </html>";
 }
 ?>
+

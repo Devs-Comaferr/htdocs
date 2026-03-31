@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('BASE_PATH')) {
     header('Location: /public/');
     exit;
@@ -20,7 +20,7 @@ require_once BASE_PATH . '/app/Support/functions.php';
 $ui_version = 'bs5';
 $ui_requires_jquery = false;
 $conn = db();
-$pageTitle = "Registrar Día No Laborable";
+$pageTitle = "Registrar DÃ­a No Laborable";
 include BASE_PATH . '/resources/views/layouts/header.php';
 
 $codigo_vendedor = isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
@@ -43,7 +43,7 @@ function registrarNoLaborablePrepareExecute($conn, string $sql, array $params = 
     return $stmt;
 }
 
-// Función para preparar la descripción: si está vacía, retorna cadena vacía; si no, la escapada
+// FunciÃ³n para preparar la descripciÃ³n: si estÃ¡ vacÃ­a, retorna cadena vacÃ­a; si no, la escapada
 function prepararDescripcion($desc) {
     $desc = trim($desc);
     if ($desc == "") {
@@ -57,7 +57,7 @@ function prepararDescripcion($desc) {
  * Verifica si una fecha concreta es festiva.
  *  1) Mira si existe EXACTAMENTE "fecha = X AND tipo_evento='Festivo' AND repetir_anualmente=0"
  *  2) O bien si hay un registro con "tipo_evento='Festivo' AND repetir_anualmente=1"
- *     donde coincidan mes/día con $fechaCheck (ignorando año).
+ *     donde coincidan mes/dÃ­a con $fechaCheck (ignorando aÃ±o).
  */
 function esFestivo($fechaCheck, $conn) {
     $ts = strtotime($fechaCheck);
@@ -84,13 +84,13 @@ function esFestivo($fechaCheck, $conn) {
         }
     }
 
-    // 2) Comprueba si hay un festivo repetible (repetir_anualmente=1) con mes/día
+    // 2) Comprueba si hay un festivo repetible (repetir_anualmente=1) con mes/dÃ­a
     $sqlAnual = "
         SELECT COUNT(*) AS c
         FROM [integral].[dbo].[cmf_dias_no_laborables]
         WHERE tipo_evento='Festivo'
           AND repetir_anualmente=1
-          -- ignoramos el año, comparamos mes/día
+          -- ignoramos el aÃ±o, comparamos mes/dÃ­a
           AND (
               DATEPART(MONTH, fecha) = $mm
               AND DATEPART(DAY,   fecha) = $dd
@@ -106,14 +106,14 @@ function esFestivo($fechaCheck, $conn) {
     return false;
 }
 
-// Procesar el formulario cuando se envía
+// Procesar el formulario cuando se envÃ­a
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tipo_evento_sel = trim($_POST['tipo_evento']);
     
     if (empty($tipo_evento_sel)) {
         $error = "Seleccione un tipo de evento.";
     } else {
-        // Usamos el campo de descripción enviado en el formulario
+        // Usamos el campo de descripciÃ³n enviado en el formulario
         $desc_sql = prepararDescripcion($_POST['descripcion']);
 
         // --------------------------------------------------------------------
@@ -134,8 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 } else {
                     $dias_insertados = 0;
                     for ($d = $ts_inicio; $d <= $ts_fin; $d += 86400) {
-                        $dia_semana = date('w', $d); // 0=domingo, 6=sábado
-                        // Omitir sábados y domingos
+                        $dia_semana = date('w', $d); // 0=domingo, 6=sÃ¡bado
+                        // Omitir sÃ¡bados y domingos
                         if ($dia_semana == 0 || $dia_semana == 6) {
                             continue;
                         }
@@ -146,10 +146,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             // Omitir
                             continue;
                         }
-                        // Comprobar si el día es LUNES y el día anterior (domingo) fue Festivo
+                        // Comprobar si el dÃ­a es LUNES y el dÃ­a anterior (domingo) fue Festivo
                         if ($dia_semana == 1) {
                             // Lunes => ver si el domingo fue festivo
-                            // (domingo = $fecha_actual - 1 día)
+                            // (domingo = $fecha_actual - 1 dÃ­a)
                             $ayerTs = $d - 86400;
                             $fecha_ayer = date("Y-m-d", $ayerTs);
                             // si $fecha_ayer es festivo => skip
@@ -169,16 +169,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         }
                     }
                     if ($dias_insertados > 0) {
-                        $success = "Vacaciones registradas correctamente para $dias_insertados día(s).";
+                        $success = "Vacaciones registradas correctamente para $dias_insertados dÃ­a(s).";
                     } else {
-                        $error = "No se registraron días de vacaciones (puede que haya elegido fines de semana/festivos).";
+                        $error = "No se registraron dÃ­as de vacaciones (puede que haya elegido fines de semana/festivos).";
                     }
                 }
             }
         }
 
         // --------------------------------------------------------------------
-        // 2. BLOQUE PARA "FESTIVO" (aquí sí puede ser sábado/domingo, si quieres)
+        // 2. BLOQUE PARA "FESTIVO" (aquÃ­ sÃ­ puede ser sÃ¡bado/domingo, si quieres)
         //    si NO quieres omitir sab/dom, lo dejas
         // --------------------------------------------------------------------
         else if ($tipo_evento_sel == "Festivo") {
@@ -217,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     && strtotime($hora_inicio_otro) >= strtotime($hora_fin_otro)) {
                     $error = "La hora de inicio debe ser anterior a la hora de fin.";
                 } else {
-                    // Aquí podrías también omitir sáb./dom. o Festivo si lo deseas
+                    // AquÃ­ podrÃ­as tambiÃ©n omitir sÃ¡b./dom. o Festivo si lo deseas
                     $sql = "
                         INSERT INTO [integral].[dbo].[cmf_dias_no_laborables]
                         (cod_vendedor, fecha, hora_inicio, hora_fin, tipo_evento, descripcion, repetir_anualmente)
@@ -238,7 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registrar Día No Laborable</title>
+    <title>Registrar DÃ­a No Laborable</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap CSS (compatible con PHP 5.2.3) -->
         <style>
@@ -307,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body>
 <div class="container">
-    <h2>Registrar Día No Laborable</h2>
+    <h2>Registrar DÃ­a No Laborable</h2>
     <?php if (!empty($error)): ?>
         <div class="alert alert-danger"><?php echo $error; ?></div>
     <?php endif; ?>
@@ -316,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php endif; ?>
     
     <form action="registrar_dia_no_laborable.php" method="POST">
-        <!-- Selección del Tipo de Evento -->
+        <!-- SelecciÃ³n del Tipo de Evento -->
         <div class="mb-3">
             <label for="tipo_evento">Tipo de Evento:</label>
             <select name="tipo_evento" id="tipo_evento" class="form-select" required>
@@ -371,16 +371,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
 
         <div class="mb-3">
-            <label for="descripcion">Descripción (opcional):</label>
+            <label for="descripcion">DescripciÃ³n (opcional):</label>
             <textarea name="descripcion" id="descripcion" class="form-control" rows="3" placeholder="Detalles adicionales"></textarea>
         </div>
         <button type="submit" class="btn btn-primary w-100">Registrar</button>
     </form>
     
     <br>
-    <a href="planificacion_rutas.php" class="btn btn-secondary w-100">Volver al Panel</a>
+    <a href="planificador_menu.php" class="btn btn-secondary w-100">Volver al Panel</a>
 </div>
 </body>
 </html>
 <?php
 ?>
+

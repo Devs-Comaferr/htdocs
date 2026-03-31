@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('BASE_URL')) {
     define('BASE_URL', '/public');
 }
@@ -113,7 +113,7 @@ $factor = 480 / 720;
       }
       .event.completed { background: #28a745; }
       .event.pending { background: #ffc107; color: #333; }
-      /* Ajustes para dispositivos móviles */
+      /* Ajustes para dispositivos mÃ³viles */
       @media (max-width: 1024px) {
           .timeline-container { height: 400px; }
       }
@@ -197,7 +197,7 @@ $factor = 480 / 720;
         </div>
     </div>
     <br>
-    <a href="planificacion_rutas.php" class="btn btn-secondary">Volver al Panel</a>
+    <a href="planificador_menu.php" class="btn btn-secondary">Volver al Panel</a>
 </div>
 </body>
 </html>
@@ -208,3 +208,4 @@ if (!defined('BASE_PATH')) {
 }
 
 ?>
+

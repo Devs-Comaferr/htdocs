@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once BASE_PATH . '/app/Support/header.php';
 ?>
 <!-- Frontend policy: el stack UI global es Bootstrap 5. Las vistas activas deben apoyarse en este header y usar assets locales de /public/assets/vendor/. -->
-<!-- Font Awesome local (instalado vía Composer/npm-asset) -->
+<!-- Font Awesome local (instalado vÃ­a Composer/npm-asset) -->
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/fontawesome/css/all.min.css">
 <link rel="icon" href="<?= BASE_URL ?>/imagenes/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= BASE_URL ?>/imagenes/favicon-32.png">
@@ -121,7 +121,7 @@ require_once BASE_PATH . '/app/Support/header.php';
     display: none;
   }
 
-  /* Móvil: en index-header, ocultar el pageTitle */
+  /* MÃ³vil: en index-header, ocultar el pageTitle */
   @media (max-width: 1024px) {
     html, body {
       overflow-x: hidden;
@@ -249,17 +249,17 @@ require_once BASE_PATH . '/app/Support/header.php';
     <i class="fa fa-unlock"></i>
   </a>
   <?php if ($puedeVerPlanificadorBar): ?>
-    <a href="<?= BASE_URL ?>/planificacion_rutas.php" class="app-btn app-planificador" title="Planificador">
+    <a href="<?= BASE_URL ?>/planificador_menu.php" class="app-btn app-planificador" title="Planificador">
       <?php if ($badgeSinVisita > 0): ?><span class="badge"><?= $badgeSinVisita ?></span><?php endif; ?>
       <i class="fa fa-calendar"></i>
     </a>
   <?php endif; ?>
   <?php if ($puedeVerEstadisticasBar): ?>
-    <a href="<?= BASE_URL ?>/estadisticas.php" class="app-btn app-estadisticas" title="Estadísticas">
+    <a href="<?= BASE_URL ?>/estadisticas.php" class="app-btn app-estadisticas" title="EstadÃ­sticas">
       <i class="fa fa-bar-chart"></i>
     </a>
   <?php endif; ?>
-  <a href="<?= BASE_URL ?>/altaClientes/alta_cliente.php" class="app-btn app-nuevo" title="Añadir cliente">
+  <a href="<?= BASE_URL ?>/altaClientes/alta_cliente.php" class="app-btn app-nuevo" title="AÃ±adir cliente">
     <i class="fa fa-user-plus"></i>
   </a>
 </div>
@@ -315,4 +315,5 @@ window.addEventListener('load', syncGlobalBars);
 window.addEventListener('resize', syncGlobalBars);
 window.addEventListener('orientationchange', syncGlobalBars);
 </script>
+
 

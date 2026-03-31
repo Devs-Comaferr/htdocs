@@ -2,6 +2,7 @@
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/db.php';
+require_once BASE_PATH . '/app/Support/pedidos_badges.php';
 requierePermiso('perm_planificador');
 
 $conn = db();
@@ -24,6 +25,9 @@ $fecha_minima = '2025-01-01';
 // Construir la consulta modificada para incluir tiempo_promedio_visita
 $sql_pedidos = "
 SELECT 
+    h.tipo_venta,
+    h.cod_empresa,
+    h.cod_caja,
     h.cod_venta,
     h.cod_cliente,
     h.cod_seccion,
@@ -73,7 +77,7 @@ while ($row = odbc_fetch_array($res_pedidos)) {
     $tiempo_promedio_min = floatval($row['tiempo_promedio_visita']) * 60;
   }
 
-  // Añadir al array de pedidos con tiempo_promedio_min
+  // AÃ±adir al array de pedidos con tiempo_promedio_min
   // Dado que PHP 5.2.3 no soporta array_merge con arrays asociativos de la misma manera, realizamos una combinación manual
   $row['tiempo_promedio_min'] = $tiempo_promedio_min;
   $pedidos[] = $row;
@@ -212,7 +216,60 @@ function formatoHora($horaSql)
       margin-bottom: 5px;
     }
 
+    .meta-pedido {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+
+    .meta-pedido span {
+      display: flex;
+      align-items: center;
+    }
+
+    .meta-pedido i {
+      color: #6c757d;
+      opacity: 0.8;
+    }
+
+    .meta-pedido .importe {
+      font-weight: 600;
+    }
+
+    .importe-positivo {
+      color: #198754;
+    }
+
+    .importe-negativo {
+      color: #dc3545;
+    }
+
+    .importe-cero {
+      color: #6c757d;
+    }
+
+    .meta-pedido .importe i {
+      opacity: 1;
+    }
+
+    .meta-pedido .lineas {
+      opacity: 0.7;
+      font-size: 0.85rem;
+    }
+
+    .card h5 {
+      margin-bottom: 6px;
+    }
+
     .pedido-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .acciones-pedido {
+      margin-top: 12px;
       display: flex;
       gap: 10px;
     }
@@ -252,6 +309,57 @@ function formatoHora($horaSql)
     .btn-web {
       background-color: #007bff;
       color: #fff;
+    }
+
+    .nota-pedido {
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      border-left: 3px solid #dee2e6;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .nota-pedido i {
+      margin-top: 2px;
+    }
+
+    .nota-pedido .badge {
+      display: inline-block !important;
+      width: auto !important;
+      flex: 0 0 auto !important;
+      white-space: nowrap;
+    }
+
+    .badges-pedido {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    .badges-pedido .badge {
+      font-size: 0.7rem;
+      padding: 3px 6px;
+      border-radius: 4px;
+    }
+
+    .bg-purple {
+      background-color: #6f42c1;
+      color: #fff;
+    }
+
+    .badge-xy {
+      background-color: #495057;
+      color: #fff;
+    }
+
+    .nota-pedido span {
+      flex: 1;
     }
 
     /* Estilos para el nombre del vendedor */
@@ -327,10 +435,15 @@ function formatoHora($horaSql)
 
             // Obtener el número de líneas desde el mapa, o 0 si no existe
             $numero_lineas = isset($numero_lineas_map[$pedido['cod_venta']]) ? $numero_lineas_map[$pedido['cod_venta']] : 0;
+            $obsOriginal = (string)($pedido['observacion_interna'] ?? '');
+            $badges = generarBadgesPedido($pedido['observacion_interna'] ?? '');
           ?>
-            <div class="pedido-item"
+            <div class="pedido-item <?= !empty($pedido['observacion_interna']) ? 'pedido-con-nota' : '' ?>"
               data-cod_venta="<?php echo htmlspecialchars($pedido['cod_venta']); ?>"
-              data-cod_cliente="<?php echo htmlspecialchars($pedido['cod_cliente']); ?>">
+              data-cod_cliente="<?php echo htmlspecialchars($pedido['cod_cliente']); ?>"
+              data-tipo_venta="<?php echo htmlspecialchars((string)$pedido['tipo_venta']); ?>"
+              data-cod_empresa="<?php echo htmlspecialchars((string)$pedido['cod_empresa']); ?>"
+              data-cod_caja="<?php echo htmlspecialchars((string)$pedido['cod_caja']); ?>">
               <div class="nombre-comercial">
                 <?php echo htmlspecialchars($pedido['nombre_comercial']); ?>
               </div>
@@ -341,34 +454,30 @@ function formatoHora($horaSql)
                 } ?>
               </div>
 
-              <div class="pedido-info">
-                <div>
-                  <?php
-                  if (!empty($pedido['cod_pedido_web'])) {
-                    echo ' ';
-                  } else {
-                    echo ' ';
-                  }
-                  echo htmlspecialchars($pedido['cod_venta']);
-                  ?>
-                </div>
-                <div>
-                   <?php echo date("d/m/Y", strtotime($pedido['fecha_venta'])); ?>
-                </div>
-                <div>
-                   <?php echo date("H:i", strtotime($pedido['hora_venta'])); ?>
-                </div>
-                <div>
-                   <?php echo number_format($pedido['importe'], 2, ',', '.') . " "; ?>
-                </div>
-                <div>
-                   <?php echo intval($numero_lineas) . " líneas"; ?>
-                </div>
+              <div class="pedido-info meta-pedido">
+                <span><i class="fa-solid fa-receipt me-1"></i> <?php echo htmlspecialchars($pedido['cod_venta']); ?></span>
+                <span><i class="fa-solid fa-calendar-days me-1"></i> <?php echo date("d/m/Y", strtotime($pedido['fecha_venta'])); ?></span>
+                <span><i class="fa-solid fa-clock me-1"></i> <?php echo date("H:i", strtotime($pedido['hora_venta'])); ?></span>
+                <span class="importe <?= $pedido['importe'] > 0 ? 'importe-positivo' : ($pedido['importe'] < 0 ? 'importe-negativo' : 'importe-cero') ?>">
+                  <i class="fa-solid fa-coins me-1"></i>
+                  <?= number_format($pedido['importe'], 2, ',', '.') ?> €
+                </span>
+                <span class="lineas"><i class="fa-solid fa-box-open me-1"></i> <?php echo intval($numero_lineas) . " líneas"; ?></span>
               </div>
+              <?php if (!empty($badges)): ?>
+                <div class="badges-pedido mb-1">
+                  <?php foreach ($badges as $b): ?>
+                    <span class="badge <?php echo htmlspecialchars($b['clase']); ?>">
+                      <?php echo htmlspecialchars($b['texto']); ?>
+                    </span>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
+
               <?php if (!empty($pedido['observacion_interna'])) { ?>
-                <div style="font-style:italic; color:#007bff;">
-                  <i class="fa fa-pencil"></i>
-                  <?php echo htmlspecialchars($pedido['observacion_interna']); ?><br><br>
+                <div class="nota-pedido">
+                  <i class="fa-solid fa-pen me-2"></i>
+                  <span><?php echo htmlspecialchars($obsOriginal); ?></span>
                 </div>
               <?php } ?>
 
@@ -379,7 +488,7 @@ function formatoHora($horaSql)
                 </div>
               <?php } ?>
 
-              <div class="pedido-buttons">
+              <div class="pedido-buttons acciones-pedido">
                 <?php if (!empty($pedido['cod_pedido_web'])) { ?>
                   <!-- Botón Web -->
                   <button class="btn btn-circle btn-web"
@@ -390,7 +499,7 @@ function formatoHora($horaSql)
                     data-cod_seccion="<?php echo htmlspecialchars($pedido['cod_seccion']); ?>"
                     data-fecha_visita="<?php echo $fechaInput; ?>"
                     data-hora_visita="<?php echo $horaVenta; ?>">
-                    <i class="fa fa-globe"></i>
+                    <i class="fa-solid fa-globe"></i>
                   </button>
                 <?php } else { ?>
                   <!-- Botón Visita -->
@@ -403,7 +512,7 @@ function formatoHora($horaSql)
                     data-fecha_visita="<?php echo $fechaInput; ?>"
                     data-hora_visita="<?php echo $horaVenta; ?>"
                     data-tiempo-promedio="<?php echo intval($pedido['tiempo_promedio_min']); ?>">
-                    <i class="fa fa-calendar-check-o"></i>
+                    <i class="fa-regular fa-calendar-check"></i>
                   </button>
                   <!-- Botón Teléfono -->
                   <button class="btn btn-circle btn-telefono"
@@ -414,7 +523,7 @@ function formatoHora($horaSql)
                     data-cod_seccion="<?php echo htmlspecialchars($pedido['cod_seccion']); ?>"
                     data-fecha_visita="<?php echo $fechaInput; ?>"
                     data-hora_visita="<?php echo $horaVenta; ?>">
-                    <i class="fa fa-phone"></i>
+                    <i class="fa-solid fa-phone"></i>
                   </button>
                   <!-- Botón WhatsApp -->
                   <button class="btn btn-circle btn-whatsapp"
@@ -425,7 +534,7 @@ function formatoHora($horaSql)
                     data-cod_seccion="<?php echo htmlspecialchars($pedido['cod_seccion']); ?>"
                     data-fecha_visita="<?php echo $fechaInput; ?>"
                     data-hora_visita="<?php echo $horaVenta; ?>">
-                    <i class="fa fa-whatsapp"></i>
+                    <i class="fa-brands fa-whatsapp"></i>
                   </button>
                   <!-- Botón Email -->
                   <button class="btn btn-circle btn-email"
@@ -436,7 +545,7 @@ function formatoHora($horaSql)
                     data-cod_seccion="<?php echo htmlspecialchars($pedido['cod_seccion']); ?>"
                     data-fecha_visita="<?php echo $fechaInput; ?>"
                     data-hora_visita="<?php echo $horaVenta; ?>">
-                    <i class="fa fa-envelope"></i>
+                    <i class="fa-solid fa-envelope"></i>
                   </button>
                 <?php } ?>
               </div>
@@ -452,23 +561,7 @@ function formatoHora($horaSql)
   </div>
 
   <!-- Modales aquí -->
-
-  <div class="modal fade" id="pedidoDetalleModal" tabindex="-1" role="dialog" aria-labelledby="pedidoDetalleModalLabel">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-          <h5 class="modal-title" id="pedidoDetalleModalLabel">Detalle del Pedido</h5>
-        </div>
-        <div class="modal-body" id="pedidoDetalleModalBody">
-          Cargando...
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <?php require_once BASE_PATH . '/app/Modules/Pedidos/Views/modal_documento.php'; ?>
 
   <!-- Modal Visita -->
   <div class="modal fade" id="visitaModal" tabindex="-1" role="dialog" aria-labelledby="visitaModalLabel">
@@ -821,39 +914,19 @@ function formatoHora($horaSql)
           }
 
           var codVenta = getData(item, 'cod_venta');
-          if (!codVenta) {
+          var tipoVenta = getData(item, 'tipo_venta');
+          var codEmpresa = getData(item, 'cod_empresa');
+          var codCaja = getData(item, 'cod_caja');
+          if (!codVenta || !tipoVenta || !codEmpresa || !codCaja) {
             return;
           }
 
-          var detalleModal = document.getElementById('pedidoDetalleModal');
-          var detalleLabel = document.getElementById('pedidoDetalleModalLabel');
-          var detalleBody = document.getElementById('pedidoDetalleModalBody');
-          if (!detalleModal || !detalleLabel || !detalleBody) {
+          if (typeof abrirDocumento !== 'function') {
+            console.error('abrirDocumento no está disponible');
             return;
           }
 
-          detalleLabel.textContent = 'Detalle del Pedido #' + codVenta;
-          detalleBody.innerHTML = 'Cargando...';
-          bootstrap.Modal.getOrCreateInstance(detalleModal).show();
-
-          var detailUrl = new URL('<?= BASE_URL ?>/ajax/detalle_pedido.php', window.location.origin);
-          detailUrl.searchParams.set('cod_venta', codVenta);
-
-          fetch(detailUrl.toString(), {
-            credentials: 'same-origin'
-          })
-            .then(function(response) {
-              if (!response.ok) {
-                throw new Error('HTTP ' + response.status);
-              }
-              return response.text();
-            })
-            .then(function(resp) {
-              detalleBody.innerHTML = resp;
-            })
-            .catch(function() {
-              detalleBody.innerHTML = '<div class="alert alert-danger">Error al cargar el detalle del pedido.</div>';
-            });
+          abrirDocumento(tipoVenta, codEmpresa, codCaja, codVenta);
         });
       });
 
@@ -1044,6 +1117,7 @@ function formatoHora($horaSql)
 </body>
 
 </html>
+
 
 
 

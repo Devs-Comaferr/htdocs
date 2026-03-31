@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('BASE_PATH')) {
     header('Location: /public/');
     exit;
@@ -15,7 +15,7 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
-require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
+require_once BASE_PATH . '/app/Modules/Planificador/planificacion_service.php';
 
 if (!isset($_POST['cod_cliente'], $_POST['cod_zona'], $_POST['cod_seccion'], $_POST['frecuencia_visita'], $_POST['tiempo_promedio_visita'], $_POST['preferencia_horaria'])) {
     appExitTextError('Error: Datos insuficientes para actualizar la asignacion.', 400);
@@ -60,3 +60,4 @@ if (!$resultado) {
 
 header("Location: asignacion_clientes_zonas.php?cod_zona=$cod_zona");
 exit;
+
