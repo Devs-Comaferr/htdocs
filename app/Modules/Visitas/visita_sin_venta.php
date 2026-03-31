@@ -17,14 +17,14 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 // visita_sin_venta.php
 
-$ui_version = 'bs3';
-
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
 
 $conn = db();
 
 $codigo_vendedor = isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
 
-// Manejar el envo del formulario
+// Manejar el envio del formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $estado_visita = 'Realizada';
     $cod_vendedor = $codigo_vendedor;
@@ -34,47 +34,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hora_inicio_visita = isset($_POST['hora_inicio_visita']) ? $_POST['hora_inicio_visita'] : '';
     $hora_fin_visita = isset($_POST['hora_fin_visita']) ? $_POST['hora_fin_visita'] : '';
     $observaciones = isset($_POST['observaciones']) ? $_POST['observaciones'] : '';
-    
+
     // Validar datos
     $errors = array();
     if ($cod_cliente === 0 || $cod_seccion === 0 || empty($fecha_visita) || empty($hora_inicio_visita) || empty($hora_fin_visita)) {
-        $errors[] = "Todos los campos son obligatorios.";
+        $errors[] = 'Todos los campos son obligatorios.';
     }
-    
+
     // Validar formatos
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_visita)) {
-        $errors[] = "Formato de fecha inválido.";
+        $errors[] = 'Formato de fecha invalido.';
     }
     if (!preg_match('/^\d{2}:\d{2}$/', $hora_inicio_visita) || !preg_match('/^\d{2}:\d{2}$/', $hora_fin_visita)) {
-        $errors[] = "Formato de hora inválido.";
+        $errors[] = 'Formato de hora invalido.';
     }
-    
+
     // Validar diferencia de tiempo
     if (!empty($hora_inicio_visita) && !empty($hora_fin_visita)) {
         list($inicio_h, $inicio_m) = explode(':', $hora_inicio_visita);
         list($fin_h, $fin_m) = explode(':', $hora_fin_visita);
-    
+
         $inicio_total = intval($inicio_h) * 60 + intval($inicio_m);
         $fin_total = intval($fin_h) * 60 + intval($fin_m);
         $diff = $fin_total - $inicio_total;
-    
-        if ($diff < 15 || $diff > 300) { // 15 minutos y 300 minutos (5 horas)
-            $errors[] = "La diferencia entre la hora de inicio y la hora de fin debe ser de al menos 15 minutos y no exceder las 5 horas.";
+
+        if ($diff < 15 || $diff > 300) {
+            $errors[] = 'La diferencia entre la hora de inicio y la hora de fin debe ser de al menos 15 minutos y no exceder las 5 horas.';
         }
     }
-    
+
     if (empty($errors)) {
-        // Insertar en la tabla cmf_visitas_comerciales
         $sql = "INSERT INTO cmf_visitas_comerciales 
                 (estado_visita, cod_vendedor, cod_cliente, cod_seccion, fecha_visita, hora_inicio_visita, hora_fin_visita, observaciones)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = odbc_prepare($conn, $sql);
         if (odbc_execute($stmt, array($estado_visita, $cod_vendedor, $cod_cliente, $cod_seccion, $fecha_visita, $hora_inicio_visita, $hora_fin_visita, $observaciones))) {
-            // Redireccionar con mensaje de xito
-            header("Location: index.php?msg=visita_realizada");
+            header('Location: index.php?msg=visita_realizada');
             exit;
         } else {
-            $errors[] = "Ocurri un error al registrar la visita.";
+            $errors[] = 'Ocurrio un error al registrar la visita.';
         }
         odbc_free_result($stmt);
     }
@@ -87,11 +85,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <title>Visita sin Venta</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
+  <style>
+    body { padding-top: 80px; }
+    .cliente-autocomplete {
+      position: relative;
+    }
+    .cliente-autocomplete-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      display: none;
+      max-height: 240px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #ced4da;
+      border-top: 0;
+      border-radius: 0 0 0.375rem 0.375rem;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .cliente-autocomplete-list.show {
+      display: block;
+    }
+    .cliente-autocomplete-item {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    .cliente-autocomplete-item:hover,
+    .cliente-autocomplete-item:focus {
+      background: #f8f9fa;
+    }
+  </style>
 </head>
 <body>
 <div class="container">
   <h2>Visita sin Venta</h2>
-  
+
   <?php
   if (!empty($errors)) {
       echo '<div class="alert alert-danger"><ul>';
@@ -101,110 +134,198 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       echo '</ul></div>';
   }
   ?>
-  
+
   <form action="visita_sin_venta.php" method="POST">
     <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
-    
-    <!-- Campo de Búsqueda de Cliente -->
-    <div class="form-group">
-      <label for="nombre_comercial">Buscar Cliente</label>
-      <input type="text" class="form-control" id="nombre_comercial" name="nombre_comercial" placeholder="Escribe el nombre comercial del cliente" required>
+
+    <div class="mb-3 cliente-autocomplete">
+      <label class="form-label" for="nombre_comercial">Buscar Cliente</label>
+      <input type="text" class="form-control" id="nombre_comercial" name="nombre_comercial" placeholder="Escribe el nombre comercial del cliente" required autocomplete="off">
       <input type="hidden" id="cod_cliente" name="cod_cliente">
+      <div id="cliente_sugerencias" class="cliente-autocomplete-list" role="listbox" aria-label="Clientes sugeridos"></div>
     </div>
 
-    <!-- Lista Desplegable de Secciones (se cargar dinmicamente) -->
-    <div class="form-group" id="seccion_container" style="display: none;">
-      <label for="cod_seccion">Seleccionar Sección</label>
-      <select class="form-control" id="cod_seccion" name="cod_seccion" required>
-        <!-- Opciones se cargarán vía AJAX -->
-      </select>
+    <div class="mb-3" id="seccion_container" style="display: none;">
+      <label class="form-label" for="cod_seccion">Seleccionar Seccion</label>
+      <select class="form-select" id="cod_seccion" name="cod_seccion" required></select>
     </div>
-    
-    <!-- Campos de Fecha y Hora -->
-    <div class="form-group">
-      <label for="fecha_visita">Fecha de la Visita</label>
+
+    <div class="mb-3">
+      <label class="form-label" for="fecha_visita">Fecha de la Visita</label>
       <input type="date" class="form-control" id="fecha_visita" name="fecha_visita" required>
     </div>
-    <div class="form-group">
-      <label for="hora_inicio_visita">Hora de Inicio de la Visita</label>
+    <div class="mb-3">
+      <label class="form-label" for="hora_inicio_visita">Hora de Inicio de la Visita</label>
       <input type="time" class="form-control" id="hora_inicio_visita" name="hora_inicio_visita" required>
     </div>
-    <div class="form-group">
-      <label for="hora_fin_visita">Hora de Finalización de la Visita</label>
+    <div class="mb-3">
+      <label class="form-label" for="hora_fin_visita">Hora de Finalizacion de la Visita</label>
       <input type="time" class="form-control" id="hora_fin_visita" name="hora_fin_visita" required>
     </div>
-    <div class="form-group">
-      <label for="observaciones">Observaciones</label>
+    <div class="mb-3">
+      <label class="form-label" for="observaciones">Observaciones</label>
       <textarea class="form-control" id="observaciones" name="observaciones" rows="3"></textarea>
     </div>
-    
+
     <button type="submit" class="btn btn-danger">Registrar Visita sin Venta</button>
-    <a href="index.php" class="btn btn-default">Cancelar</a>
+    <a href="index.php" class="btn btn-secondary">Cancelar</a>
   </form>
 </div>
 
-<!-- jQuery + Bootstrap JS -->
-
-<!-- Scripts para Autocompletado y Validación -->
 <script>
-$(document).ready(function() {
-    // Autocompletado para Buscar Cliente
-    $("#nombre_comercial").autocomplete({
-        source: "buscar_cliente.php",
-        minLength: 2,
-        select: function(event, ui) {
-            $("#cod_cliente").val(ui.item.cod_cliente);
-            cargarSecciones(ui.item.cod_cliente);
-        },
-        change: function(event, ui) {
-            if (!ui.item) {
-                $("#cod_cliente").val('');
-                $("#seccion_container").hide();
-                $("#cod_seccion").html('');
-            }
-        }
-    });
+document.addEventListener('DOMContentLoaded', function () {
+    var nombreInput = document.getElementById('nombre_comercial');
+    var codClienteInput = document.getElementById('cod_cliente');
+    var seccionContainer = document.getElementById('seccion_container');
+    var seccionSelect = document.getElementById('cod_seccion');
+    var sugerencias = document.getElementById('cliente_sugerencias');
+    var horaInicioInput = document.getElementById('hora_inicio_visita');
+    var horaFinInput = document.getElementById('hora_fin_visita');
+    var searchTimer = null;
+    var clientesSugeridos = [];
 
-    function cargarSecciones(cod_cliente) {
-        $.ajax({
-            url: '<?= BASE_URL ?>/obtener_secciones_pedidos_visitas.php', // Usar tu archivo existente
-            type: 'GET', // Segn cmo est implementado tu archivo
-            dataType: 'json',
-            data: { cod_cliente: cod_cliente },
-            success: function(secciones) {
-                if (secciones.length > 0) {
-                    var opciones = '<option value="">Selecciona una sección</option>';
-                    $.each(secciones, function(index, seccion) {
-                        opciones += '<option value="' + seccion.cod_seccion + '">' + seccion.nombre_seccion + '</option>';
-                    });
-                    $("#cod_seccion").html(opciones);
-                    $("#seccion_container").show();
-                } else {
-                    $("#seccion_container").hide();
-                    $("#cod_seccion").html('');
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error("Error al obtener secciones:", error);
-                $("#seccion_container").hide();
-                $("#cod_seccion").html('');
-            }
+    function limpiarSecciones() {
+        seccionSelect.innerHTML = '';
+        seccionContainer.style.display = 'none';
+    }
+
+    function ocultarSugerencias() {
+        sugerencias.innerHTML = '';
+        sugerencias.classList.remove('show');
+    }
+
+    function renderizarSugerencias(clientes) {
+        sugerencias.innerHTML = '';
+        if (!clientes.length) {
+            ocultarSugerencias();
+            return;
+        }
+
+        clientes.forEach(function (cliente) {
+            var boton = document.createElement('button');
+            boton.type = 'button';
+            boton.className = 'cliente-autocomplete-item';
+            boton.textContent = cliente.label || cliente.value || '';
+            boton.addEventListener('click', function () {
+                nombreInput.value = cliente.value || cliente.label || '';
+                codClienteInput.value = cliente.cod_cliente || '';
+                ocultarSugerencias();
+                cargarSecciones(cliente.cod_cliente);
+            });
+            sugerencias.appendChild(boton);
+        });
+
+        sugerencias.classList.add('show');
+    }
+
+    function buscarClientes(term) {
+        fetch(BASE_URL + '/buscar_cliente.php?term=' + encodeURIComponent(term), {
+            credentials: 'same-origin'
+        })
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (clientes) {
+            clientesSugeridos = Array.isArray(clientes) ? clientes : [];
+            renderizarSugerencias(clientesSugeridos);
+        })
+        .catch(function (error) {
+            console.error('Error al buscar clientes:', error);
+            clientesSugeridos = [];
+            ocultarSugerencias();
         });
     }
 
-    // Validar diferencia de tiempo
-$("#hora_inicio_visita, #hora_fin_visita").on('change', function() {
-        var inicio = $("#hora_inicio_visita").val();
-        var fin = $("#hora_fin_visita").val();
-        if (inicio && fin) {
-            var inicio_total = parseTime(inicio);
-            var fin_total = parseTime(fin);
-            var diff = fin_total - inicio_total;
-            if (diff < 15 || diff > 300) {
-                alert("La diferencia entre la hora de inicio y la hora de fin debe ser de al menos 15 minutos y no exceder las 5 horas.");
-                // Opcional: Resetear las horas o ajustarlas automáticamente
+    function cargarSecciones(codCliente) {
+        fetch(BASE_URL + '/obtener_secciones_pedidos_visitas.php?cod_cliente=' + encodeURIComponent(codCliente), {
+            credentials: 'same-origin'
+        })
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (secciones) {
+            seccionSelect.innerHTML = '';
+
+            if (Array.isArray(secciones) && secciones.length > 0) {
+                var opcionDefault = document.createElement('option');
+                opcionDefault.value = '';
+                opcionDefault.textContent = 'Selecciona una seccion';
+                seccionSelect.appendChild(opcionDefault);
+
+                secciones.forEach(function (seccion) {
+                    var opcion = document.createElement('option');
+                    opcion.value = seccion.cod_seccion;
+                    opcion.textContent = seccion.nombre_seccion;
+                    seccionSelect.appendChild(opcion);
+                });
+
+                seccionContainer.style.display = 'block';
+            } else {
+                limpiarSecciones();
             }
+        })
+        .catch(function (error) {
+            console.error('Error al obtener secciones:', error);
+            limpiarSecciones();
+        });
+    }
+
+    nombreInput.addEventListener('input', function () {
+        var term = nombreInput.value.trim();
+        codClienteInput.value = '';
+        limpiarSecciones();
+
+        if (searchTimer) {
+            clearTimeout(searchTimer);
         }
+
+        if (term.length < 2) {
+            clientesSugeridos = [];
+            ocultarSugerencias();
+            return;
+        }
+
+        searchTimer = setTimeout(function () {
+            buscarClientes(term);
+        }, 200);
+    });
+
+    nombreInput.addEventListener('change', function () {
+        var valor = nombreInput.value.trim();
+        var clienteSeleccionado = clientesSugeridos.find(function (cliente) {
+            return (cliente.value || cliente.label || '') === valor;
+        });
+
+        if (clienteSeleccionado) {
+            codClienteInput.value = clienteSeleccionado.cod_cliente || '';
+            cargarSecciones(clienteSeleccionado.cod_cliente);
+        } else {
+            codClienteInput.value = '';
+            limpiarSecciones();
+        }
+    });
+
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('.cliente-autocomplete')) {
+            ocultarSugerencias();
+        }
+    });
+
+    [horaInicioInput, horaFinInput].forEach(function (input) {
+        input.addEventListener('change', function () {
+            var inicio = horaInicioInput.value;
+            var fin = horaFinInput.value;
+
+            if (inicio && fin) {
+                var inicioTotal = parseTime(inicio);
+                var finTotal = parseTime(fin);
+                var diff = finTotal - inicioTotal;
+
+                if (diff < 15 || diff > 300) {
+                    alert('La diferencia entre la hora de inicio y la hora de fin debe ser de al menos 15 minutos y no exceder las 5 horas.');
+                }
+            }
+        });
     });
 });
 </script>

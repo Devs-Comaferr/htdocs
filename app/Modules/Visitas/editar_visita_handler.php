@@ -17,7 +17,8 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 require_once BASE_PATH . '/app/Support/functions.php';
 
-$ui_version = 'bs3';
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
 
 $conn = db();
 
@@ -258,21 +259,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       .boton-derecha { float: right; margin-left: 10px; }
     </style>
     <script>
-    $(document).ready(function(){
-        $("#hora_inicio_visita").change(function(){
-            var startTime = $(this).val();
-            var promedio = <?php echo $tiempo_promedio_minutes; ?>;
-            if(startTime) {
-                var parts = startTime.split(":");
+    document.addEventListener('DOMContentLoaded', function () {
+        var horaInicioInput = document.getElementById('hora_inicio_visita');
+        var horaFinInput = document.getElementById('hora_fin_visita');
+        var promedio = <?php echo $tiempo_promedio_minutes; ?>;
+
+        if (!horaInicioInput || !horaFinInput) {
+            return;
+        }
+
+        horaInicioInput.addEventListener('change', function () {
+            var startTime = horaInicioInput.value;
+            if (startTime) {
+                var parts = startTime.split(':');
                 var date = new Date();
                 date.setHours(parseInt(parts[0], 10));
                 date.setMinutes(parseInt(parts[1], 10) + promedio);
                 var endHours = date.getHours();
                 var endMinutes = date.getMinutes();
-                if(endHours < 10) { endHours = "0" + endHours; }
-                if(endMinutes < 10) { endMinutes = "0" + endMinutes; }
-                var endTime = endHours + ":" + endMinutes;
-                $("#hora_fin_visita").val(endTime);
+                if (endHours < 10) { endHours = '0' + endHours; }
+                if (endMinutes < 10) { endMinutes = '0' + endMinutes; }
+                horaFinInput.value = endHours + ':' + endMinutes;
             }
         });
     });
@@ -287,39 +294,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <form action="<?= BASE_URL ?>/visitas.php?action=editar&amp;id_visita=<?php echo $id_visita; ?><?php echo isset($_GET['origen']) ? '&amp;origen=' . $_GET['origen'] : ''; ?>" method="POST">
         <input type="hidden" name="id_visita" value="<?php echo $id_visita; ?>">
 
-        <div class="form-group">
+        <div class="mb-3">
             <label>Nombre Comercial:</label>
             <input type="text" class="form-control" value="<?php echo htmlspecialchars($nombre_comercial); ?>" readonly>
         </div>
 
         <?php if (!is_null($cod_seccion)) { ?>
-        <div class="form-group">
+        <div class="mb-3">
             <label>Sección:</label>
             <input type="text" class="form-control" value="<?php echo htmlspecialchars($cod_seccion); ?>" readonly>
         </div>
         <?php } ?>
 
-        <div class="form-group">
+        <div class="mb-3">
             <label>Fecha de Visita:</label>
             <input type="date" class="form-control" name="fecha_visita" value="<?php echo htmlspecialchars($fecha_visita); ?>" required>
         </div>
 
-        <div class="form-group">
+        <div class="mb-3">
             <label>Hora de Inicio:</label>
             <input type="time" class="form-control" name="hora_inicio_visita" id="hora_inicio_visita" value="<?php echo htmlspecialchars($hora_inicio_visita); ?>" required>
         </div>
 
-        <div class="form-group">
+        <div class="mb-3">
             <label>Hora de Fin:</label>
             <input type="time" class="form-control" name="hora_fin_visita" id="hora_fin_visita" value="<?php echo htmlspecialchars($hora_fin_visita); ?>">
         </div>
 
-        <div class="form-group">
+        <div class="mb-3">
             <label>Observaciones:</label>
             <textarea class="form-control" name="observaciones"><?php echo htmlspecialchars($observaciones); ?></textarea>
         </div>
 
-        <div class="form-group">
+        <div class="mb-3">
             <label>Estado de Visita:</label>
             <select class="form-control" name="estado_visita">
                 <option value="Pendiente" <?php if (normalizarEstadoVisita($estado_visita) == 'Pendiente') echo 'selected'; ?>>Pendiente</option>
@@ -338,7 +345,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $cancelUrl = 'calendario.php';
             }
         ?>
-        <a href="<?php echo $cancelUrl; ?>" class="btn btn-default">Cancelar</a>
+        <a href="<?php echo $cancelUrl; ?>" class="btn btn-secondary">Cancelar</a>
 
         <a href="<?= BASE_URL ?>/visitas.php?action=eliminar&amp;id_visita=<?php echo $id_visita; ?>" class="btn btn-danger boton-derecha">
             Eliminar Visita

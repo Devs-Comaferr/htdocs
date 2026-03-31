@@ -1,7 +1,5 @@
 <?php
-// ⚠️ ARCHIVO LEGACY
-// Este archivo ya no debe usarse directamente.
-// Se mantiene por compatibilidad.
+// Archivo legacy mantenido por compatibilidad.
 // Usar /visitas.php?action=crear|editar|eliminar
 
 if (!defined('BASE_URL')) {
@@ -19,7 +17,8 @@ require_once BASE_PATH . '/app/Support/db.php';
 require_once BASE_PATH . '/app/Modules/Visitas/eliminar_visita_handler.php';
 requierePermiso('perm_planificador');
 
-$ui_version = 'bs3';
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
 
 $conn = db();
 
@@ -65,17 +64,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar']) && $_POS
 </head>
 <body>
 <div class="container">
-    <div class="panel panel-danger confirm-card">
-        <div class="panel-heading">
-            <h2 class="panel-title">Eliminar visita</h2>
+    <div class="card border-danger confirm-card">
+        <div class="card-header bg-danger text-white">
+            <h2 class="h5 mb-0">Eliminar visita</h2>
         </div>
-        <div class="panel-body">
-            <p>�Seguro que quieres eliminar esta visita? Se eliminar�n tambi�n los pedidos asociados.</p>
+        <div class="card-body">
+            <p>Seguro que quieres eliminar esta visita? Se eliminaran tambien los pedidos asociados.</p>
             <form action="eliminar_visita.php" method="POST" class="confirm-actions">
                 <input type="hidden" name="id_visita" value="<?php echo htmlspecialchars((string)$idVisita, ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="confirmar" value="1">
                 <button type="submit" class="btn btn-danger">Confirmar</button>
-                <a href="index.php" class="btn btn-default">Cancelar</a>
+                <a href="index.php" class="btn btn-secondary">Cancelar</a>
             </form>
         </div>
     </div>
