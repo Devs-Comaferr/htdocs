@@ -126,7 +126,6 @@ if (isset($_GET['cod_zona'])) {
     <meta charset="UTF-8">
     <title>Asignar Clientes a Zonas</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap 3.3.7 -->
         <!-- Font Awesome para los íconos -->
     <style>
         /* Estilos existentes... */

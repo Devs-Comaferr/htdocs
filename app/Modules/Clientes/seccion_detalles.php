@@ -814,8 +814,6 @@ include_once BASE_PATH . '/resources/views/layouts/header.php';
     <title><?php echo htmlspecialchars($pageTitle ?? ''); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Bootstrap 3 CSS -->
-    
     <!-- Font Awesome 4.7 (para iconos) -->
     
     <!-- Estilos unificados con cliente_detalles.php -->

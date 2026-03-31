@@ -141,6 +141,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           padding-top: calc(50px + env(safe-area-inset-top)) !important;
         }
       }
+
+      .mb-3 {
+        margin-bottom: 1rem;
+      }
     </style>
 </head>
 
@@ -159,55 +163,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Datos básicos -->
             <div class="form-row">
-                <div class="form-group half">
+                <div class="mb-3 half">
                     <label>Nombre de la Empresa o Persona física: *</label>
                     <input type="text" name="empresa" required>
                 </div>
-                <div class="form-group half">
+                <div class="mb-3 half">
                     <label>NIF - CIF: *</label>
                     <input type="text" name="nif" required>
                 </div>
             </div>
 
             <div class="form-row">
-                <div class="form-group half">
+                <div class="mb-3 half">
                     <label>Correo electrónico: *</label>
                     <input type="email" name="email" required>
                 </div>
-                <div class="form-group half">
+                <div class="mb-3 half">
                     <label>Teléfono: *</label>
                     <input type="text" name="telefono" required>
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="mb-3">
                 <label>Dirección Comercial: *</label>
                 <input type="text" name="direccion_comercial" required>
             </div>
 
-            <div class="form-group">
+            <div class="mb-3">
                 <label>Dirección Logística:</label>
                 <input type="text" name="direccion_logistica">
             </div>
 
             <!-- Localización -->
             <div class="form-row">
-                <div class="form-group half">
+                <div class="mb-3 half">
                     <label>Población: *</label>
                     <input type="text" name="poblacion" required>
                 </div>
-                <div class="form-group half">
+                <div class="mb-3 half">
                     <label>Provincia: *</label>
                     <input type="text" name="provincia" required>
                 </div>
             </div>
 
             <div class="form-row">
-                <div class="form-group half">
+                <div class="mb-3 half">
                     <label>Código Postal: *</label>
                     <input type="text" name="cp" required>
                 </div>
-                <div class="form-group half">
+                <div class="mb-3 half">
                     <label>Web:</label>
                     <input type="text" name="web">
                 </div>
@@ -215,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Datos fiscales y bancarios -->
             <div class="form-row">
-                <div class="form-group half">
+                <div class="mb-3 half">
                     <label>Régimen de IVA: *</label>
                     <select name="iva" required>
                         <option value="">Seleccione una opción</option>
@@ -225,31 +229,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <option value="Especial">Especial</option>
                     </select>
                 </div>
-                <div class="form-group half">
+                <div class="mb-3 half">
                     <label>Forma de Pago: *</label>
                     <input type="text" name="forma_pago" maxlength="30" required>
                 </div>
             </div>
 
             <div class="form-row">
-                <div class="form-group half">
+                <div class="mb-3 half">
                     <label>Banco:</label>
                     <input type="text" name="banco">
                 </div>
-                <div class="form-group half">
+                <div class="mb-3 half">
                     <label>Número de Cuenta:</label>
                     <input type="text" name="cuenta">
                 </div>
             </div>
 
             <!-- Otros -->
-            <div class="form-group">
+            <div class="mb-3">
                 <label>Comentarios:</label>
                 <textarea name="comentarios"></textarea>
             </div>
 
             <!-- Protección de datos -->
-            <div class="form-group proteccionDatos">
+            <div class="mb-3 proteccionDatos">
                 <strong>ï¸ Protección de datos:</strong>
                 <p>
                     En cumplimiento de la normativa vigente en materia de Protección de Datos de Carácter Personal, le informamos que los datos personales que nos proporciona serán tratados por <strong>COMERCIAL DE MAQUINARIA Y FERRETERIA, S.A.</strong> con la finalidad de asegurar la correcta gestión de los servicios y/o productos solicitados y las tareas administrativas derivadas de la misma. Y en su caso, para el envío de información sobre productos y/o servicios de su interés.
@@ -264,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
             <!-- Protección de datos -->
-            <div class="form-group">
+            <div class="mb-3">
                 <label>
                     <input type="checkbox" name="accesoWeb">
                     Quiero solicitar acceso a la web.

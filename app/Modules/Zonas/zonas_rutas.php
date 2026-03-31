@@ -68,8 +68,6 @@ if (isset($_GET['cod_zona'])) {
     <meta charset="UTF-8">
     <title><?php echo isset($cod_zona) ? "Gestionar Rutas de la Zona: " . htmlspecialchars($zona_actual['nombre_zona']) : "Zonas Disponibles"; ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap 3.3.7 -->
-        
     <style>
         /* Estilos mejorados para dispositivos tctiles */
         body {

@@ -322,11 +322,11 @@ body {
     flex-wrap:wrap;
 }
 
-.filters-row .form-group {
+.filters-row .filter-group {
     margin-bottom: 0;
 }
 
-.filters-row .form-group > label {
+.filters-row .filter-group > label {
     display: block;
     margin-bottom: 6px;
     font-size: 13px;
@@ -1229,7 +1229,7 @@ FILTROS - ESTILO UNIFICADO
     line-height:1;
 }
 
-.panel-filtro{
+.filtro-panel{
     display:none;
     position:absolute;
     margin-top:6px;
@@ -1260,14 +1260,14 @@ FILTROS - ESTILO UNIFICADO
     cursor:pointer;
 }
 
-.panel-filtro .opcion{
+.filtro-panel .opcion{
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
     padding:8px 12px;
 }
 
-.panel-filtro .lista-opciones div{
+.filtro-panel .lista-opciones div{
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -1341,7 +1341,7 @@ flush();
             <span class="filtro-boton-valor" id="filtro-comercial-label"><?= htmlspecialchars($comercialLabel, ENT_QUOTES, 'UTF-8') ?></span>
             <span class="filtro-boton-flecha">&#9662;</span>
         </div>
-        <div class="panel-filtro" id="panel-filtro-comercial">
+        <div class="filtro-panel" id="filtro-panel-comercial">
             <input type="text"
                    id="buscar-comercial"
                    placeholder="Buscar comercial..."
@@ -1379,7 +1379,7 @@ flush();
         <span class="filtro-boton-flecha">&#9662;</span>
     </div>
 
-    <div class="panel-filtro" id="panel-filtro-marca">
+        <div class="filtro-panel" id="filtro-panel-marca">
         <input type="text"
                id="buscar-marca"
                placeholder="Buscar marca..."
@@ -1417,7 +1417,7 @@ flush();
         <span class="filtro-boton-valor" id="filtro-familia-label"><?= htmlspecialchars($familiaLabel, ENT_QUOTES, 'UTF-8') ?></span>
         <span class="filtro-boton-flecha">&#9662;</span>
     </div>
-    <div class="panel-filtro" id="panel-filtro-familia">
+    <div class="filtro-panel" id="filtro-panel-familia">
         <input type="text"
                id="buscar-familia"
                placeholder="Buscar familia..."
@@ -1456,7 +1456,7 @@ flush();
         <span class="filtro-boton-valor" id="filtro-subfamilia-label"><?= htmlspecialchars($subfamiliaLabel, ENT_QUOTES, 'UTF-8') ?></span>
         <span class="filtro-boton-flecha">&#9662;</span>
     </div>
-    <div class="panel-filtro" id="panel-filtro-subfamilia">
+    <div class="filtro-panel" id="filtro-panel-subfamilia">
         <input type="text"
                id="buscar-subfamilia"
                placeholder="Buscar subfamilia..."
@@ -2408,7 +2408,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         btn.addEventListener('click', function () {
             const isOpen = panel.style.display === 'block';
-            document.querySelectorAll('.panel-filtro').forEach(function (p) {
+            document.querySelectorAll('.filtro-panel').forEach(function (p) {
                 p.style.display = 'none';
             });
             panel.style.display = isOpen ? 'none' : 'block';
@@ -2439,7 +2439,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initFiltroCustom({
         buttonId: 'btn-filtro-marca',
-        panelId: 'panel-filtro-marca',
+        panelId: 'filtro-panel-marca',
         searchId: 'buscar-marca',
         listId: 'lista-marcas',
         labelId: 'filtro-marca-label',
@@ -2448,7 +2448,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initFiltroCustom({
         buttonId: 'btn-filtro-familia',
-        panelId: 'panel-filtro-familia',
+        panelId: 'filtro-panel-familia',
         searchId: 'buscar-familia',
         listId: 'lista-familias',
         labelId: 'filtro-familia-label',
@@ -2457,7 +2457,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initFiltroCustom({
         buttonId: 'btn-filtro-subfamilia',
-        panelId: 'panel-filtro-subfamilia',
+        panelId: 'filtro-panel-subfamilia',
         searchId: 'buscar-subfamilia',
         listId: 'lista-subfamilias',
         labelId: 'filtro-subfamilia-label',
@@ -2466,7 +2466,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initFiltroCustom({
         buttonId: 'btn-filtro-comercial',
-        panelId: 'panel-filtro-comercial',
+        panelId: 'filtro-panel-comercial',
         searchId: 'buscar-comercial',
         listId: 'lista-comerciales',
         labelId: 'filtro-comercial-label',
@@ -2475,7 +2475,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('click', function (event) {
         if (!event.target.closest('.filter-dropdown')) {
-            document.querySelectorAll('.panel-filtro').forEach(function (p) {
+            document.querySelectorAll('.filtro-panel').forEach(function (p) {
                 p.style.display = 'none';
             });
         }
