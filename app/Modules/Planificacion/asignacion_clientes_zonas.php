@@ -19,6 +19,8 @@ requierePermiso('perm_planificador');
 require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
 require_once BASE_PATH . '/app/Support/functions.php';
 $pageTitle = "Asignar Clientes a Zonas";
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
 include BASE_PATH . '/resources/views/layouts/header.php';
 
 // Verificar si el usuario ha iniciado sesión
@@ -291,7 +293,7 @@ if (isset($_GET['cod_zona'])) {
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .assign-form select, .assign-form input, .assign-form textarea {
+        .assign-form .form-select, .assign-form .form-control {
             width: 100%;
             padding: 12px;
             margin: 8px 0 20px 0;
@@ -300,14 +302,14 @@ if (isset($_GET['cod_zona'])) {
             box-sizing: border-box;
             font-size: 16px;
         }
-        .assign-form input[type="submit"] {
+        .assign-form .submit-button {
             background-color: #28a745;
             color: white;
             border: none;
             cursor: pointer;
             font-size: 20px;
         }
-        .assign-form input[type="submit"]:hover {
+        .assign-form .submit-button:hover {
             background-color: #218838;
         }
         .back-button {
@@ -328,14 +330,9 @@ if (isset($_GET['cod_zona'])) {
             background-color: #5a6268;
         }
         /* Estilo para el campo de Sección oculto */
-        #seccion-container {
-            display: none;
-        }
-        /* Estilos para mensajes de error */
         .error-message {
             color: red;
             margin-bottom: 15px;
-            display: none;
         }
         /* Estilo para asignaciones secundarias */
         .asignacion-secundaria {
@@ -388,13 +385,13 @@ if (isset($_GET['cod_zona'])) {
                 <h3>Asignar Nuevo Cliente a la Zona</h3>
                 
                 <!-- Mensaje de error -->
-                <div id="error-message" class="error-message">Por favor, completa todos los campos obligatorios.</div>
+                <div id="error-message" class="alert alert-danger error-message d-none" role="alert">Por favor, completa todos los campos obligatorios.</div>
                 
                 <form id="assign-form" action="procesar_asignar_cliente_zona.php" method="post">
                     <input type="hidden" name="cod_zona" value="<?php echo $cod_zona; ?>">
                     
                     <label for="cod_cliente">Selecciona el Cliente:</label>
-                    <select id="cod_cliente" name="cod_cliente" required>
+                    <select id="cod_cliente" name="cod_cliente" class="form-select" required>
                         <option value="">--Selecciona un Cliente--</option>
                         <?php if (!empty($clientes_disponibles)): ?>
                             <?php foreach ($clientes_disponibles as $cliente): ?>
@@ -408,16 +405,16 @@ if (isset($_GET['cod_zona'])) {
                     </select>
                     
                     <!-- Campo de Sección que se muestra dinámicamente -->
-                    <div id="seccion-container">
+                    <div id="seccion-container" class="d-none">
                         <label for="cod_seccion">Selecciona la Sección:</label>
-                        <select id="cod_seccion" name="cod_seccion">
+                        <select id="cod_seccion" name="cod_seccion" class="form-select">
                             <option value="">--Selecciona una Sección--</option>
                             <!-- Las opciones se llenarán mediante AJAX -->
                         </select>
                     </div>
                     
                     <label for="zona_secundaria">Zona Secundaria (Opcional):</label>
-                    <select id="zona_secundaria" name="zona_secundaria">
+                    <select id="zona_secundaria" name="zona_secundaria" class="form-select">
                         <option value="">--Selecciona una Zona Secundaria--</option>
                         <?php foreach ($zonas as $zona): ?>
                             <?php if ($zona['cod_zona'] != $cod_zona): ?>
@@ -429,17 +426,17 @@ if (isset($_GET['cod_zona'])) {
                     </select>
                     
                     <label for="tiempo_promedio_visita">Tiempo Promedio de Visita (horas):</label>
-                    <input type="number" id="tiempo_promedio_visita" name="tiempo_promedio_visita" step="0.5">
+                    <input type="number" id="tiempo_promedio_visita" name="tiempo_promedio_visita" class="form-control" step="0.5">
                     
                     <label for="preferencia_horaria">Preferencia Horaria:</label>
-                    <select id="preferencia_horaria" name="preferencia_horaria">
+                    <select id="preferencia_horaria" name="preferencia_horaria" class="form-select">
                         <option value="">--Selecciona una Preferencia--</option>
                         <option value="M">Mañana</option>
                         <option value="T">Tarde</option>
                     </select>
                     
                     <label for="frecuencia_visita">Frecuencia de Visita:</label>
-                    <select id="frecuencia_visita" name="frecuencia_visita" required>
+                    <select id="frecuencia_visita" name="frecuencia_visita" class="form-select" required>
                         <option value="">--Selecciona una Frecuencia--</option>
                         <option value="Todos">Todos los meses</option>
                         <option value="Cada2">Cada 2 meses</option>
@@ -448,9 +445,9 @@ if (isset($_GET['cod_zona'])) {
                     </select>
                     
                     <label for="observaciones">Observaciones (Opcional):</label>
-                    <textarea id="observaciones" name="observaciones"></textarea>
+                    <textarea id="observaciones" name="observaciones" class="form-control"></textarea>
                     
-                    <input type="submit" value="Asignar Cliente a Zona">
+                    <input type="submit" value="Asignar Cliente a Zona" class="btn btn-success w-100 submit-button">
                 </form>
             </div>
             <?php endif; ?>           
@@ -613,11 +610,11 @@ if (isset($_GET['cod_zona'])) {
                                         option.text = seccion_nombre;
                                         seccionSelect.appendChild(option);
                                     }
-                                    seccionContainer.style.display = 'block';
+                                    seccionContainer.classList.remove('d-none');
                                     seccionSelect.required = true;
                                 } else {
                                     // Cliente no tiene secciones disponibles, ocultar el campo de secciones
-                                    seccionContainer.style.display = 'none';
+                                    seccionContainer.classList.add('d-none');
                                     seccionSelect.required = false;
                                     seccionSelect.value = '';
                                 }
@@ -637,7 +634,7 @@ if (isset($_GET['cod_zona'])) {
                         verificarSecciones(cod_cliente);
                     } else {
                         // Si no hay cliente seleccionado, ocultar el campo de secciones
-                        document.getElementById('seccion-container').style.display = 'none';
+                        document.getElementById('seccion-container').classList.add('d-none');
                         document.getElementById('cod_seccion').required = false;
                         document.getElementById('cod_seccion').value = '';
                     }
@@ -654,26 +651,26 @@ if (isset($_GET['cod_zona'])) {
                     var frecuencia_visita = document.getElementById('frecuencia_visita').value;
                     
                     // Resetear mensaje de error
-                    errorMessage.style.display = 'none';
+                    errorMessage.classList.add('d-none');
                     errorMessage.textContent = 'Por favor, completa todos los campos obligatorios.';
                     
                     // Verificar campos obligatorios
                     if (cod_cliente === '') {
-                        errorMessage.style.display = 'block';
+                        errorMessage.classList.remove('d-none');
                         errorMessage.textContent = 'Debes seleccionar un cliente.';
                         event.preventDefault();
                         return;
                     }
                     
-                    if (seccionContainer.style.display === 'block' && cod_seccion === '') {
-                        errorMessage.style.display = 'block';
+                    if (!seccionContainer.classList.contains('d-none') && cod_seccion === '') {
+                        errorMessage.classList.remove('d-none');
                         errorMessage.textContent = 'Debes seleccionar una sección.';
                         event.preventDefault();
                         return;
                     }
                     
                     /* if (tiempo_promedio_visita === '' || tiempo_promedio_visita <= 0) {
-                        errorMessage.style.display = 'block';
+                        errorMessage.classList.remove('d-none');
                         errorMessage.textContent = 'Debes ingresar un tiempo promedio de visita vlido.';
                         event.preventDefault();
                         return;
