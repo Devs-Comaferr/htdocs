@@ -744,26 +744,32 @@ if ($isJcasado) {
     }
 
     .sidebar .buttons-container > .btn {
+      position: relative;
+      overflow: visible;
       width: 100%;
       margin-bottom: 0;
-      padding-right: 40px;
     }
-    .sidebar .buttons-container > .btn .badge {
-      top: 6px;
-      right: 6px;
-      z-index: 3;
-      min-width: 20px;
-      height: 20px;
-      padding: 0 5px;
-      display: inline-flex;
+    .badge-app {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      z-index: 5;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
+      font-size: 12px;
+      font-weight: 600;
       line-height: 1;
-      font-weight: 700;
       border-radius: 999px;
-      border: 2px solid #fff;
-      box-shadow: 0 8px 16px rgba(220, 38, 38, 0.28);
+      background: #ff3b30;
+      color: #fff;
+      border: 1.5px solid rgba(255,255,255,0.9);
+      box-shadow:
+        0 4px 10px rgba(0,0,0,0.25),
+        0 1px 2px rgba(0,0,0,0.15);
     }
 
     /* ==== Tablas ==== */
@@ -1302,23 +1308,23 @@ $ui_requires_jquery = false;
          class="btn btn-clientes">
         <i class="fa fa-user"></i> Clientes
       </a>
-      <a href="faltas_todos.php" class="btn btn-faltas" style="position: relative;">
+      <a href="faltas_todos.php" class="btn btn-faltas">
         <?php if ($count_pedidos_cerrados_70 > 0) { ?>
-          <span class="badge"><?php echo $count_pedidos_cerrados_70; ?></span>
+          <span class="badge-app"><?php echo $count_pedidos_cerrados_70; ?></span>
         <?php } ?>
         <i class="fa fa-lock"></i> Pedidos Cerrados
       </a>
-      <a href="pedidos_todos.php" class="btn btn-pedidos" style="position: relative;">
+      <a href="pedidos_todos.php" class="btn btn-pedidos">
       <?php if ($count_pedidos_abiertos > 0) { ?>
-        <span class="badge"><?php echo $count_pedidos_abiertos; ?></span>
+        <span class="badge-app"><?php echo $count_pedidos_abiertos; ?></span>
       <?php } ?>
        <i class="fa fa-unlock-alt"></i> Pedidos Abiertos
       </a>
 
       <?php if ($puedeVerPlanificador) { ?>
-        <a href="planificador_menu.php" class="btn btn-planificador" style="position: relative;">
+        <a href="planificador_menu.php" class="btn btn-planificador">
           <?php if ($count_pedidos_sin_visita > 0) { ?>
-            <span class="badge"><?php echo $count_pedidos_sin_visita; ?></span>
+            <span class="badge-app"><?php echo $count_pedidos_sin_visita; ?></span>
           <?php } ?>
           <i class="fa fa-calendar"></i> Planificador
         </a>
