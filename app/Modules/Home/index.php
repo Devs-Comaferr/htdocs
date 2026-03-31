@@ -1215,6 +1215,10 @@ if ($isJcasado) {
 <body>
 
 <!-- Incluir el header -->
+<?php
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
+?>
 <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
 
 <div class="page-container <?php echo $layoutClass; ?>">
@@ -1911,64 +1915,6 @@ if (window.matchMedia('(max-width: 1024px)').matches) {
     });
   }
 }
-
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('[data-cod-venta]').forEach(function (el) {
-    el.addEventListener('click', function () {
-      var codVenta = this.getAttribute('data-cod-venta');
-      var tipoVenta = this.getAttribute('data-tipo-venta');
-      var codEmpresa = this.getAttribute('data-cod-empresa');
-      var codCaja = this.getAttribute('data-cod-caja');
-      var modal = (typeof obtenerInstanciaDocumentoModal === 'function') ? obtenerInstanciaDocumentoModal() : null;
-      var titulo = document.getElementById('modalDocumentoLabel');
-      var contenedor = document.getElementById('contenidoDocumento');
-      var query;
-
-      if (!codVenta || !tipoVenta || !codEmpresa || !codCaja || !modal || !contenedor) {
-        return;
-      }
-
-      if (titulo) {
-        titulo.textContent = String(tipoVenta) === '1' ? 'Pedido' : 'Albarán';
-      }
-
-      query = new URLSearchParams({
-        tipo_venta: tipoVenta,
-        cod_empresa: codEmpresa,
-        cod_caja: codCaja,
-        cod_venta: codVenta
-      });
-
-      contenedor.innerHTML = '<p class="documento-cargando">Cargando documento...</p>';
-      modal.show();
-
-      fetch(BASE_URL + '/ajax/detalle_documento.php?' + query.toString(), {
-        credentials: 'same-origin'
-      })
-      .then(function (response) {
-        return response.json().then(function (data) {
-          return {
-            ok: response.ok,
-            data: data
-          };
-        });
-      })
-      .then(function (result) {
-        if (!result.ok || (result.data && result.data.error)) {
-          throw new Error((result.data && result.data.error) ? result.data.error : 'No se pudo cargar el documento.');
-        }
-
-        if (typeof renderizarDocumento === 'function') {
-          renderizarDocumento(result.data || {});
-        }
-      })
-      .catch(function (err) {
-        console.error(err);
-        contenedor.innerHTML = '<p class="documento-error">' + String(err && err.message ? err.message : 'No se pudo cargar el documento.') + '</p>';
-      });
-    });
-  });
-});
 </script>
 
 <?php
