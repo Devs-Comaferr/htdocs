@@ -19,7 +19,8 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Modules/Planificacion/planificacion_service.php';
 header('Content-Type: text/html; charset=UTF-8');
 
-$ui_version = 'bs3';
+$ui_version = 'bs5';
+$ui_requires_jquery = false;
 ob_start();
 include BASE_PATH . '/resources/views/layouts/header.php';
 $globalHeaderHead = ob_get_clean();
