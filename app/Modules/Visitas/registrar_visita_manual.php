@@ -54,11 +54,6 @@ $hora_inicio_tarde = '';
 $hora_fin_tarde = '';
 $citas = [];
 
-if ($accion === 'registrar') {
-    header('Location: ' . BASE_URL . '/visitas.php?action=crear', true, 307);
-    exit;
-}
-
 if ($accion === 'buscar') {
     if ($busqueda !== '') {
         $sql_busqueda = "SELECT cl.cod_cliente, cl.nombre_comercial, sc.cod_seccion, sc.nombre AS nombre_seccion
@@ -141,7 +136,7 @@ if ($cod_cliente > 0 && $assignment) {
     } else {
         $sql_citas .= "AND cod_seccion IS NULL ";
     }
-    $sql_citas .= "AND LOWER(estado_visita) IN ('planificada','pendiente')
+    $sql_citas .= "AND estado_visita IN ('Planificada','Pendiente')
                   AND fecha_visita >= ?
                   ORDER BY fecha_visita ASC";
     $citasParams[] = $currentDate;
@@ -265,8 +260,7 @@ if ($cod_cliente > 0 && $assignment) {
             <?php endif; ?>
         </div>
 
-        <form method="POST" action="<?= BASE_URL ?>/registrar_visita_manual.php" class="form" id="flujoVisitaManual">
-            <input type="hidden" name="accion" id="accion" value="<?php echo htmlspecialchars((string)$accion); ?>">
+        <form method="POST" action="<?= BASE_URL ?>/visitas.php?action=crear" class="form" id="flujoVisitaManual">
             <input type="hidden" name="origen" value="manual">
             <input type="hidden" name="cod_cliente" id="cod_cliente" value="<?php echo $cod_cliente > 0 ? htmlspecialchars((string)$cod_cliente) : ''; ?>">
             <input type="hidden" name="cod_seccion" id="cod_seccion" value="<?php echo $cod_seccion !== null ? htmlspecialchars((string)$cod_seccion) : ''; ?>">
@@ -275,7 +269,7 @@ if ($cod_cliente > 0 && $assignment) {
                 <div class="mb-3">
                     <label for="buscar">Nombre del Cliente:</label>
                     <input type="text" name="buscar" id="buscar" class="form-control" value="<?php echo htmlspecialchars($busqueda); ?>" placeholder="Introduce el nombre del cliente">
-                    <button type="submit" name="accion" value="buscar" class="btn btn-primary w-100 btn-submit">Buscar</button>
+                    <button type="submit" name="accion" value="buscar" formaction="<?= BASE_URL ?>/registrar_visita_manual.php" class="btn btn-primary w-100 btn-submit">Buscar</button>
                     <p class="text-center" style="margin-top:20px;">Solo se mostrarán clientes asignados a tu usuario.</p>
                 </div>
             <?php endif; ?>
@@ -299,6 +293,7 @@ if ($cod_cliente > 0 && $assignment) {
                             type="submit"
                             name="accion"
                             value="seleccionar_cliente"
+                            formaction="<?= BASE_URL ?>/registrar_visita_manual.php"
                             class="result-button"
                             onclick="document.getElementById('cod_cliente').value='<?php echo htmlspecialchars((string)$clienteCod, ENT_QUOTES, 'UTF-8'); ?>'; document.getElementById('cod_seccion').value='<?php echo htmlspecialchars($clienteSeccion, ENT_QUOTES, 'UTF-8'); ?>';"
                         >
@@ -366,25 +361,27 @@ if ($cod_cliente > 0 && $assignment) {
                     <div class="modal-content">
                         <span class="close">&times;</span>
                         <h3>Definir Horario de Disponibilidad</h3>
-                        <input type="hidden" id="horario_modal_cod_cliente" value="<?php echo htmlspecialchars((string)$cod_cliente); ?>">
-                        <input type="hidden" id="horario_modal_cod_seccion" value="<?php echo $cod_seccion !== null ? htmlspecialchars((string)$cod_seccion) : ''; ?>">
-                        <div class="mb-3">
-                            <label for="horario_inicio_manana">Hora Inicio Mañana:</label>
-                            <input type="time" class="form-control" id="horario_inicio_manana" value="<?php echo htmlspecialchars($hora_inicio_manana); ?>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="horario_fin_manana">Hora Fin Mañana:</label>
-                            <input type="time" class="form-control" id="horario_fin_manana" value="<?php echo htmlspecialchars($hora_fin_manana); ?>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="horario_inicio_tarde">Hora Inicio Tarde:</label>
-                            <input type="time" class="form-control" id="horario_inicio_tarde" value="<?php echo htmlspecialchars($hora_inicio_tarde); ?>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="horario_fin_tarde">Hora Fin Tarde:</label>
-                            <input type="time" class="form-control" id="horario_fin_tarde" value="<?php echo htmlspecialchars($hora_fin_tarde); ?>" required>
-                        </div>
-                        <button type="button" id="horario_guardarHorarioBtn" class="btn btn-success w-100 btn-submit">Guardar Horario</button>
+                        <form id="formDefinirHorario">
+                            <input type="hidden" id="horario_modal_cod_cliente" value="<?php echo htmlspecialchars((string)$cod_cliente); ?>">
+                            <input type="hidden" id="horario_modal_cod_seccion" value="<?php echo $cod_seccion !== null ? htmlspecialchars((string)$cod_seccion) : ''; ?>">
+                            <div class="mb-3">
+                                <label for="horario_inicio_manana">Hora Inicio Mañana:</label>
+                                <input type="time" class="form-control" id="horario_inicio_manana" value="<?php echo htmlspecialchars($hora_inicio_manana); ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="horario_fin_manana">Hora Fin Mañana:</label>
+                                <input type="time" class="form-control" id="horario_fin_manana" value="<?php echo htmlspecialchars($hora_fin_manana); ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="horario_inicio_tarde">Hora Inicio Tarde:</label>
+                                <input type="time" class="form-control" id="horario_inicio_tarde" value="<?php echo htmlspecialchars($hora_inicio_tarde); ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="horario_fin_tarde">Hora Fin Tarde:</label>
+                                <input type="time" class="form-control" id="horario_fin_tarde" value="<?php echo htmlspecialchars($hora_fin_tarde); ?>" required>
+                            </div>
+                            <button type="button" id="horario_guardarHorarioBtn" class="btn btn-success w-100 btn-submit">Guardar Horario</button>
+                        </form>
                     </div>
                 </div>
 
@@ -424,6 +421,7 @@ if ($cod_cliente > 0 && $assignment) {
                     <label for="observaciones">Observaciones (opcional):</label>
                     <textarea name="observaciones" id="observaciones" class="form-control" rows="4"><?php echo htmlspecialchars($observaciones); ?></textarea>
                 </div>
+                <div id="mensajes_validacion"></div>
                 <button type="submit" name="accion" value="registrar" class="btn btn-primary w-100 btn-submit">Registrar Visita Manual</button>
 
                 <div id="visitas_del_dia" style="margin-top:20px;">
@@ -444,14 +442,282 @@ if ($cod_cliente > 0 && $assignment) {
             var modalClose = modalDefinirHorario ? modalDefinirHorario.querySelector('.close') : null;
             var guardarHorarioBtn = document.querySelector('#horario_guardarHorarioBtn');
             var flujoVisitaManual = document.querySelector('#flujoVisitaManual');
+            var formDefinirHorario = document.querySelector('#formDefinirHorario');
+            var estadoVisitaInput = document.querySelector('#estado_visita');
             var promedio = <?php echo json_encode($tiempo_promedio_minutes); ?>;
+            var horarioCliente = {
+                mananaInicio: <?php echo json_encode($hora_inicio_manana); ?>,
+                mananaFin: <?php echo json_encode($hora_fin_manana); ?>,
+                tardeInicio: <?php echo json_encode($hora_inicio_tarde); ?>,
+                tardeFin: <?php echo json_encode($hora_fin_tarde); ?>
+            };
             var emptyStateHtml = "<div class='alert alert-info'>Seleccione una fecha para ver las visitas programadas.</div>";
             var errorStateHtml = "<div class='alert alert-danger'>Error al cargar las visitas.</div>";
+            var usuarioTocoHoraInicio = !!(horaInicioInput && horaInicioInput.value);
 
             function setVisitasContent(html) {
                 if (visitasDelDia) {
                     visitasDelDia.innerHTML = html;
                 }
+            }
+
+            function mostrarMensaje(tipo, texto) {
+                var contenedor = document.getElementById('mensajes_validacion');
+                if (!contenedor) {
+                    return;
+                }
+
+                var clase = 'alert ';
+                if (tipo === 'error') clase += 'alert-danger';
+                if (tipo === 'warning') clase += 'alert-warning';
+                if (tipo === 'info') clase += 'alert-info';
+
+                contenedor.innerHTML = '<div class="' + clase + '">' + texto + '</div>';
+                contenedor.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            function limpiarMensajes() {
+                var contenedor = document.getElementById('mensajes_validacion');
+                if (contenedor) {
+                    contenedor.innerHTML = '';
+                }
+            }
+
+            function marcarCampoError(input, hayError) {
+                if (!input) {
+                    return;
+                }
+
+                input.style.border = hayError ? '2px solid red' : '';
+            }
+
+            function horaToMin(hora) {
+                if (!hora || hora.indexOf(':') === -1) {
+                    return null;
+                }
+
+                var partes = hora.split(':');
+                return (parseInt(partes[0], 10) * 60) + parseInt(partes[1], 10);
+            }
+
+            function minToHora(minutos) {
+                var horas = Math.floor(minutos / 60);
+                var mins = minutos % 60;
+                return String(horas).padStart(2, '0') + ':' + String(mins).padStart(2, '0');
+            }
+
+            function parsearVisitasDesdeHtml() {
+                if (!visitasDelDia) {
+                    return [];
+                }
+
+                var horas = visitasDelDia.querySelectorAll('.visita-horas');
+                return Array.prototype.map.call(horas, function(item) {
+                    var texto = (item.textContent || '').trim();
+                    var coincidencia = texto.match(/(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/);
+                    if (!coincidencia) {
+                        return null;
+                    }
+
+                    return {
+                        inicio: coincidencia[1],
+                        fin: coincidencia[2]
+                    };
+                }).filter(function(visita) {
+                    return visita !== null;
+                });
+            }
+
+            function calcularSiguienteHueco(visitas, duracionMinutos) {
+                var inicioJornada = horaToMin('09:00');
+                var finJornada = horaToMin('20:00');
+                var cursor = inicioJornada;
+
+                if (!Array.isArray(visitas) || visitas.length === 0) {
+                    return {
+                        inicio: minToHora(inicioJornada),
+                        fin: minToHora(Math.min(inicioJornada + duracionMinutos, finJornada))
+                    };
+                }
+
+                var visitasOrdenadas = visitas.slice().sort(function(a, b) {
+                    return horaToMin(a.inicio) - horaToMin(b.inicio);
+                });
+
+                for (var i = 0; i < visitasOrdenadas.length; i += 1) {
+                    var visita = visitasOrdenadas[i];
+                    var inicioVisita = horaToMin(visita.inicio);
+                    var finVisita = horaToMin(visita.fin);
+
+                    if (inicioVisita !== null && inicioVisita - cursor >= duracionMinutos) {
+                        return {
+                            inicio: minToHora(cursor),
+                            fin: minToHora(cursor + duracionMinutos)
+                        };
+                    }
+
+                    if (finVisita !== null) {
+                        cursor = Math.max(cursor, finVisita);
+                    }
+                }
+
+                if (cursor + duracionMinutos <= finJornada) {
+                    return {
+                        inicio: minToHora(cursor),
+                        fin: minToHora(cursor + duracionMinutos)
+                    };
+                }
+
+                return {
+                    inicio: minToHora(cursor),
+                    fin: minToHora(cursor + duracionMinutos)
+                };
+            }
+
+            function aplicarSiguienteHuecoAutomatico() {
+                if (usuarioTocoHoraInicio || !horaInicioInput || !horaFinInput) {
+                    return;
+                }
+
+                var duracionMinutos = parseInt(promedio, 10);
+                if (!duracionMinutos || duracionMinutos <= 0) {
+                    return;
+                }
+
+                var visitas = parsearVisitasDesdeHtml();
+                var hueco = calcularSiguienteHueco(visitas, duracionMinutos);
+                if (!hueco) {
+                    return;
+                }
+
+                horaInicioInput.value = hueco.inicio;
+                horaFinInput.value = hueco.fin;
+            }
+
+            function haySolapeConVisitasExistentes(nuevoInicio, nuevoFin, visitas) {
+                return visitas.some(function(visita) {
+                    var visitaInicio = horaToMin(visita.inicio);
+                    var visitaFin = horaToMin(visita.fin);
+
+                    if (visitaInicio === null || visitaFin === null) {
+                        return false;
+                    }
+
+                    return nuevoInicio < visitaFin && nuevoFin > visitaInicio;
+                });
+            }
+
+            function estaDentroHorarioCliente(nuevoInicio, nuevoFin) {
+                var mananaInicio = horaToMin(horarioCliente.mananaInicio);
+                var mananaFin = horaToMin(horarioCliente.mananaFin);
+                var tardeInicio = horaToMin(horarioCliente.tardeInicio);
+                var tardeFin = horaToMin(horarioCliente.tardeFin);
+
+                var encajaManana = mananaInicio !== null && mananaFin !== null && nuevoInicio >= mananaInicio && nuevoFin <= mananaFin;
+                var encajaTarde = tardeInicio !== null && tardeFin !== null && nuevoInicio >= tardeInicio && nuevoFin <= tardeFin;
+
+                return encajaManana || encajaTarde;
+            }
+
+            function existeHuecoManualValido(nuevoInicio, nuevoFin, visitas) {
+                var duracionMinutos = nuevoFin - nuevoInicio;
+                var hueco = calcularSiguienteHueco(visitas, duracionMinutos);
+                if (!hueco) {
+                    return false;
+                }
+
+                var huecoInicio = horaToMin(hueco.inicio);
+                var huecoFin = horaToMin(hueco.fin);
+                if (huecoInicio === null || huecoFin === null) {
+                    return false;
+                }
+
+                if (nuevoInicio < huecoInicio || nuevoFin > huecoFin) {
+                    return !haySolapeConVisitasExistentes(nuevoInicio, nuevoFin, visitas);
+                }
+
+                return true;
+            }
+
+            function evaluarValidacionesHorario() {
+                limpiarMensajes();
+                marcarCampoError(fechaInput, false);
+                marcarCampoError(horaInicioInput, false);
+                marcarCampoError(horaFinInput, false);
+
+                var clienteInput = document.querySelector('#cod_cliente');
+                if (!clienteInput || !clienteInput.value) {
+                    return { ok: false, tipo: 'error', mensaje: 'Debes seleccionar un cliente.', campos: [] };
+                }
+
+                if (!fechaInput || !fechaInput.value) {
+                    marcarCampoError(fechaInput, true);
+                    return { ok: false, tipo: 'error', mensaje: 'La fecha de la visita es obligatoria.', campos: [fechaInput] };
+                }
+
+                if (!horaInicioInput || !horaInicioInput.value) {
+                    marcarCampoError(horaInicioInput, true);
+                    return { ok: false, tipo: 'error', mensaje: 'La hora de inicio de la visita es obligatoria.', campos: [horaInicioInput] };
+                }
+
+                if (!horaFinInput || !horaFinInput.value) {
+                    marcarCampoError(horaFinInput, true);
+                    return { ok: false, tipo: 'error', mensaje: 'La hora de fin de la visita es obligatoria.', campos: [horaFinInput] };
+                }
+
+                if (horaInicioInput.value >= horaFinInput.value) {
+                    marcarCampoError(horaInicioInput, true);
+                    marcarCampoError(horaFinInput, true);
+                    return { ok: false, tipo: 'error', mensaje: 'La hora de inicio debe ser anterior a la hora de fin.', campos: [horaInicioInput, horaFinInput] };
+                }
+
+                var nuevoInicio = horaToMin(horaInicioInput.value);
+                var nuevoFin = horaToMin(horaFinInput.value);
+                var visitas = parsearVisitasDesdeHtml();
+
+                if (haySolapeConVisitasExistentes(nuevoInicio, nuevoFin, visitas)) {
+                    marcarCampoError(horaInicioInput, true);
+                    marcarCampoError(horaFinInput, true);
+                    return { ok: false, tipo: 'error', mensaje: 'Ya tienes una visita en ese horario', campos: [horaInicioInput, horaFinInput] };
+                }
+
+                if (!estaDentroHorarioCliente(nuevoInicio, nuevoFin)) {
+                    marcarCampoError(horaInicioInput, true);
+                    marcarCampoError(horaFinInput, true);
+
+                    var estado = estadoVisitaInput ? estadoVisitaInput.value : '';
+                    if (estado === 'Planificada' || estado === 'Pendiente') {
+                        return { ok: false, tipo: 'error', mensaje: 'La visita está fuera del horario del cliente', campos: [horaInicioInput, horaFinInput] };
+                    }
+
+                    if (estado === 'Realizada' || estado === 'No atendida' || estado === 'Descartada') {
+                        return { ok: false, tipo: 'warning', mensaje: 'La visita está fuera del horario del cliente', permiteContinuar: true, campos: [horaInicioInput, horaFinInput] };
+                    }
+                }
+
+                if (usuarioTocoHoraInicio && !existeHuecoManualValido(nuevoInicio, nuevoFin, visitas)) {
+                    marcarCampoError(horaInicioInput, true);
+                    marcarCampoError(horaFinInput, true);
+                    return { ok: false, tipo: 'error', mensaje: 'La hora no encaja en un hueco disponible', campos: [horaInicioInput, horaFinInput] };
+                }
+
+                return { ok: true };
+            }
+
+            function validarEnTiempoReal() {
+                var resultado = evaluarValidacionesHorario();
+                if (resultado.ok) {
+                    limpiarMensajes();
+                    return true;
+                }
+
+                if (resultado.tipo === 'error') {
+                    mostrarMensaje('error', resultado.mensaje);
+                } else if (resultado.tipo === 'warning') {
+                    mostrarMensaje('warning', '⚠️ ' + resultado.mensaje + ' (puedes continuar)');
+                }
+
+                return false;
             }
 
             function calcularHoraFin() {
@@ -494,6 +760,7 @@ if ($cod_cliente > 0 && $assignment) {
                     })
                     .then(function(data) {
                         setVisitasContent(data);
+                        aplicarSiguienteHuecoAutomatico();
                     })
                     .catch(function(error) {
                         console.error('Error cargando visitas:', error);
@@ -514,14 +781,23 @@ if ($cod_cliente > 0 && $assignment) {
             }
 
             if (horaInicioInput) {
+                horaInicioInput.addEventListener('input', function() {
+                    usuarioTocoHoraInicio = true;
+                });
                 horaInicioInput.addEventListener('change', calcularHoraFin);
+                horaInicioInput.addEventListener('change', validarEnTiempoReal);
             }
 
             if (fechaInput) {
                 fechaInput.addEventListener('change', cargarVisitasDelDia);
+                fechaInput.addEventListener('change', validarEnTiempoReal);
                 if (fechaInput.value !== '') {
                     cargarVisitasDelDia();
                 }
+            }
+
+            if (horaFinInput) {
+                horaFinInput.addEventListener('change', validarEnTiempoReal);
             }
 
             if (btnDefinirHorario) {
@@ -569,15 +845,15 @@ if ($cod_cliente > 0 && $assignment) {
                         })
                         .then(function(responseText) {
                             if (responseText.indexOf('OK') === 0) {
-                                alert('Horario guardado correctamente.');
+                                mostrarMensaje('info', 'Horario guardado correctamente.');
                                 window.location.reload();
                             } else {
-                                alert('Error: ' + responseText);
+                                mostrarMensaje('error', 'Error: ' + responseText);
                             }
                         })
                         .catch(function(error) {
                             console.error('Error guardando horario:', error);
-                            alert('Error en la petición.');
+                            mostrarMensaje('error', 'Error en la petición.');
                         });
                 });
             }
@@ -589,16 +865,31 @@ if ($cod_cliente > 0 && $assignment) {
                         return;
                     }
 
-                    if (!fechaInput || !fechaInput.value) {
-                        alert('La fecha de la visita es obligatoria.');
-                        event.preventDefault();
+                    var resultado = evaluarValidacionesHorario();
+                    if (resultado.ok) {
+                        limpiarMensajes();
                         return;
                     }
 
-                    if (!horaInicioInput || !horaInicioInput.value) {
-                        alert('La hora de inicio de la visita es obligatoria.');
-                        event.preventDefault();
+                    event.preventDefault();
+
+                    if (resultado.tipo === 'warning' && resultado.permiteContinuar) {
+                        mostrarMensaje('warning', '⚠️ ' + resultado.mensaje + ' (puedes continuar)');
+                        var contenedor = document.getElementById('mensajes_validacion');
+                        if (contenedor) {
+                            contenedor.innerHTML += '<button id="confirmarContinuar" class="btn btn-warning mt-2">Continuar igualmente</button>';
+                            var botonContinuar = document.getElementById('confirmarContinuar');
+                            if (botonContinuar) {
+                                botonContinuar.addEventListener('click', function() {
+                                    limpiarMensajes();
+                                    flujoVisitaManual.submit();
+                                }, { once: true });
+                            }
+                        }
+                        return;
                     }
+
+                    mostrarMensaje('error', resultado.mensaje);
                 });
             }
         });
