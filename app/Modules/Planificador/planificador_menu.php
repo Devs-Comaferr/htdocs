@@ -80,10 +80,6 @@ if ($nombreZonaActiva === '') {
     $nombreZonaActiva = 'No definida';
 }
 $clienteRecomendado = obtenerSiguienteClienteRecomendadoService();
-echo '<pre>';
-echo "DEBUG CLIENTE:\n";
-print_r($clienteRecomendado);
-exit;
 $nombreClienteRecomendado = trim((string)($clienteRecomendado['nombre'] ?? ''));
 if ($nombreClienteRecomendado === '') {
     $nombreClienteRecomendado = 'Sin recomendaciones';

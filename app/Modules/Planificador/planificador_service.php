@@ -249,9 +249,12 @@ function obtenerSiguienteClienteRecomendado() {
     $codZona = intval($zonaActiva['cod_zona'] ?? 0);
     $codVendedor = obtenerCodVendedorPlanificacionService();
     $conn = db();
+    $clienteZona = [];
+    $clienteGlobal = [];
+    $clienteFallback = [];
 
     if ($codVendedor <= 0) {
-        return null;
+        return [];
     }
 
     if ($codZona > 0) {
@@ -286,7 +289,10 @@ function obtenerSiguienteClienteRecomendado() {
         ";
 
         $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZona, 'zona');
-        if ($clienteZona !== null) {
+        echo '<pre>';
+        echo "ZONA:\n";
+        print_r($clienteZona);
+        if (!empty($clienteZona)) {
             return $clienteZona;
         }
     }
@@ -309,7 +315,10 @@ function obtenerSiguienteClienteRecomendado() {
     ";
 
     $clienteGlobal = obtenerClienteRecomendadoPorQuery($conn, $queryGlobal, 'global');
-    if ($clienteGlobal !== null) {
+    echo '<pre>';
+    echo "GLOBAL:\n";
+    print_r($clienteGlobal);
+    if (!empty($clienteGlobal)) {
         return $clienteGlobal;
     }
 
@@ -350,7 +359,26 @@ function obtenerSiguienteClienteRecomendado() {
             c.nombre_comercial ASC
     ";
 
-    return obtenerClienteRecomendadoPorQuery($conn, $queryFallback, 'fallback');
+    $clienteFallback = obtenerClienteRecomendadoPorQuery($conn, $queryFallback, 'fallback');
+    echo '<pre>';
+    echo "FALLBACK:\n";
+    print_r($clienteFallback);
+    exit;
+    if (!empty($clienteFallback)) {
+        return $clienteFallback;
+    }
+
+    if (!empty($clienteZona)) {
+        return $clienteZona;
+    }
+    if (!empty($clienteGlobal)) {
+        return $clienteGlobal;
+    }
+    if (!empty($clienteFallback)) {
+        return $clienteFallback;
+    }
+
+    return [];
 }
 
 /**
