@@ -56,6 +56,91 @@ function obtenerZonasVisita() {
 }
 
 /**
+ * Obtener la zona activa del vendedor segun el ciclo configurado.
+ *
+ * @return array|null ['nombre' => string, 'orden' => int, 'duracion_semanas' => int]
+ */
+function obtenerZonaActivaHoy() {
+    $cod_vendedor = obtenerCodVendedorPlanificacionService();
+    $conn = db();
+
+    if ($cod_vendedor <= 0) {
+        return null;
+    }
+
+    $query = "SELECT cod_zona, nombre_zona, duracion_semanas, orden, fecha_inicio_ciclo
+              FROM cmf_zonas_visita
+              WHERE cod_vendedor = '$cod_vendedor'
+              ORDER BY orden ASC, cod_zona ASC";
+
+    $resultado = odbc_exec($conn, $query);
+    if (!$resultado) {
+        error_log('Error al obtener la zona activa del ciclo: ' . odbc_errormsg($conn));
+        return null;
+    }
+
+    $zonas = array();
+    $fechaInicioCiclo = '';
+
+    while ($fila = odbc_fetch_array($resultado)) {
+        $duracion = max(0, intval($fila['duracion_semanas'] ?? 0));
+        if ($duracion <= 0) {
+            continue;
+        }
+
+        $fechaFila = trim((string)($fila['fecha_inicio_ciclo'] ?? ''));
+        if ($fechaInicioCiclo === '' && $fechaFila !== '') {
+            $fechaInicioCiclo = $fechaFila;
+        }
+
+        $zonas[] = array(
+            'nombre' => trim((string)($fila['nombre_zona'] ?? '')),
+            'orden' => intval($fila['orden'] ?? 0),
+            'duracion_semanas' => $duracion,
+        );
+    }
+
+    if (empty($zonas) || $fechaInicioCiclo === '') {
+        return null;
+    }
+
+    $inicioCicloTs = strtotime(substr($fechaInicioCiclo, 0, 10) . ' 00:00:00');
+    if ($inicioCicloTs === false) {
+        return null;
+    }
+
+    $hoyTs = strtotime(date('Y-m-d') . ' 00:00:00');
+    if ($hoyTs === false) {
+        return null;
+    }
+
+    $totalSemanasCiclo = 0;
+    foreach ($zonas as $zona) {
+        $totalSemanasCiclo += (int)$zona['duracion_semanas'];
+    }
+
+    if ($totalSemanasCiclo <= 0) {
+        return null;
+    }
+
+    $segundosSemana = 7 * 24 * 60 * 60;
+    $semanasTranscurridas = $hoyTs >= $inicioCicloTs
+        ? (int)floor(($hoyTs - $inicioCicloTs) / $segundosSemana)
+        : 0;
+    $posicionSemana = $semanasTranscurridas % $totalSemanasCiclo;
+
+    $acumuladoSemanas = 0;
+    foreach ($zonas as $zona) {
+        $acumuladoSemanas += (int)$zona['duracion_semanas'];
+        if ($posicionSemana < $acumuladoSemanas) {
+            return $zona;
+        }
+    }
+
+    return null;
+}
+
+/**
  * Obtener información de una zona por su código
  */
 function obtenerZonaPorCodigo($cod_zona) {
@@ -647,6 +732,12 @@ if (!function_exists('crearZonaVisitaService')) {
 if (!function_exists('obtenerZonasVisitaService')) {
     function obtenerZonasVisitaService() {
         return obtenerZonasVisita();
+    }
+}
+
+if (!function_exists('obtenerZonaActivaHoyService')) {
+    function obtenerZonaActivaHoyService() {
+        return obtenerZonaActivaHoy();
     }
 }
 

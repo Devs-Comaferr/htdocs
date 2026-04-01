@@ -73,6 +73,11 @@ $totalPedidosSinAsignar = obtenerConteoPlanificadorMenu(
 );
 
 $totalZonasActivas = count(obtenerZonasVisita() ?? []);
+$zonaActiva = obtenerZonaActivaHoyService();
+$nombreZonaActiva = trim((string)($zonaActiva['nombre'] ?? ''));
+if ($nombreZonaActiva === '') {
+    $nombreZonaActiva = 'No definida';
+}
 
 $pedidosSinAsignarCriticos = ($totalPedidosSinAsignar ?? 0) > 0;
 $pendientesHoy = $totalPendientesHoy ?? 0;
@@ -637,7 +642,7 @@ unset($card);
                 <div class="dashboard-summary">
                     <div class="dashboard-item">
                         <div class="dashboard-label">Zona activa</div>
-                        <div class="dashboard-metric">Sevilla</div>
+                        <div class="dashboard-metric"><?= htmlspecialchars($nombreZonaActiva, ENT_QUOTES, 'UTF-8') ?></div>
                     </div>
                     <div class="dashboard-item">
                         <div class="dashboard-label">Visitas hoy</div>
