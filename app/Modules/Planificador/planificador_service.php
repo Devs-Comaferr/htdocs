@@ -338,6 +338,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
     $codVendedor = obtenerCodVendedorPlanificacionService();
     $conn = db();
     $iteracionZona = 0;
+    $fechaInicioCiclo = '';
 
     if ($codVendedor <= 0) {
         return [];
@@ -376,6 +377,13 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
     error_log('ITERACION ZONA: ' . $iteracionZona);
     error_log('ITERACION REAL: ' . ($iteracionZona + 1));
 
+    $filtroVisitasCicloActual = '';
+    if ($fechaInicioCiclo !== '') {
+        $filtroVisitasCicloActual = "
+            AND v.fecha_visita >= '" . substr($fechaInicioCiclo, 0, 10) . "'
+        ";
+    }
+
     $selectZonaBase = "
         SELECT
             c.cod_cliente,
@@ -394,6 +402,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
         LEFT JOIN cmf_visitas_comerciales v
             ON v.cod_cliente = c.cod_cliente
             AND v.cod_vendedor = c.cod_vendedor
+            $filtroVisitasCicloActual
     ";
 
     $orderByBase = "
@@ -425,7 +434,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
         $queryZonaNivel1 = $selectZonaBase
             . $whereZona
             . $groupByZona
-            . " HAVING MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) = 0 "
+            . " HAVING MAX(v.fecha_visita) IS NULL "
             . $orderByBase;
 
         $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZonaNivel1, 'zona', $iteracionZona);
@@ -436,6 +445,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
         $queryZonaNivel2 = $selectZonaBase
             . $whereZona
             . $groupByZona
+            . " HAVING MAX(v.fecha_visita) IS NULL "
             . $orderByBase;
 
         $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZonaNivel2, 'zona', $iteracionZona);
