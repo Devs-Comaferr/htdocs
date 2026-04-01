@@ -192,17 +192,18 @@ function construirClienteRecomendadoDesdeFila(array $fila, string $origenRecomen
 
 function calcularTocaVisitaPlanificador($frecuenciaVisita, int $iteracionZona): int {
     $frecuencia = strtoupper(trim((string)$frecuenciaVisita));
+    $iteracionZonaReal = $iteracionZona + 1;
 
     if ($frecuencia === 'TODOS') {
         return 1;
     }
 
     if ($frecuencia === 'CADA2') {
-        return ($iteracionZona % 2) === 0 ? 1 : 0;
+        return ($iteracionZonaReal % 2) === 0 ? 1 : 0;
     }
 
     if ($frecuencia === 'CADA3') {
-        return ($iteracionZona % 3) === 0 ? 1 : 0;
+        return ($iteracionZonaReal % 3) === 0 ? 1 : 0;
     }
 
     return 0;
@@ -373,6 +374,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
 
     error_log('ZONA ACTIVA ID: ' . $codZona);
     error_log('ITERACION ZONA: ' . $iteracionZona);
+    error_log('ITERACION REAL: ' . ($iteracionZona + 1));
 
     $selectZonaBase = "
         SELECT
