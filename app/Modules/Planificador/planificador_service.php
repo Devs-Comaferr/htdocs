@@ -190,7 +190,25 @@ function construirClienteRecomendadoDesdeFila(array $fila, string $origenRecomen
     );
 }
 
-function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenRecomendacion) {
+function calcularTocaVisitaPlanificador($frecuenciaVisita, int $iteracionZona): int {
+    $frecuencia = strtoupper(trim((string)$frecuenciaVisita));
+
+    if ($frecuencia === 'TODOS') {
+        return 1;
+    }
+
+    if ($frecuencia === 'CADA2') {
+        return ($iteracionZona % 2) === 0 ? 1 : 0;
+    }
+
+    if ($frecuencia === 'CADA3') {
+        return ($iteracionZona % 3) === 0 ? 1 : 0;
+    }
+
+    return 0;
+}
+
+function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenRecomendacion, ?int $iteracionZona = null) {
     planificadorConfigurarDebugLog();
 
     $sql = $query;
@@ -212,6 +230,17 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
         if (!isset($fila['score']) || $fila['score'] === null) {
             $fila['score'] = 0;
         }
+
+        if ($iteracionZona !== null) {
+            $fila['toca_visita'] = calcularTocaVisitaPlanificador($fila['frecuencia_visita'] ?? '', $iteracionZona);
+            $fila['iteracion_zona'] = $iteracionZona;
+            error_log(
+                'FRECUENCIA candidato: ' . trim((string)($fila['frecuencia_visita'] ?? ''))
+                . ' | iteracionZona: ' . $iteracionZona
+                . ' | toca_visita: ' . (int)($fila['toca_visita'] ?? 0)
+            );
+        }
+
         $clientes[] = $fila;
     }
 
@@ -223,6 +252,18 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
 
     if (empty($clientes)) {
         return null;
+    }
+
+    if ($iteracionZona !== null) {
+        $clientes = array_values(array_filter($clientes, function ($cliente) {
+            return (int)($cliente['toca_visita'] ?? 0) === 1;
+        }));
+
+        error_log('Clientes candidatos tras filtro de frecuencia: ' . count($clientes));
+
+        if (empty($clientes)) {
+            return null;
+        }
     }
 
     foreach ($clientes as &$c) {
@@ -252,6 +293,7 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
             'cod_cliente' => $cliente['cod_cliente'] ?? null,
             'nombre' => $cliente['nombre'] ?? '',
             'frecuencia_visita' => $cliente['frecuencia_visita'] ?? null,
+            'iteracion_zona' => $cliente['iteracion_zona'] ?? null,
             'toca_visita' => $cliente['toca_visita'] ?? null,
             'score' => $cliente['score'] ?? 0,
         );
@@ -384,7 +426,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
             . " HAVING MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) = 0 "
             . $orderByBase;
 
-        $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZonaNivel1, 'zona');
+        $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZonaNivel1, 'zona', $iteracionZona);
         if (!empty($clienteZona)) {
             return $clienteZona;
         }
@@ -394,7 +436,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
             . $groupByZona
             . $orderByBase;
 
-        $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZonaNivel2, 'zona');
+        $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZonaNivel2, 'zona', $iteracionZona);
         if (!empty($clienteZona)) {
             return $clienteZona;
         }
