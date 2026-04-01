@@ -7,7 +7,6 @@
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/db.php';
-require_once BASE_PATH . '/app/Modules/Visitas/registrar_visita_handler.php';
 requierePermiso('perm_planificador');
 
 $conn = db();
@@ -125,9 +124,9 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
                         $displayName = htmlspecialchars($cliente['nombre_comercial']);
                         if ($cliente['cod_seccion'] !== null) {
                             $displayName .= " - " . htmlspecialchars($cliente['nombre_seccion']);
-                            $link = "registrar_visita_manual.php?cod_cliente=" . $cliente['cod_cliente'] . "&cod_seccion=" . $cliente['cod_seccion'];
+                            $link = BASE_URL . "/registrar_visita_manual.php?cod_cliente=" . $cliente['cod_cliente'] . "&cod_seccion=" . $cliente['cod_seccion'];
                         } else {
-                            $link = "registrar_visita_manual.php?cod_cliente=" . $cliente['cod_cliente'];
+                            $link = BASE_URL . "/registrar_visita_manual.php?cod_cliente=" . $cliente['cod_cliente'];
                         }
                         echo "<a href='$link' class='list-group-item'>$displayName</a>";
                     }
@@ -136,7 +135,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
                     }
                     ?>
                 </div>
-                <a href="registrar_visita_manual.php" class="back-link">Realizar nueva búsqueda</a>
+                <a href="<?= BASE_URL ?>/registrar_visita_manual.php" class="back-link">Realizar nueva búsqueda</a>
             </div>
         </body>
 
@@ -208,7 +207,7 @@ if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
         <body>
             <div class="container">
                 <h1>Buscar Cliente para Visita Manual</h1>
-                <form method="get" action="<?= BASE_URL ?>/visitas.php">
+                <form method="get" action="<?= BASE_URL ?>/registrar_visita_manual.php">
                     <input type="hidden" name="action" value="crear">
                     <div class="mb-3">
                         <label for="buscar">Nombre del Cliente:</label>
@@ -316,178 +315,12 @@ if ($result_citas) {
 
 $error = '';
 $success = '';
-$requiereConfirmacion = false;
-// Forzar formato de fecha a YYYY-MM-DD
-$fecha_visita = isset($_POST['fecha_visita']) ? date('Y-m-d', strtotime(trim($_POST['fecha_visita']))) : "";
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $fecha_visita = date('Y-m-d', strtotime(trim($_POST['fecha_visita'])));
-    $hora_inicio_visita = trim($_POST['hora_inicio_visita']);
-    $hora_fin_visita = trim($_POST['hora_fin_visita']);
-    $zona_seleccionada = intval($_POST['zona_seleccionada']);
-    $estado_visita = isset($_POST['estado_visita']) ? normalizarEstadoVisita(trim($_POST['estado_visita'])) : 'Planificada';
-    $observaciones = trim($_POST['observaciones']);
-
-    if (empty($fecha_visita) || empty($hora_inicio_visita) || empty($hora_fin_visita)) {
-        $error = "Por favor, complete la fecha y las horas de la visita.";
-    } else {
-        if (strtotime($hora_inicio_visita) >= strtotime($hora_fin_visita)) {
-            $error = "La hora de inicio debe ser anterior a la de fin.";
-        } else {
-            // Determinar la franja (slot) en la que se encuentra la visita
-            $slot = '';
-            if (!empty($hora_inicio_manana) && !empty($hora_fin_manana)) {
-                $morning_start = strtotime($hora_inicio_manana);
-                $morning_end = strtotime($hora_fin_manana);
-                if (strtotime($hora_inicio_visita) >= $morning_start && strtotime($hora_inicio_visita) < $morning_end) {
-                    $slot = 'morning';
-                }
-            }
-            if (empty($slot) && !empty($hora_inicio_tarde) && !empty($hora_fin_tarde)) {
-                $afternoon_start = strtotime($hora_inicio_tarde);
-                $afternoon_end = strtotime($hora_fin_tarde);
-                if (strtotime($hora_inicio_visita) >= $afternoon_start && strtotime($hora_inicio_visita) < $afternoon_end) {
-                    $slot = 'afternoon';
-                }
-            }
-            if (empty($slot)) {
-                $error = "La hora de inicio de la visita no se encuentra dentro de las franjas de disponibilidad del cliente.";
-            } else {
-                // Validar que la hora de fin no supere el cierre del slot
-                if ($slot == 'morning' && strtotime($hora_fin_visita) > strtotime($hora_fin_manana)) {
-                    $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la mañana ($hora_fin_manana).";
-                } elseif ($slot == 'afternoon' && strtotime($hora_fin_visita) > strtotime($hora_fin_tarde)) {
-                    $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la tarde ($hora_fin_tarde).";
-                } else {
-                    // Validación adicional: No se debe solapar la nueva visita con ninguna ya registrada para este vendedor en el mismo día
-                    $overlap = false;
-                    $overlapDetails = "";
-                    $sql_overlap = "SELECT * FROM [integral].[dbo].[cmf_visitas_comerciales]
-                                    WHERE cod_vendedor = ?
-                                      AND CONVERT(varchar(10), fecha_visita, 120) = ?
-                                      AND LOWER(estado_visita) IN ('planificada','pendiente')";
-                    $result_overlap = registrarVisitaManualPrepareExecute($conn, $sql_overlap, [$codigo_vendedor, $fecha_visita]);
-                    if ($result_overlap) {
-                        while ($row = odbc_fetch_array($result_overlap)) {
-                            $existing_start = strtotime($row['hora_inicio_visita']);
-                            $existing_end = strtotime($row['hora_fin_visita']);
-                            $new_start = strtotime($hora_inicio_visita);
-                            $new_end = strtotime($hora_fin_visita);
-                            if ($new_start < $existing_end && $new_end > $existing_start) {
-                                $overlap = true;
-                                // Recuperar el nombre del cliente para la visita solapada
-                                $overlapCliente = "";
-                                $sql_cliente_overlap = "SELECT nombre_comercial FROM [integral].[dbo].[clientes] WHERE cod_cliente = ?";
-                                $result_cliente_overlap = registrarVisitaManualPrepareExecute($conn, $sql_cliente_overlap, [$row['cod_cliente']]);
-                                if ($result_cliente_overlap) {
-                                    $data_cliente_overlap = odbc_fetch_array($result_cliente_overlap);
-                                    $overlapCliente = $data_cliente_overlap ? $data_cliente_overlap['nombre_comercial'] : "";
-                                }
-                                // Si la visita solapada tiene asignada una sección, se recupera su nombre
-                                $overlapSeccion = "";
-                                if ($row['cod_seccion'] !== null) {
-                                    $overlap_seccion = intval($row['cod_seccion']);
-                                    $sql_overlap_seccion = "SELECT nombre FROM [integral].[dbo].[secciones_cliente] WHERE cod_cliente = ? AND cod_seccion = ?";
-                                    $result_overlap_seccion = registrarVisitaManualPrepareExecute($conn, $sql_overlap_seccion, [$row['cod_cliente'], $overlap_seccion]);
-                                    if ($result_overlap_seccion) {
-                                        $data_overlap_seccion = odbc_fetch_array($result_overlap_seccion);
-                                        $overlapSeccion = $data_overlap_seccion ? $data_overlap_seccion['nombre'] : "";
-                                    }
-                                }
-                                $overlapDetails = " " . $overlapCliente;
-                                if (!empty($overlapSeccion)) {
-                                    $overlapDetails .= " - " . $overlapSeccion;
-                                }
-                                $overlapDetails .= " de " . date("H:i", $existing_start) . " a " . date("H:i", $existing_end);
-                                break;
-                            }
-                        }
-                    }
-                    if ($overlap) {
-                        $error = "Existe una visita programada que se solapa con la visita que intenta registrar:" . $overlapDetails . ".";
-                    } else {
-                        // Consulta para calcular los minutos ya usados en el slot
-                        $sql_visitas_slot = "SELECT hora_inicio_visita, hora_fin_visita 
-                            FROM [integral].[dbo].[cmf_visitas_comerciales] 
-                            WHERE cod_vendedor = ? 
-                              AND CONVERT(varchar(10), fecha_visita, 120) = ?
-                              AND LOWER(estado_visita) IN ('planificada', 'pendiente')";
-                        $result_visitas_slot = registrarVisitaManualPrepareExecute($conn, $sql_visitas_slot, [$codigo_vendedor, $fecha_visita]);
-                        if (!$result_visitas_slot) {
-                            $error = "Error al consultar visitas programadas.";
-                        } else {
-                            $used_minutes = 0;
-                            if ($slot == 'morning') {
-                                while ($row = odbc_fetch_array($result_visitas_slot)) {
-                                    $visita_start = strtotime($row['hora_inicio_visita']);
-                                    if ($visita_start >= strtotime($hora_inicio_manana) && $visita_start < strtotime($hora_fin_manana)) {
-                                        $dur = (strtotime($row['hora_fin_visita']) - strtotime($row['hora_inicio_visita'])) / 60;
-                                        $used_minutes += $dur;
-                                    }
-                                }
-                                $total_slot_minutes = (strtotime($hora_fin_manana) - strtotime($hora_inicio_manana)) / 60;
-                            } elseif ($slot == 'afternoon') {
-                                while ($row = odbc_fetch_array($result_visitas_slot)) {
-                                    $visita_start = strtotime($row['hora_inicio_visita']);
-                                    if ($visita_start >= strtotime($hora_inicio_tarde) && $visita_start < strtotime($hora_fin_tarde)) {
-                                        $dur = (strtotime($row['hora_fin_visita']) - strtotime($row['hora_inicio_visita'])) / 60;
-                                        $used_minutes += $dur;
-                                    }
-                                }
-                                $total_slot_minutes = (strtotime($hora_fin_tarde) - strtotime($hora_inicio_tarde)) / 60;
-                            }
-                            $free_minutes = $total_slot_minutes - $used_minutes;
-                            if ($free_minutes < 0) {
-                                $free_minutes = 0;
-                            }
-
-                            if ($free_minutes < $tiempo_promedio_minutes) {
-                                $error = "No hay suficiente tiempo libre en la franja seleccionada. Tiempo libre: $free_minutes minutos, se requiere al menos $tiempo_promedio_minutes minutos.";
-                            } else {
-                                $result_insert = registrarVisitaManual([
-                                    'cod_cliente' => $cod_cliente,
-                                    'cod_seccion' => $cod_seccion,
-                                    'cod_vendedor' => $codigo_vendedor,
-                                    'fecha_visita' => $fecha_visita,
-                                    'hora_inicio_visita' => $hora_inicio_visita,
-                                    'hora_fin_visita' => $hora_fin_visita,
-                                    'estado_visita' => $estado_visita,
-                                    'cod_zona_visita' => $zona_seleccionada,
-                                    'observaciones' => $observaciones,
-                                ], isset($_POST['forzar']));
-                                if (!($result_insert['ok'] ?? false)) {
-                                    $conflictos = $result_insert['conflictos'] ?? [];
-                                    $requiereConfirmacion = !empty($result_insert['requiere_confirmacion']);
-                                    $mensajesConflicto = [];
-                                    if (!empty($conflictos['solape'])) {
-                                        $mensajesConflicto[] = "Conflicto detectado: solape de horario";
-                                    }
-                                    if (!empty($conflictos['cliente_duplicado'])) {
-                                        $mensajesConflicto[] = "Conflicto detectado: ya existe una visita para este cliente en ese dia";
-                                    }
-                                    if (!empty($conflictos['no_cabe'])) {
-                                        $mensajesConflicto[] = "La visita no cabe en el horario disponible";
-                                    }
-                                    if (!empty($conflictos['exceso_tiempo'])) {
-                                        $mensajesConflicto[] = "Estas superando el tiempo recomendado del dia";
-                                    }
-                                    if (!empty($mensajesConflicto)) {
-                                        $error = implode(". ", $mensajesConflicto);
-                                    } else {
-                                        $error = "Error al insertar la visita.";
-                                    }
-                                } else {
-                                    echo "<script>window.location.href='" . BASE_URL . "/mostrar_calendario.php';</script>";
-                                    exit();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+$fecha_visita = '';
+$hora_inicio_visita = '';
+$hora_fin_visita = '';
+$zona_seleccionada = $zonas[0]['codigo'] ?? '';
+$estado_visita = 'Planificada';
+$observaciones = '';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -686,27 +519,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
 
         <!-- Formulario para registrar visita manual -->
-        <form action="<?= BASE_URL ?>/visitas.php?action=crear&amp;cod_cliente=<?php echo $cod_cliente; ?><?php echo ($cod_seccion !== null ? "&amp;cod_seccion=" . $cod_seccion : ""); ?>" method="post" class="form">
-            <?php if ($requiereConfirmacion): ?>
-                <input type="hidden" name="forzar" value="1" />
+        <form method="POST" action="<?= BASE_URL ?>/visitas.php?action=crear" class="form">
+            <input type="hidden" name="origen" value="manual">
+            <input type="hidden" name="cod_cliente" value="<?php echo $cod_cliente; ?>">
+            <?php if ($cod_seccion !== null): ?>
+                <input type="hidden" name="cod_seccion" value="<?php echo $cod_seccion; ?>">
             <?php endif; ?>
             <div class="mb-3">
                 <label for="fecha_visita">Fecha de la Visita:</label>
-                <input type="date" class="form-control" name="fecha_visita" id="fecha_visita" value="<?php echo isset($_POST['fecha_visita']) ? htmlspecialchars($_POST['fecha_visita']) : ''; ?>" />
+                <input type="date" class="form-control" name="fecha_visita" id="fecha_visita" value="<?php echo htmlspecialchars($fecha_visita); ?>" />
             </div>
             <div class="mb-3">
                 <label for="hora_inicio_visita">Hora de Inicio:</label>
-                <input type="time" class="form-control" name="hora_inicio_visita" id="hora_inicio_visita" value="<?php echo isset($_POST['hora_inicio_visita']) ? htmlspecialchars($_POST['hora_inicio_visita']) : ''; ?>" />
+                <input type="time" class="form-control" name="hora_inicio_visita" id="hora_inicio_visita" value="<?php echo htmlspecialchars($hora_inicio_visita); ?>" />
             </div>
             <div class="mb-3">
                 <label for="hora_fin_visita">Hora de Fin:</label>
-                <input type="time" class="form-control" name="hora_fin_visita" id="hora_fin_visita" value="<?php echo isset($_POST['hora_fin_visita']) ? htmlspecialchars($_POST['hora_fin_visita']) : ''; ?>" />
+                <input type="time" class="form-control" name="hora_fin_visita" id="hora_fin_visita" value="<?php echo htmlspecialchars($hora_fin_visita); ?>" />
             </div>
             <div class="mb-3">
                 <label for="zona_seleccionada">Zona de Visita:</label>
                 <select name="zona_seleccionada" id="zona_seleccionada" class="form-select">
                     <?php foreach ($zonas as $zona): ?>
-                        <option value="<?php echo $zona['codigo']; ?>" <?php if (isset($_POST['zona_seleccionada']) && $_POST['zona_seleccionada'] == $zona['codigo']) echo 'selected'; ?>>
+                        <option value="<?php echo $zona['codigo']; ?>" <?php if ((string)$zona_seleccionada === (string)$zona['codigo']) echo 'selected'; ?>>
                             <?php echo htmlspecialchars($zona['nombre']); ?>
                         </option>
                     <?php endforeach; ?>
@@ -715,22 +550,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="mb-3">
                 <label for="estado_visita">Estado de la Visita:</label>
                 <select name="estado_visita" id="estado_visita" class="form-select">
-                    <option value="Pendiente" <?php if (isset($_POST['estado_visita']) && normalizarEstadoVisita($_POST['estado_visita']) == 'Pendiente') echo 'selected'; ?>>Pendiente</option>
-                    <option value="Planificada" <?php if (isset($_POST['estado_visita']) && normalizarEstadoVisita($_POST['estado_visita']) == 'Planificada') echo 'selected'; ?>>Planificada</option>
-                    <option value="Realizada" <?php if (isset($_POST['estado_visita']) && normalizarEstadoVisita($_POST['estado_visita']) == 'Realizada') echo 'selected'; ?>>Realizada</option>
-                    <option value="No atendida" <?php if (isset($_POST['estado_visita']) && normalizarEstadoVisita($_POST['estado_visita']) == 'No atendida') echo 'selected'; ?>>No atendida</option>
-                    <option value="Descartada" <?php if (isset($_POST['estado_visita']) && normalizarEstadoVisita($_POST['estado_visita']) == 'Descartada') echo 'selected'; ?>>Descartada</option>
+                    <option value="Pendiente" <?php if ($estado_visita === 'Pendiente') echo 'selected'; ?>>Pendiente</option>
+                    <option value="Planificada" <?php if ($estado_visita === 'Planificada') echo 'selected'; ?>>Planificada</option>
+                    <option value="Realizada" <?php if ($estado_visita === 'Realizada') echo 'selected'; ?>>Realizada</option>
+                    <option value="No atendida" <?php if ($estado_visita === 'No atendida') echo 'selected'; ?>>No atendida</option>
+                    <option value="Descartada" <?php if ($estado_visita === 'Descartada') echo 'selected'; ?>>Descartada</option>
                 </select>
             </div>
             <div class="mb-3">
                 <label for="observaciones">Observaciones (opcional):</label>
-                <textarea name="observaciones" id="observaciones" class="form-control" rows="4"><?php echo isset($_POST['observaciones']) ? htmlspecialchars($_POST['observaciones']) : ''; ?></textarea>
+                <textarea name="observaciones" id="observaciones" class="form-control" rows="4"><?php echo htmlspecialchars($observaciones); ?></textarea>
             </div>
-            <?php if ($requiereConfirmacion): ?>
-                <button type="submit" class="btn btn-warning w-100 btn-submit">Guardar de todas formas</button>
-            <?php else: ?>
-                <button type="submit" class="btn btn-primary w-100 btn-submit">Registrar Visita Manual</button>
-            <?php endif; ?>
+            <button type="submit" class="btn btn-primary w-100 btn-submit">Registrar Visita Manual</button>
         </form>
 
         <!-- Div para mostrar las visitas del da seleccionado -->
