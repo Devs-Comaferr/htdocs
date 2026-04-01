@@ -145,7 +145,7 @@ function obtenerZonaActivaHoy() {
  * Obtener un cliente recomendado de la zona activa priorizando clientes sin visita hoy
  * y, despues, por antiguedad de su ultima visita.
  *
- * @return array|null ['cod_cliente' => int, 'nombre' => string]
+ * @return array|null ['cod_cliente' => int, 'nombre' => string, 'motivo' => string]
  */
 function obtenerSiguienteClienteRecomendado() {
     $zonaActiva = obtenerZonaActivaHoyService();
@@ -160,7 +160,8 @@ function obtenerSiguienteClienteRecomendado() {
     $query = "
         SELECT TOP 1
             base.cod_cliente,
-            base.nombre
+            base.nombre,
+            base.ultima_visita
         FROM (
             SELECT
                 c.cod_cliente,
@@ -202,9 +203,30 @@ function obtenerSiguienteClienteRecomendado() {
         return null;
     }
 
+    $ultimaVisita = trim((string)($fila['ultima_visita'] ?? ''));
+    $motivo = 'Nunca visitado';
+
+    if ($ultimaVisita !== '') {
+        $ultimaVisitaTs = strtotime(substr($ultimaVisita, 0, 19));
+        $hoyTs = strtotime(date('Y-m-d') . ' 00:00:00');
+
+        if ($ultimaVisitaTs !== false && $hoyTs !== false) {
+            $diasDesdeUltimaVisita = max(0, (int)floor(($hoyTs - $ultimaVisitaTs) / (24 * 60 * 60)));
+
+            if ($diasDesdeUltimaVisita > 30) {
+                $motivo = 'No visitado en ' . $diasDesdeUltimaVisita . ' dias';
+            } elseif ($diasDesdeUltimaVisita >= 7) {
+                $motivo = 'Seguimiento recomendado';
+            } else {
+                $motivo = 'Visita reciente';
+            }
+        }
+    }
+
     return array(
         'cod_cliente' => intval($fila['cod_cliente'] ?? 0),
         'nombre' => $nombre,
+        'motivo' => $motivo,
     );
 }
 

@@ -83,6 +83,7 @@ $nombreClienteRecomendado = trim((string)($clienteRecomendado['nombre'] ?? ''));
 if ($nombreClienteRecomendado === '') {
     $nombreClienteRecomendado = 'Sin recomendaciones';
 }
+$motivoClienteRecomendado = trim((string)($clienteRecomendado['motivo'] ?? ''));
 
 $pedidosSinAsignarCriticos = ($totalPedidosSinAsignar ?? 0) > 0;
 $pendientesHoy = $totalPendientesHoy ?? 0;
@@ -345,6 +346,12 @@ unset($card);
             font-size: 14px;
             color: #475569;
             margin: 0 0 8px;
+        }
+
+        .dashboard-subtext {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
         }
 
         .card,
@@ -668,6 +675,7 @@ unset($card);
                 <div class="dashboard-title">Siguiente accion</div>
                 <div class="dashboard-label">Cliente recomendado</div>
                 <p class="dashboard-note"><?= htmlspecialchars($nombreClienteRecomendado, ENT_QUOTES, 'UTF-8') ?></p>
+                <span class="dashboard-subtext"><?= htmlspecialchars($motivoClienteRecomendado, ENT_QUOTES, 'UTF-8') ?></span>
             </div>
         </div>
 
