@@ -48,6 +48,8 @@ function guardarConfigApp($conn, string $clave, string $valor): bool
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrfValidateRequest('configuracion.aplicacion');
+
     $nombreSistema = trim((string)($_POST['nombre_sistema'] ?? ''));
     $colorPrimary = trim((string)($_POST['color_primary'] ?? ''));
     $logoPath = trim((string)($_POST['logo_path'] ?? ''));
@@ -163,6 +165,7 @@ $config = obtenerConfiguracionApp($conn);
       <?php endif; ?>
 
       <form method="post">
+        <?= csrfInput() ?>
         <div class="field">
           <label for="nombre_sistema">Nombre del sistema</label>
           <input type="text" id="nombre_sistema" name="nombre_sistema" value="<?= htmlspecialchars((string)$config['nombre_sistema'], ENT_QUOTES, 'UTF-8') ?>" required>

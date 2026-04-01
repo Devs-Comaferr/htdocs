@@ -114,6 +114,7 @@ if ($result) {
     <div class="cards-wrapper">
       <?php foreach ($usuarios as $u): ?>
         <form method="post" action="guardar_usuario.php">
+          <?= csrfInput() ?>
           <div class="user-card">
             <h3><?= htmlspecialchars((string)$u['nombre']) ?></h3>
             <div class="field">
@@ -155,6 +156,7 @@ if ($result) {
         </tr>
         <?php foreach ($usuarios as $u): ?>
           <form method="post" action="guardar_usuario.php">
+            <?= csrfInput() ?>
             <tr>
               <td><?= htmlspecialchars((string)$u['nombre']) ?></td>
               <td>

@@ -15,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     appExitTextError('Metodo no permitido.', 405);
 }
 
+csrfValidateRequest('configuracion.guardar_usuario');
+
 $email = trim((string)($_POST['email'] ?? ''));
 $tipo_plan = trim((string)($_POST['tipo_plan'] ?? 'free'));
 $perm_productos = isset($_POST['perm_productos']) ? 1 : 0;
