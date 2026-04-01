@@ -10,6 +10,8 @@ require_once BASE_PATH . '/app/Support/header.php';
 <link rel="icon" type="image/png" sizes="32x32" href="<?= BASE_URL ?>/imagenes/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="<?= BASE_URL ?>/imagenes/favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="<?= BASE_URL ?>/imagenes/apple-touch-icon.png">
+<link rel="manifest" href="/public/manifest.json">
+<meta name="theme-color" content="#000000">
 <style>
   :root {
     --primary: <?= htmlspecialchars((string)($config['color_primary'] ?? '#2563eb'), ENT_QUOTES, 'UTF-8') ?>;

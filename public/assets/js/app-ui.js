@@ -382,3 +382,17 @@ function abrirDocumento(tipo_venta, cod_empresa, cod_caja, cod_venta) {
     });
 }
 
+if ('serviceWorker' in navigator && !window.__appServiceWorkerRegistrationBound) {
+    window.__appServiceWorkerRegistrationBound = true;
+
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/public/service-worker.js')
+            .then(function(reg) {
+                console.log('SW registrado', reg);
+            })
+            .catch(function(err) {
+                console.log('SW error', err);
+            });
+    });
+}
+

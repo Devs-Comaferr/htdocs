@@ -161,7 +161,7 @@ $cards = [
         'metric_class' => '',
         'status_text' => null,
         'status_class' => '',
-        'card_class' => 'card-tertiary',
+        'card_class' => 'card-tertiary card-low',
         'importance' => 3,
     ],
     [
@@ -178,7 +178,7 @@ $cards = [
         'metric_class' => '',
         'status_text' => null,
         'status_class' => '',
-        'card_class' => 'card-tertiary',
+        'card_class' => 'card-tertiary card-low',
         'importance' => 3,
     ],
     [
@@ -224,7 +224,7 @@ foreach ($cards as $card) {
 
 $ordenBase = $pedidosSinAsignarCriticos
     ? ['orders', 'manual', 'calendar', 'complete', 'zones', 'assign', 'holiday', 'closed']
-    : ['complete', 'manual', 'calendar', 'orders', 'zones', 'assign', 'holiday', 'closed'];
+    : ['manual', 'calendar', 'complete', 'orders', 'zones', 'assign', 'holiday', 'closed'];
 
 $cardsOrdenadas = [];
 foreach ($ordenBase as $key) {
@@ -238,10 +238,19 @@ foreach ($cardsByKey as $cardRestante) {
 }
 $cards = $cardsOrdenadas;
 
-foreach ($cards as $index => &$card) {
-    $esMain = $index === 0;
-    $card['span_class'] = $esMain ? 'card-main' : 'card-normal';
-    $card['compact'] = !$esMain;
+foreach ($cards as &$card) {
+    $importance = (int)($card['importance'] ?? 3);
+
+    if ($importance <= 1) {
+        $card['span_class'] = 'card-large';
+        $card['compact'] = false;
+    } elseif ($importance === 2) {
+        $card['span_class'] = 'card-medium';
+        $card['compact'] = false;
+    } else {
+        $card['span_class'] = 'card-mini';
+        $card['compact'] = true;
+    }
 }
 unset($card);
 ?>
@@ -261,16 +270,17 @@ unset($card);
 
         .routes-container {
             max-width: 1100px;
-            margin: 16px auto 70px;
+            margin: 16px auto 24px;
             padding: 0 24px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .container-cards,
         .routes-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            grid-auto-rows: 140px;
-            gap: 16px;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 12px;
         }
 
         .card,
@@ -278,27 +288,32 @@ unset($card);
             background: #ffffff;
             border: none;
             border-radius: 16px;
-            padding: 24px;
+            padding: 12px 14px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.06);
             transition: all 0.25s cubic-bezier(.4,0,.2,1);
             cursor: pointer;
             text-decoration: none;
             color: #1f2937;
-            min-height: 140px;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             justify-content: flex-start;
             text-align: left;
             will-change: transform;
+            box-sizing: border-box;
         }
 
-        .card-main {
+        .card-large {
+            grid-column: span 6;
+        }
+
+        .card-medium {
+            grid-column: span 3;
+        }
+
+        .card-mini {
             grid-column: span 2;
-        }
-
-        .card-normal {
-            grid-column: span 1;
+            padding: 6px 8px;
         }
 
         .card:hover,
@@ -315,29 +330,41 @@ unset($card);
         }
 
         .icon-wrapper {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 16px;
+            margin-bottom: 10px;
         }
 
         .icon-wrapper i,
         .route-icon i {
-            font-size: 30px;
+            font-size: 20px;
         }
 
-        .card-main .icon-wrapper {
-            width: 70px;
-            height: 70px;
-            margin-bottom: 20px;
+        .card-large .icon-wrapper {
+            width: 52px;
+            height: 52px;
+            margin-bottom: 12px;
         }
 
-        .card-main .icon-wrapper i,
-        .card-main .route-icon i {
-            font-size: 34px;
+        .card-large .icon-wrapper i,
+        .card-large .route-icon i {
+            font-size: 24px;
+        }
+
+        .card-mini .icon-wrapper {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .card-mini .icon-wrapper i,
+        .card-mini .route-icon i {
+            font-size: 16px;
         }
 
         .icon-blue { background: rgba(37, 99, 235, 0.12); color: #2563eb; }
@@ -351,10 +378,10 @@ unset($card);
 
         .card h3,
         .route-card h3 {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 600;
             color: #1f2937;
-            margin: 0 0 6px;
+            margin: 0 0 4px;
         }
 
         .card p,
@@ -368,7 +395,7 @@ unset($card);
         .card .cta,
         .route-card .cta {
             margin-top: auto;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             color: #2563eb;
             display: inline-flex;
@@ -393,20 +420,25 @@ unset($card);
         }
 
         .metric-value {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 800;
             line-height: 1;
             color: #111827;
         }
 
         .metric-label {
-            margin-top: 4px;
-            font-size: 12px;
+            margin-top: 2px;
+            font-size: 11px;
             color: #6b7280;
         }
 
-        .card-normal p {
+        .card-mini p,
+        .card-mini .cta {
             display: none;
+        }
+
+        .card-low {
+            opacity: 0.7;
         }
 
         .status-badge {
@@ -470,61 +502,32 @@ unset($card);
 
             .container-cards,
             .routes-grid {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                grid-auto-rows: 140px;
-                gap: 16px;
-            }
-
-            .card,
-            .route-card {
-                min-height: 140px;
-                padding: 24px;
+                grid-template-columns: repeat(12, minmax(0, 1fr));
+                gap: 12px;
             }
         }
 
         @media (max-width: 768px) {
             .container-cards,
             .routes-grid {
-                grid-template-columns: repeat(2, 1fr);
-                grid-auto-rows: auto;
-                gap: 16px;
+                grid-template-columns: repeat(12, minmax(0, 1fr));
+                gap: 10px;
             }
 
             .routes-container {
                 margin-bottom: 28px;
             }
 
-            .card,
-            .route-card {
-                min-height: 140px;
-                padding: 22px 18px;
+            .card-large {
+                grid-column: span 4;
             }
 
-            .card-main {
+            .card-medium {
+                grid-column: span 3;
+            }
+
+            .card-mini {
                 grid-column: span 2;
-            }
-
-            .card-normal {
-                grid-column: span 1;
-            }
-
-            .card-normal p {
-                display: none;
-            }
-
-            .card-main p {
-                display: block;
-            }
-
-            .card-main .icon-wrapper {
-                width: 58px;
-                height: 58px;
-                margin-bottom: 14px;
-            }
-
-            .card-main .icon-wrapper i,
-            .card-main .route-icon i {
-                font-size: 28px;
             }
         }
 
@@ -540,25 +543,24 @@ unset($card);
             .container-cards,
             .routes-grid {
                 grid-template-columns: repeat(2, 1fr);
-                grid-auto-rows: auto;
             }
 
             .card,
             .route-card {
-                min-height: auto;
-                padding: 20px 16px;
+                padding: 14px 12px;
             }
 
-            .card-main {
+            .card-large,
+            .card-medium {
                 grid-column: span 2;
             }
 
-            .card-normal {
+            .card-mini {
                 grid-column: span 1;
             }
 
-            .card-normal p {
-                display: none;
+            .card-medium .cta {
+                display: inline-flex;
             }
         }
     </style>

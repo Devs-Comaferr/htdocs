@@ -1,0 +1,15 @@
+{
+  "name": "APP Comerciales",
+  "short_name": "Comerciales",
+  "start_url": "/public/index.php",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/public/assets/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    }
+  ]
+}
