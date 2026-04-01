@@ -30,18 +30,33 @@ function escape_string_visita(string $str): string
     return str_replace("'", "''", $str);
 }
 
+function insertarVisitaBase($conn, int $cod_cliente, $cod_seccion, int $cod_vendedor, string $fecha_visita, string $hora_inicio_visita, ?string $hora_fin_visita, ?string $observaciones): int
+{
+    return crearVisitaRealizada(
+        $conn,
+        $cod_cliente,
+        $cod_seccion,
+        $cod_vendedor,
+        $fecha_visita,
+        $hora_inicio_visita,
+        $hora_fin_visita ?? $hora_inicio_visita,
+        $observaciones
+    );
+}
+
 $cod_venta = isset($_POST['cod_venta']) ? (int)$_POST['cod_venta'] : 0;
 $cod_cliente = isset($_POST['cod_cliente']) ? (int)$_POST['cod_cliente'] : 0;
 $cod_seccion = (isset($_POST['cod_seccion']) && $_POST['cod_seccion'] !== '') ? (int)$_POST['cod_seccion'] : null;
-$cod_vendedor = isset($_POST['cod_vendedor']) ? (int)$_POST['cod_vendedor'] : 0;
+$cod_vendedor = isset($_SESSION['codigo']) ? (int)$_SESSION['codigo'] : 0;
 $fecha_visita = isset($_POST['fecha_visita']) ? (string)$_POST['fecha_visita'] : '';
 $hora_inicio_visita = isset($_POST['hora_inicio_visita']) ? (string)$_POST['hora_inicio_visita'] : '';
 $hora_fin_visita = (isset($_POST['hora_fin_visita']) && $_POST['hora_fin_visita'] !== '') ? (string)$_POST['hora_fin_visita'] : null;
 $observaciones = isset($_POST['observaciones']) ? escape_string_visita((string)$_POST['observaciones']) : null;
 $ampliacion = (isset($_POST['ampliacion']) && (string)$_POST['ampliacion'] === '1') ? 1 : 0;
 $previous_id_visita = isset($_POST['previous_id_visita']) ? (int)$_POST['previous_id_visita'] : 0;
+$esVisitaManual = ($cod_venta <= 0);
 
-if ($cod_venta <= 0 || $cod_cliente <= 0 || $cod_vendedor <= 0 || $fecha_visita === '' || $hora_inicio_visita === '') {
+if ($cod_cliente <= 0 || $cod_vendedor <= 0 || $fecha_visita === '' || $hora_inicio_visita === '') {
     header('Location: pedidos_visitas.php?msg=error_formato_fecha');
     exit();
 }
@@ -53,42 +68,84 @@ if ($observaciones !== null && strlen($observaciones) > 500) {
 try {
     odbc_autocommit($conn, false);
 
-    if ($ampliacion === 1 && $previous_id_visita > 0) {
-        asegurarRelacionVisitaPedido($conn, $cod_venta, 'Visita', [
-            'id_visita' => $previous_id_visita,
-            'cod_cliente' => $cod_cliente,
-            'cod_seccion' => $cod_seccion
-        ]);
-
-        $sqlUpdate = "
-            UPDATE [integral].[dbo].[cmf_visitas_comerciales]
-            SET
-                estado_visita = 'Realizada',
-                fecha_visita = ?,
-                hora_inicio_visita = ?,
-                hora_fin_visita = ?,
-                observaciones = ?
-            WHERE
-                id_visita = ?
-                AND LOWER(estado_visita) IN ('pendiente', 'planificada')
-        ";
-        $stmtUpdate = odbc_prepare($conn, $sqlUpdate);
-        if (!$stmtUpdate) {
-            throw new Exception('Error al preparar update de visita: ' . odbc_errormsg($conn));
-        }
-        if (!odbc_execute($stmtUpdate, [$fecha_visita, $hora_inicio_visita, $hora_fin_visita, $observaciones, $previous_id_visita])) {
-            throw new Exception('Error al actualizar visita: ' . odbc_errormsg($conn));
+    if ($esVisitaManual) {
+        if ($ampliacion === 1 && $previous_id_visita > 0) {
+            $sqlUpdate = "
+                UPDATE [integral].[dbo].[cmf_visitas_comerciales]
+                SET
+                    estado_visita = 'Realizada',
+                    fecha_visita = ?,
+                    hora_inicio_visita = ?,
+                    hora_fin_visita = ?,
+                    observaciones = ?
+                WHERE
+                    id_visita = ?
+                    AND LOWER(estado_visita) IN ('pendiente', 'planificada')
+            ";
+            $stmtUpdate = odbc_prepare($conn, $sqlUpdate);
+            if (!$stmtUpdate) {
+                throw new Exception('Error al preparar update de visita: ' . odbc_errormsg($conn));
+            }
+            if (!odbc_execute($stmtUpdate, [$fecha_visita, $hora_inicio_visita, $hora_fin_visita, $observaciones, $previous_id_visita])) {
+                throw new Exception('Error al actualizar visita: ' . odbc_errormsg($conn));
+            }
+        } else {
+            insertarVisitaBase(
+                $conn,
+                $cod_cliente,
+                $cod_seccion,
+                $cod_vendedor,
+                $fecha_visita,
+                $hora_inicio_visita,
+                $hora_fin_visita,
+                $observaciones
+            );
         }
     } else {
-        asegurarRelacionVisitaPedido($conn, $cod_venta, 'Visita', [
-            'cod_cliente' => $cod_cliente,
-            'cod_seccion' => $cod_seccion,
-            'cod_vendedor' => $cod_vendedor,
-            'fecha_visita' => $fecha_visita,
-            'hora_inicio_visita' => $hora_inicio_visita,
-            'hora_fin_visita' => $hora_fin_visita,
-            'observaciones' => $observaciones
-        ]);
+        if ($ampliacion === 1 && $previous_id_visita > 0) {
+            asegurarRelacionVisitaPedido($conn, $cod_venta, 'Visita', [
+                'id_visita' => $previous_id_visita,
+                'cod_cliente' => $cod_cliente,
+                'cod_seccion' => $cod_seccion
+            ]);
+
+            $sqlUpdate = "
+                UPDATE [integral].[dbo].[cmf_visitas_comerciales]
+                SET
+                    estado_visita = 'Realizada',
+                    fecha_visita = ?,
+                    hora_inicio_visita = ?,
+                    hora_fin_visita = ?,
+                    observaciones = ?
+                WHERE
+                    id_visita = ?
+                    AND LOWER(estado_visita) IN ('pendiente', 'planificada')
+            ";
+            $stmtUpdate = odbc_prepare($conn, $sqlUpdate);
+            if (!$stmtUpdate) {
+                throw new Exception('Error al preparar update de visita: ' . odbc_errormsg($conn));
+            }
+            if (!odbc_execute($stmtUpdate, [$fecha_visita, $hora_inicio_visita, $hora_fin_visita, $observaciones, $previous_id_visita])) {
+                throw new Exception('Error al actualizar visita: ' . odbc_errormsg($conn));
+            }
+        } else {
+            $idVisita = insertarVisitaBase(
+                $conn,
+                $cod_cliente,
+                $cod_seccion,
+                $cod_vendedor,
+                $fecha_visita,
+                $hora_inicio_visita,
+                $hora_fin_visita,
+                $observaciones
+            );
+
+            asegurarRelacionVisitaPedido($conn, $cod_venta, 'Visita', [
+                'id_visita' => $idVisita,
+                'cod_cliente' => $cod_cliente,
+                'cod_seccion' => $cod_seccion
+            ]);
+        }
     }
 
     recalcularTiempoPromedioVisita($conn, $cod_cliente, $cod_seccion);

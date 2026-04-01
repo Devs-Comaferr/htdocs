@@ -45,8 +45,8 @@ $observaciones = isset($_POST['observaciones']) ? trim((string)$_POST['observaci
 
 $error = '';
 $resultadosBusqueda = [];
-$mostrarResultados = false;
-$mostrarFormulario = false;
+$mostrarResultados = ($accion === 'buscar');
+$mostrarFormulario = ($cod_cliente > 0);
 $assignment = null;
 $nombreCliente = '';
 $nombreSeccion = '';
@@ -59,14 +59,11 @@ $hora_fin_tarde = '';
 $citas = [];
 
 if ($accion === 'registrar') {
-    $_GET['action'] = 'crear';
-    $_POST['origen'] = 'manual';
-    require BASE_PATH . '/public/visitas.php';
+    header('Location: ' . BASE_URL . '/visitas.php?action=crear', true, 307);
+    exit;
 }
 
 if ($accion === 'buscar') {
-    $mostrarResultados = true;
-
     if ($busqueda !== '') {
         $sql_busqueda = "SELECT cl.cod_cliente, cl.nombre_comercial, sc.cod_seccion, sc.nombre AS nombre_seccion
                          FROM [integral].[dbo].[clientes] cl
@@ -85,10 +82,6 @@ if ($accion === 'buscar') {
     } else {
         $error = 'Introduce un nombre para buscar.';
     }
-}
-
-if ($accion === 'seleccionar_cliente' && $cod_cliente > 0) {
-    $mostrarFormulario = true;
 }
 
 if ($mostrarFormulario) {
@@ -276,14 +269,16 @@ if ($mostrarFormulario && $assignment) {
             <input type="hidden" name="cod_cliente" id="cod_cliente" value="<?php echo $cod_cliente > 0 ? htmlspecialchars((string)$cod_cliente) : ''; ?>">
             <input type="hidden" name="cod_seccion" id="cod_seccion" value="<?php echo $cod_seccion !== null ? htmlspecialchars((string)$cod_seccion) : ''; ?>">
 
-            <div class="mb-3">
-                <label for="buscar">Nombre del Cliente:</label>
-                <input type="text" name="buscar" id="buscar" class="form-control" value="<?php echo htmlspecialchars($busqueda); ?>" placeholder="Ingrese el nombre del cliente">
-                <button type="submit" name="accion" value="buscar" class="btn btn-primary w-100 btn-submit">Buscar</button>
-                <p class="text-center" style="margin-top:20px;">Solo se mostraran clientes asignados a tu usuario.</p>
-            </div>
+            <?php if ($cod_cliente == 0): ?>
+                <div class="mb-3">
+                    <label for="buscar">Nombre del Cliente:</label>
+                    <input type="text" name="buscar" id="buscar" class="form-control" value="<?php echo htmlspecialchars($busqueda); ?>" placeholder="Ingrese el nombre del cliente">
+                    <button type="submit" name="accion" value="buscar" class="btn btn-primary w-100 btn-submit">Buscar</button>
+                    <p class="text-center" style="margin-top:20px;">Solo se mostraran clientes asignados a tu usuario.</p>
+                </div>
+            <?php endif; ?>
 
-            <?php if ($mostrarResultados): ?>
+            <?php if ($mostrarResultados && $cod_cliente == 0): ?>
                 <hr>
                 <h3>Resultados de la busqueda</h3>
                 <?php if (empty($resultadosBusqueda)): ?>
@@ -311,7 +306,7 @@ if ($mostrarFormulario && $assignment) {
                 <?php endif; ?>
             <?php endif; ?>
 
-            <?php if ($mostrarFormulario && $assignment): ?>
+            <?php if ($cod_cliente > 0 && $assignment): ?>
                 <hr>
 
                 <?php if (count($citas) > 0): ?>

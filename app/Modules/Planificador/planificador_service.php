@@ -443,14 +443,18 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
         ";
     }
 
+    error_log('DEBUG fechaInicioCiclo: ' . $fechaInicioCiclo);
+    error_log('DEBUG HOY: ' . date('Y-m-d'));
+
     $selectZonaBase = "
         SELECT
             c.cod_cliente,
             c.nombre_comercial AS nombre,
-            MAX(v.fecha_visita) AS ultima_visita,
+            MAX(v_all.fecha_visita) AS ultima_visita_real,
+            MAX(v_ciclo.fecha_visita) AS ultima_visita_ciclo,
             MAX(
                 CASE
-                    WHEN v.id_visita IS NOT NULL
+                    WHEN v_all.id_visita IS NOT NULL
                      AND (
                         vp.id_visita IS NULL
                         OR vp.origen = 'Visita'
@@ -469,19 +473,23 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
         FROM clientes c
         LEFT JOIN cmf_asignacion_zonas_clientes z
             ON z.cod_cliente = c.cod_cliente
-        LEFT JOIN cmf_visitas_comerciales v
-            ON v.cod_cliente = c.cod_cliente
-            AND v.cod_vendedor = c.cod_vendedor
-            $filtroVisitasCicloActual
-            AND v.estado_visita = 'Realizada'
+        LEFT JOIN cmf_visitas_comerciales v_all
+            ON v_all.cod_cliente = c.cod_cliente
+            AND v_all.cod_vendedor = c.cod_vendedor
+            AND v_all.estado_visita = 'Realizada'
+        LEFT JOIN cmf_visitas_comerciales v_ciclo
+            ON v_ciclo.cod_cliente = c.cod_cliente
+            AND v_ciclo.cod_vendedor = c.cod_vendedor
+            AND v_ciclo.estado_visita = 'Realizada'
+            AND v_ciclo.fecha_visita >= '" . substr($fechaInicioCiclo, 0, 10) . "'
         LEFT JOIN cmf_visita_pedidos vp
-            ON vp.id_visita = v.id_visita
+            ON vp.id_visita = v_all.id_visita
     ";
 
     $orderByBase = "
         ORDER BY
-            CASE WHEN MAX(v.fecha_visita) IS NULL THEN 0 ELSE 1 END ASC,
-            MAX(v.fecha_visita) ASC
+            CASE WHEN MAX(v_all.fecha_visita) IS NULL THEN 0 ELSE 1 END ASC,
+            MAX(v_all.fecha_visita) ASC
     ";
 
     $filtrosOperativos = "
@@ -563,7 +571,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
             . $groupByZona
             . " HAVING MAX(
                     CASE
-                        WHEN v.id_visita IS NOT NULL
+                        WHEN v_all.id_visita IS NOT NULL
                          AND (
                             vp.id_visita IS NULL
                             OR vp.origen = 'Visita'
@@ -584,7 +592,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
             . $groupByZona
             . " HAVING MAX(
                     CASE
-                        WHEN v.id_visita IS NOT NULL
+                        WHEN v_all.id_visita IS NOT NULL
                          AND (
                             vp.id_visita IS NULL
                             OR vp.origen = 'Visita'
