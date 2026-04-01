@@ -285,10 +285,6 @@ function obtenerSiguienteClienteRecomendado() {
         FROM clientes c
         LEFT JOIN cmf_asignacion_zonas_clientes z
             ON z.cod_cliente = c.cod_cliente
-            AND (
-                z.zona_principal = '$codZona'
-                OR z.zona_secundaria = '$codZona'
-            )
         LEFT JOIN cmf_visitas_comerciales v
             ON v.cod_cliente = c.cod_cliente
             AND v.cod_vendedor = c.cod_vendedor
@@ -309,7 +305,11 @@ function obtenerSiguienteClienteRecomendado() {
     if ($codZona > 0) {
         $whereZona = "
             WHERE c.cod_vendedor = '$codVendedor'
-              AND z.cod_cliente IS NOT NULL
+              AND (
+                    z.zona_principal = '$codZona'
+                    OR z.zona_secundaria = '$codZona'
+                    OR z.cod_cliente IS NULL
+              )
               $filtrosOperativos
         ";
 
