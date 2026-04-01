@@ -290,9 +290,8 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
     );
 }
 
-function obtenerSiguienteClienteRecomendado() {
-    $zonaActiva = obtenerZonaActivaHoyService();
-    $codZona = intval($zonaActiva['cod_zona'] ?? 0);
+function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
+    $codZona = intval($zonaActivaId);
     $codVendedor = obtenerCodVendedorPlanificacionService();
     $conn = db();
 
@@ -1074,8 +1073,8 @@ if (!function_exists('obtenerZonaActivaHoyService')) {
 }
 
 if (!function_exists('obtenerSiguienteClienteRecomendadoService')) {
-    function obtenerSiguienteClienteRecomendadoService() {
-        return obtenerSiguienteClienteRecomendado();
+    function obtenerSiguienteClienteRecomendadoService($zonaActivaId = 0) {
+        return obtenerSiguienteClienteRecomendado($zonaActivaId);
     }
 }
 

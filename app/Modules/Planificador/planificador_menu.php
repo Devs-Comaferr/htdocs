@@ -74,11 +74,12 @@ $totalPedidosSinAsignar = obtenerConteoPlanificadorMenu(
 
 $totalZonasActivas = count(obtenerZonasVisita() ?? []);
 $zonaActiva = obtenerZonaActivaHoyService();
+$zonaActivaId = (int)($zonaActiva['cod_zona'] ?? 0);
 $nombreZonaActiva = trim((string)($zonaActiva['nombre'] ?? ''));
 if ($nombreZonaActiva === '') {
     $nombreZonaActiva = 'No definida';
 }
-$clienteRecomendado = obtenerSiguienteClienteRecomendadoService();
+$clienteRecomendado = obtenerSiguienteClienteRecomendadoService($zonaActivaId);
 $nombreClienteRecomendado = trim((string)toUTF8($clienteRecomendado['nombre'] ?? ''));
 $motivoClienteRecomendado = trim((string)($clienteRecomendado['motivo'] ?? ''));
 
