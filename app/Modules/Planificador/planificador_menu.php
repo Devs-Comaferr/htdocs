@@ -283,6 +283,60 @@ unset($card);
             gap: 12px;
         }
 
+        .dashboard-top {
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .dashboard-box {
+            grid-column: span 6;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+            box-sizing: border-box;
+        }
+
+        .dashboard-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .dashboard-metric {
+            font-size: 22px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .dashboard-summary {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .dashboard-item {
+            padding: 12px;
+            border-radius: 14px;
+            background: #f8fafc;
+        }
+
+        .dashboard-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .dashboard-note {
+            font-size: 14px;
+            color: #475569;
+            margin: 0 0 8px;
+        }
+
         .card,
         .route-card {
             background: #ffffff;
@@ -508,6 +562,10 @@ unset($card);
         }
 
         @media (max-width: 768px) {
+            .dashboard-box {
+                grid-column: span 12;
+            }
+
             .container-cards,
             .routes-grid {
                 grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -540,6 +598,10 @@ unset($card);
                 padding: 0 12px;
             }
 
+            .dashboard-summary {
+                grid-template-columns: 1fr;
+            }
+
             .container-cards,
             .routes-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -569,6 +631,36 @@ unset($card);
     <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
 
     <div class="routes-container">
+        <div class="dashboard-top">
+            <div class="dashboard-box">
+                <div class="dashboard-title">Hoy</div>
+                <div class="dashboard-summary">
+                    <div class="dashboard-item">
+                        <div class="dashboard-label">Zona activa</div>
+                        <div class="dashboard-metric">Sevilla</div>
+                    </div>
+                    <div class="dashboard-item">
+                        <div class="dashboard-label">Visitas hoy</div>
+                        <div class="dashboard-metric"><?= htmlspecialchars((string)$visitasHoy, ENT_QUOTES, 'UTF-8') ?></div>
+                    </div>
+                    <div class="dashboard-item">
+                        <div class="dashboard-label">Pendientes</div>
+                        <div class="dashboard-metric"><?= htmlspecialchars((string)$pendientesHoy, ENT_QUOTES, 'UTF-8') ?></div>
+                    </div>
+                    <div class="dashboard-item">
+                        <div class="dashboard-label">Pedidos sin asignar</div>
+                        <div class="dashboard-metric"><?= htmlspecialchars((string)$totalPedidosSinAsignar, ENT_QUOTES, 'UTF-8') ?></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-box">
+                <div class="dashboard-title">Siguiente accion</div>
+                <div class="dashboard-label">Cliente recomendado</div>
+                <p class="dashboard-note">Cliente demo (logica futura)</p>
+            </div>
+        </div>
+
         <div class="routes-grid container-cards">
             <?php foreach ($cards as $card): ?>
                 <a href="<?= htmlspecialchars($card['href'], ENT_QUOTES, 'UTF-8') ?>"
