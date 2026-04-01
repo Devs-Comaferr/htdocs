@@ -213,12 +213,22 @@ function obtenerSiguienteClienteRecomendado() {
                 c.nombre_comercial AS nombre,
                 MAX(v.fecha_visita) AS ultima_visita
             FROM clientes c
-            INNER JOIN cmf_asignacion_zonas_clientes z
+            LEFT JOIN secciones_cliente sc
+                ON sc.cod_cliente = c.cod_cliente
+            LEFT JOIN cmf_asignacion_zonas_clientes z
                 ON z.cod_cliente = c.cod_cliente
+                AND (
+                    z.cod_seccion = sc.cod_seccion
+                    OR z.cod_seccion IS NULL
+                )
             LEFT JOIN cmf_visitas_cliente v
                 ON v.cod_cliente = c.cod_cliente
-            WHERE z.zona_principal = '$codZona'
-              AND c.cod_vendedor = '$codVendedor'
+            WHERE c.cod_vendedor = '$codVendedor'
+              AND (
+                    z.zona_principal = '$codZona'
+                    OR z.zona_secundaria = '$codZona'
+                    OR z.cod_cliente IS NULL
+              )
             GROUP BY c.cod_cliente, c.nombre_comercial
             ORDER BY
                 MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) ASC,
