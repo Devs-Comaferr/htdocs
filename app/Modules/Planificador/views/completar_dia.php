@@ -11,40 +11,17 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 require_once BASE_PATH . '/app/Support/functions.php';
+require_once BASE_PATH . '/app/Modules/Planificador/services/planificador_service.php';
 
 $ui_version = 'bs5';
 $ui_requires_jquery = false;
 
-$conn = db();
-
-
 $codigo_vendedor = isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
 // Por defecto, la fecha es la actual. Si se pasa por GET, se usa esa fecha.
 $fecha = isset($_GET['fecha']) ? $_GET['fecha'] : date('Y-m-d');
-
-// Consulta las visitas programadas para este vendedor en la fecha seleccionada
-$sql = "SELECT 
-            id_visita,
-            fecha_visita,
-            hora_inicio_visita,
-            hora_fin_visita,
-            estado_visita,
-            (SELECT nombre_comercial FROM [integral].[dbo].[clientes] 
-             WHERE cod_cliente = cmf_visitas_comerciales.cod_cliente) AS cliente
-        FROM [integral].[dbo].[cmf_visitas_comerciales]
-        WHERE cod_vendedor = $codigo_vendedor
-          AND CONVERT(varchar(10), fecha_visita, 120) = '$fecha'
-        ORDER BY hora_inicio_visita";
-$result = odbc_exec($conn, $sql);
-$visitas = array();
-if ($result) {
-    while ($row = odbc_fetch_array($result)) {
-        $visitas[] = $row;
-    }
-}
-
-// Factor de escala: el da (08:00 a 20:00 = 720 minutos) se representar en 480px
-$factor = 480 / 720;
+$completarDiaData = obtenerDatosCompletarDia($codigo_vendedor, $fecha);
+$visitas = $completarDiaData['visitas'];
+$factor = $completarDiaData['factor'];
 ?>
 <!DOCTYPE html>
 <html lang="es">

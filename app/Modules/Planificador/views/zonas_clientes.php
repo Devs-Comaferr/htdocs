@@ -19,109 +19,26 @@ requierePermiso('perm_planificador');
 require_once BASE_PATH . '/app/Modules/Planificador/services/planificador_service.php';
 require_once BASE_PATH . '/app/Support/functions.php';
 
-$conn = db();
-
 $pageTitle = "Asignar Clientes a Zonas";
 $ui_version = 'bs5';
 $ui_requires_jquery = false;
 include BASE_PATH . '/resources/views/layouts/header.php';
 
-// Verificar si el usuario ha iniciado sesión
-
-// Obtener todas las zonas asignadas al vendedor
-$zonas = obtenerZonasVisitaService();
-$zonas_alertas = array();
-$clientes_desalineados = array();
-
-// Verificar si se ha pasado 'cod_zona' en la URL
-if (isset($_GET['cod_zona'])) {
-    $cod_zona = intval($_GET['cod_zona']);
-    
-    // Obtener información de la zona
-    $zona_actual = obtenerZonaPorCodigo($cod_zona);
-    
-    if (!$zona_actual) {
-        error_log('Zona no encontrada.');
-        echo 'Error interno';
-        return;
-    }
-    
-    // Obtener rutas asignadas a la zona
-    $rutas_asignadas = obtenerRutasPorZonaService($cod_zona);
-    
-    // Obtener clientes filtrados por rutas asignadas y no ya asignados a la zona
-    $clientes_disponibles = obtenerClientesDisponiblesParaAsignar($cod_zona, $rutas_asignadas);
-    
-    // Obtener asignaciones actuales de clientes a la zona
-    $asignaciones_actuales = obtenerClientesPorZona($cod_zona);
-
-    // Clientes en la zona cuyo cod_vendedor no coincide con el vendedor en sesión
-    $codigoSesion = isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
-    if ($codigoSesion > 0 && !empty($asignaciones_actuales)) {
-        $codigosClientes = array();
-        foreach ($asignaciones_actuales as $asig) {
-            if (isset($asig['cod_cliente']) && $asig['cod_cliente'] !== '') {
-                $codigosClientes[] = intval($asig['cod_cliente']);
-            }
-        }
-        $codigosClientes = array_values(array_unique($codigosClientes));
-
-        if (!empty($codigosClientes)) {
-            $inClientes = implode(',', $codigosClientes);
-            $sql_desalineados = "
-                SELECT DISTINCT c.cod_cliente
-                FROM clientes c
-                WHERE c.cod_cliente IN ($inClientes)
-                  AND (c.cod_vendedor IS NULL OR c.cod_vendedor <> $codigoSesion)
-            ";
-            $res_desalineados = odbc_exec($conn, $sql_desalineados);
-            if ($res_desalineados) {
-                while ($fila_desalineada = odbc_fetch_array($res_desalineados)) {
-                    $codClienteDesalineado = (string)($fila_desalineada['cod_cliente'] ?? '');
-                    if ($codClienteDesalineado !== '') {
-                        $clientes_desalineados[$codClienteDesalineado] = true;
-                    }
-                }
-            }
-        }
-    }
-    
-} else {
-    // No se ha pasado 'cod_zona', mostrar listado de zonas para seleccionar
-    $cod_zona = null;
-    $codigoSesion = isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
-
-    if ($codigoSesion > 0) {
-        $sql_alertas = "
-            SELECT
-                z.cod_zona,
-                COUNT(DISTINCT azc.cod_cliente) AS total_desalineados
-            FROM cmf_zonas_visita z
-            LEFT JOIN cmf_asignacion_zonas_clientes azc
-                ON (azc.zona_principal = z.cod_zona OR azc.zona_secundaria = z.cod_zona)
-            LEFT JOIN clientes c
-                ON c.cod_cliente = azc.cod_cliente
-            WHERE z.cod_vendedor = $codigoSesion
-              AND (c.cod_vendedor IS NULL OR c.cod_vendedor <> $codigoSesion)
-            GROUP BY z.cod_zona
-        ";
-        $res_alertas = odbc_exec($conn, $sql_alertas);
-        if ($res_alertas) {
-            while ($fila_alerta = odbc_fetch_array($res_alertas)) {
-                $codZonaAlerta = (string)($fila_alerta['cod_zona'] ?? '');
-                if ($codZonaAlerta !== '') {
-                    $zonas_alertas[$codZonaAlerta] = (int)($fila_alerta['total_desalineados'] ?? 0);
-                }
-            }
-        }
-    }
-    
-    // Obtener clientes asignados para cada zona
-    $asignaciones_por_zona = array();
-    foreach ($zonas as $zona) {
-        $asignaciones_por_zona[$zona['cod_zona']] = obtenerClientesPorZona($zona['cod_zona']);
-    }
+$zonasClientesViewData = obtenerDatosZonasClientesView(isset($_GET['cod_zona']) ? intval($_GET['cod_zona']) : null);
+if (!empty($zonasClientesViewData['error'])) {
+    echo $zonasClientesViewData['error'];
+    return;
 }
+$zonas = $zonasClientesViewData['zonas'];
+$zonas_alertas = $zonasClientesViewData['zonas_alertas'];
+$clientes_desalineados = $zonasClientesViewData['clientes_desalineados'];
+$asignaciones_por_zona = $zonasClientesViewData['asignaciones_por_zona'];
+$zona_actual = $zonasClientesViewData['zona_actual'];
+$rutas_asignadas = $zonasClientesViewData['rutas_asignadas'];
+$clientes_disponibles = $zonasClientesViewData['clientes_disponibles'];
+$asignaciones_actuales = $zonasClientesViewData['asignaciones_actuales'];
+$cod_zona = $zonasClientesViewData['cod_zona'];
+$numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -469,22 +386,6 @@ if (isset($_GET['cod_zona'])) {
         <th colspan="2"><center>Acciones</center></th>
     </tr>
     <?php if (!empty($asignaciones_actuales)): ?>
-        <?php
-            $numSeccionesPorCliente = [];
-            foreach ($asignaciones_actuales as $asigCount) {
-                $codCliCount = (string)($asigCount['cod_cliente'] ?? '');
-                if ($codCliCount === '') {
-                    continue;
-                }
-                if (!isset($numSeccionesPorCliente[$codCliCount])) {
-                    $numSeccionesPorCliente[$codCliCount] = [];
-                }
-                $nombreSecKey = trim((string)($asigCount['nombre_seccion'] ?? ''));
-                if ($nombreSecKey !== '') {
-                    $numSeccionesPorCliente[$codCliCount][$nombreSecKey] = true;
-                }
-            }
-        ?>
         <?php foreach ($asignaciones_actuales as $asignacion): ?>
             <?php
                 // Determinar la clase CSS basada en el tipo de asignación

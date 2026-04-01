@@ -15,7 +15,8 @@ require_once BASE_PATH . '/app/Modules/Planificador/services/planificador_servic
 require_once BASE_PATH . '/app/Support/functions.php';
 $pageTitle = 'Gestión de Zonas';
 include BASE_PATH . '/resources/views/layouts/header.php';
-$zonas = obtenerZonasVisitaService();
+$zonasViewData = obtenerDatosZonasView();
+$zonas = $zonasViewData['zonas'];
 
 // Verificar si el usuario ha iniciado sesión
 
