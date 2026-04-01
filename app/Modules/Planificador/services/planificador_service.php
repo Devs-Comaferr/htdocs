@@ -18,7 +18,7 @@ function obtenerCodVendedorPlanificacionService() {
  */
 
 // ==========================
-// DATOS (queries)
+// DATOS: acceso a zonas, rutas, clientes y asignaciones
 // ==========================
 
 function crearZonaVisita($nombre_zona, $descripcion, $duracion_semanas, $orden, $cod_vendedor = null) {
@@ -730,7 +730,7 @@ function actualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secun
 if (!function_exists('crearZonaVisitaService')) {
 
 // ==========================
-// MOTOR (decision)
+// MOTOR: seleccion de cliente y reglas de ciclo
 // ==========================
 
 function obtenerZonaActivaHoy($cod_vendedor = null) {
@@ -874,6 +874,7 @@ function calcularTocaVisitaPlanificador($frecuenciaVisita, int $iteracionZona): 
     return 0;
 }
 
+// === MOTOR: trazas del recomendador ===
 function registrarDebugClientesRecomendador($conn, string $queryDebug): void {
     planificadorConfigurarDebugLog();
 
@@ -930,7 +931,8 @@ function registrarDebugClientesRecomendador($conn, string $queryDebug): void {
     }
 }
 
-function obtenerUniversoCandidatos($conn, string $query, ?int $iteracionZona = null) {
+// === MOTOR: pipeline de decision ===
+function obtenerUniversoCandidatosPlanificador($conn, string $query, ?int $iteracionZona = null) {
     planificadorConfigurarDebugLog();
 
     error_log('RECOMENDADOR SQL:');
@@ -970,7 +972,7 @@ function obtenerUniversoCandidatos($conn, string $query, ?int $iteracionZona = n
     return $clientes;
 }
 
-function filtrarElegibles($clientes, ?int $iteracionZona = null) {
+function filtrarClientesElegiblesPlanificador($clientes, ?int $iteracionZona = null) {
     if (!is_array($clientes)) {
         return null;
     }
@@ -992,7 +994,7 @@ function filtrarElegibles($clientes, ?int $iteracionZona = null) {
     return $clientes;
 }
 
-function calcularScoreClientes($clientes) {
+function calcularScoreClientesPlanificador($clientes) {
     if (!is_array($clientes)) {
         return null;
     }
@@ -1026,7 +1028,7 @@ function calcularScoreClientes($clientes) {
     return $clientes;
 }
 
-function seleccionarMejorCliente($clientes, string $origenRecomendacion) {
+function seleccionarMejorClientePlanificador($clientes, string $origenRecomendacion) {
     if (!is_array($clientes)) {
         return null;
     }
@@ -1080,24 +1082,42 @@ function seleccionarMejorCliente($clientes, string $origenRecomendacion) {
     );
 }
 
+function obtenerUniversoCandidatos($conn, string $query, ?int $iteracionZona = null) {
+    return obtenerUniversoCandidatosPlanificador($conn, $query, $iteracionZona);
+}
+
+function filtrarElegibles($clientes, ?int $iteracionZona = null) {
+    return filtrarClientesElegiblesPlanificador($clientes, $iteracionZona);
+}
+
+function calcularScoreClientes($clientes) {
+    return calcularScoreClientesPlanificador($clientes);
+}
+
+function seleccionarMejorCliente($clientes, string $origenRecomendacion) {
+    return seleccionarMejorClientePlanificador($clientes, $origenRecomendacion);
+}
+
+// === MOTOR: compatibilidad del pipeline anterior ===
 function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenRecomendacion, ?int $iteracionZona = null) {
     planificadorConfigurarDebugLog();
 
-    $universo = obtenerUniversoCandidatos($conn, $query, $iteracionZona);
+    $universo = obtenerUniversoCandidatosPlanificador($conn, $query, $iteracionZona);
     if ($universo === null) {
         return null;
     }
 
-    $elegibles = filtrarElegibles($universo, $iteracionZona);
+    $elegibles = filtrarClientesElegiblesPlanificador($universo, $iteracionZona);
     if (empty($elegibles)) {
         return null;
     }
 
-    $scored = calcularScoreClientes($elegibles);
+    $scored = calcularScoreClientesPlanificador($elegibles);
 
-    return seleccionarMejorCliente($scored, $origenRecomendacion);
+    return seleccionarMejorClientePlanificador($scored, $origenRecomendacion);
 }
 
+// === MOTOR: orquestacion final del recomendador ===
 function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = null) {
     $codZona = intval($zonaActivaId);
     $codVendedor = $codVendedor !== null ? intval($codVendedor) : obtenerCodVendedorPlanificacionService();
@@ -1291,10 +1311,10 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
                 ) = 0 "
             . $orderByBase;
 
-        $universo = obtenerUniversoCandidatos($conn, $queryZonaNivel1, $iteracionZona);
-        $elegibles = filtrarElegibles($universo, $iteracionZona);
-        $scored = calcularScoreClientes($elegibles);
-        $clienteZona = seleccionarMejorCliente($scored, 'zona');
+        $universo = obtenerUniversoCandidatosPlanificador($conn, $queryZonaNivel1, $iteracionZona);
+        $elegibles = filtrarClientesElegiblesPlanificador($universo, $iteracionZona);
+        $scored = calcularScoreClientesPlanificador($elegibles);
+        $clienteZona = seleccionarMejorClientePlanificador($scored, 'zona');
         if (!empty($clienteZona)) {
             return $clienteZona;
         }
@@ -1315,10 +1335,10 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
                 ) = 0 "
             . $orderByBase;
 
-        $universo = obtenerUniversoCandidatos($conn, $queryZonaNivel2, $iteracionZona);
-        $elegibles = filtrarElegibles($universo, $iteracionZona);
-        $scored = calcularScoreClientes($elegibles);
-        $clienteZona = seleccionarMejorCliente($scored, 'zona');
+        $universo = obtenerUniversoCandidatosPlanificador($conn, $queryZonaNivel2, $iteracionZona);
+        $elegibles = filtrarClientesElegiblesPlanificador($universo, $iteracionZona);
+        $scored = calcularScoreClientesPlanificador($elegibles);
+        $clienteZona = seleccionarMejorClientePlanificador($scored, 'zona');
         if (!empty($clienteZona)) {
             return $clienteZona;
         }
@@ -1343,10 +1363,10 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
             MAX(v.fecha_visita) ASC
     ";
 
-    $universo = obtenerUniversoCandidatos($conn, $queryGlobal);
-    $elegibles = filtrarElegibles($universo);
-    $scored = calcularScoreClientes($elegibles);
-    $clienteGlobal = seleccionarMejorCliente($scored, 'global');
+    $universo = obtenerUniversoCandidatosPlanificador($conn, $queryGlobal);
+    $elegibles = filtrarClientesElegiblesPlanificador($universo);
+    $scored = calcularScoreClientesPlanificador($elegibles);
+    $clienteGlobal = seleccionarMejorClientePlanificador($scored, 'global');
     if (!empty($clienteGlobal)) {
         return $clienteGlobal;
     }
@@ -1365,10 +1385,10 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
             c.nombre_comercial ASC
     ";
 
-    $universo = obtenerUniversoCandidatos($conn, $queryFallback);
-    $elegibles = filtrarElegibles($universo);
-    $scored = calcularScoreClientes($elegibles);
-    $clienteFallback = seleccionarMejorCliente($scored, 'fallback');
+    $universo = obtenerUniversoCandidatosPlanificador($conn, $queryFallback);
+    $elegibles = filtrarClientesElegiblesPlanificador($universo);
+    $scored = calcularScoreClientesPlanificador($elegibles);
+    $clienteFallback = seleccionarMejorClientePlanificador($scored, 'fallback');
     if (!empty($clienteFallback)) {
         return $clienteFallback;
     }
@@ -1381,7 +1401,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
  */
 
 // ==========================
-// VIEW HELPERS
+// VIEW: preparacion de vistas del modulo
 // ==========================
 
     function obtenerDatosZonasView() {
@@ -1626,7 +1646,7 @@ if (!function_exists('obtenerDatosCompletarDia')) {
 }
 
 // ==========================
-// COMPATIBILIDAD
+// COMPATIBILIDAD: wrappers usados por views y controllers legacy
 // ==========================
 
 if (!function_exists('crearZonaVisitaService')) {
