@@ -225,24 +225,35 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
         return null;
     }
 
-    $mejor = null;
-    $mejorScore = -999999;
+    foreach ($clientes as &$c) {
+        $score = 0;
 
-    foreach ($clientes as $c) {
-        $score = isset($c['score']) ? (float)$c['score'] : 0;
-
-        if ($mejor === null || $score > $mejorScore) {
-            $mejor = $c;
-            $mejorScore = $score;
+        if (empty($c['ultima_visita'])) {
+            $score += 1000;
+        } else {
+            $ultima = strtotime((string)$c['ultima_visita']);
+            $hoy = strtotime(date('Y-m-d'));
+            if ($ultima !== false && $hoy !== false) {
+                $dias = ($hoy - $ultima) / 86400;
+                $score += min($dias, 365);
+            }
         }
-    }
 
-    if ($mejor === null && !empty($clientes)) {
-        $mejor = $clientes[0];
+        $c['score'] = $score;
     }
+    unset($c);
 
-    if ($mejor !== null) {
-        $cliente = construirClienteRecomendadoDesdeFila($mejor, $origenRecomendacion);
+    usort($clientes, function ($a, $b) {
+        return $b['score'] <=> $a['score'];
+    });
+
+    error_log('Top 5 recomendador:');
+    error_log(print_r(array_slice($clientes, 0, 5), true));
+
+    $clienteElegido = $clientes[0] ?? null;
+
+    if ($clienteElegido !== null) {
+        $cliente = construirClienteRecomendadoDesdeFila($clienteElegido, $origenRecomendacion);
         if ($cliente !== null) {
             error_log('Cliente elegido: ' . ($cliente['cod_cliente'] ?? 'NULL'));
             return $cliente;
