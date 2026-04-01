@@ -78,6 +78,11 @@ $nombreZonaActiva = trim((string)($zonaActiva['nombre'] ?? ''));
 if ($nombreZonaActiva === '') {
     $nombreZonaActiva = 'No definida';
 }
+$clienteRecomendado = obtenerSiguienteClienteRecomendadoService();
+$nombreClienteRecomendado = trim((string)($clienteRecomendado['nombre'] ?? ''));
+if ($nombreClienteRecomendado === '') {
+    $nombreClienteRecomendado = 'Sin recomendaciones';
+}
 
 $pedidosSinAsignarCriticos = ($totalPedidosSinAsignar ?? 0) > 0;
 $pendientesHoy = $totalPendientesHoy ?? 0;
@@ -662,7 +667,7 @@ unset($card);
             <div class="dashboard-box">
                 <div class="dashboard-title">Siguiente accion</div>
                 <div class="dashboard-label">Cliente recomendado</div>
-                <p class="dashboard-note">Cliente demo (logica futura)</p>
+                <p class="dashboard-note"><?= htmlspecialchars($nombreClienteRecomendado, ENT_QUOTES, 'UTF-8') ?></p>
             </div>
         </div>
 

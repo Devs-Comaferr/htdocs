@@ -58,7 +58,7 @@ function obtenerZonasVisita() {
 /**
  * Obtener la zona activa del vendedor segun el ciclo configurado.
  *
- * @return array|null ['nombre' => string, 'orden' => int, 'duracion_semanas' => int]
+ * @return array|null ['cod_zona' => int, 'nombre' => string, 'orden' => int, 'duracion_semanas' => int]
  */
 function obtenerZonaActivaHoy() {
     $cod_vendedor = obtenerCodVendedorPlanificacionService();
@@ -94,6 +94,7 @@ function obtenerZonaActivaHoy() {
         }
 
         $zonas[] = array(
+            'cod_zona' => intval($fila['cod_zona'] ?? 0),
             'nombre' => trim((string)($fila['nombre_zona'] ?? '')),
             'orden' => intval($fila['orden'] ?? 0),
             'duracion_semanas' => $duracion,
@@ -138,6 +139,73 @@ function obtenerZonaActivaHoy() {
     }
 
     return null;
+}
+
+/**
+ * Obtener un cliente recomendado de la zona activa priorizando clientes sin visita hoy
+ * y, despues, por antiguedad de su ultima visita.
+ *
+ * @return array|null ['cod_cliente' => int, 'nombre' => string]
+ */
+function obtenerSiguienteClienteRecomendado() {
+    $zonaActiva = obtenerZonaActivaHoyService();
+    $codZona = intval($zonaActiva['cod_zona'] ?? 0);
+    $codVendedor = obtenerCodVendedorPlanificacionService();
+    $conn = db();
+
+    if ($codZona <= 0 || $codVendedor <= 0) {
+        return null;
+    }
+
+    $query = "
+        SELECT TOP 1
+            base.cod_cliente,
+            base.nombre
+        FROM (
+            SELECT
+                c.cod_cliente,
+                c.nombre_comercial AS nombre,
+                MAX(v.fecha_visita) AS ultima_visita,
+                MAX(CASE
+                    WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1
+                    ELSE 0
+                END) AS tiene_visita_hoy
+            FROM clientes c
+            INNER JOIN cmf_asignacion_zonas_clientes z
+                ON z.cod_cliente = c.cod_cliente
+            LEFT JOIN cmf_visitas_cliente v
+                ON v.cod_cliente = c.cod_cliente
+            WHERE z.zona_principal = '$codZona'
+              AND c.cod_vendedor = '$codVendedor'
+            GROUP BY c.cod_cliente, c.nombre_comercial
+        ) AS base
+        ORDER BY
+            base.tiene_visita_hoy ASC,
+            CASE WHEN base.ultima_visita IS NULL THEN 0 ELSE 1 END ASC,
+            base.ultima_visita ASC,
+            base.nombre ASC
+    ";
+
+    $resultado = odbc_exec($conn, $query);
+    if (!$resultado) {
+        error_log('Error al obtener el cliente recomendado del planificador: ' . odbc_errormsg($conn));
+        return null;
+    }
+
+    $fila = odbc_fetch_array($resultado);
+    if (!$fila) {
+        return null;
+    }
+
+    $nombre = trim((string)($fila['nombre'] ?? ''));
+    if ($nombre === '') {
+        return null;
+    }
+
+    return array(
+        'cod_cliente' => intval($fila['cod_cliente'] ?? 0),
+        'nombre' => $nombre,
+    );
 }
 
 /**
@@ -738,6 +806,12 @@ if (!function_exists('obtenerZonasVisitaService')) {
 if (!function_exists('obtenerZonaActivaHoyService')) {
     function obtenerZonaActivaHoyService() {
         return obtenerZonaActivaHoy();
+    }
+}
+
+if (!function_exists('obtenerSiguienteClienteRecomendadoService')) {
+    function obtenerSiguienteClienteRecomendadoService() {
+        return obtenerSiguienteClienteRecomendado();
     }
 }
 
