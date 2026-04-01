@@ -648,34 +648,49 @@ unset($card);
     <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
 
     <div class="routes-container">
-        <div class="dashboard-top">
-            <div class="dashboard-box">
-                <div class="dashboard-title">Hoy</div>
-                <div class="dashboard-summary">
-                    <div class="dashboard-item">
-                        <div class="dashboard-label">Zona activa</div>
-                        <div class="dashboard-metric"><?= htmlspecialchars($nombreZonaActiva, ENT_QUOTES, 'UTF-8') ?></div>
-                    </div>
-                    <div class="dashboard-item">
-                        <div class="dashboard-label">Visitas hoy</div>
-                        <div class="dashboard-metric"><?= htmlspecialchars((string)$visitasHoy, ENT_QUOTES, 'UTF-8') ?></div>
-                    </div>
-                    <div class="dashboard-item">
-                        <div class="dashboard-label">Pendientes</div>
-                        <div class="dashboard-metric"><?= htmlspecialchars((string)$pendientesHoy, ENT_QUOTES, 'UTF-8') ?></div>
-                    </div>
-                    <div class="dashboard-item">
-                        <div class="dashboard-label">Pedidos sin asignar</div>
-                        <div class="dashboard-metric"><?= htmlspecialchars((string)$totalPedidosSinAsignar, ENT_QUOTES, 'UTF-8') ?></div>
+        <div class="container-fluid mb-4 px-0">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-body">
+                            <div class="text-muted small mb-1">HOY</div>
+                            <h5 class="fw-bold mb-3">
+                                <?= htmlspecialchars($nombreZonaActiva ?? 'Sin zona', ENT_QUOTES, 'UTF-8') ?>
+                            </h5>
+
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <div class="text-muted small">Visitas</div>
+                                    <div class="fw-semibold fs-5">
+                                        <?= (int)($totalVisitasHoy ?? $visitasHoy ?? 0) ?>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="text-muted small">Pendientes</div>
+                                    <div class="fw-semibold fs-5 text-warning">
+                                        <?= (int)($totalPendientesHoy ?? $pendientesHoy ?? 0) ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="dashboard-box">
-                <div class="dashboard-title">Siguiente accion</div>
-                <div class="dashboard-label">Cliente recomendado</div>
-                <p class="dashboard-note"><?= htmlspecialchars($nombreClienteRecomendado, ENT_QUOTES, 'UTF-8') ?></p>
-                <span class="dashboard-subtext"><?= htmlspecialchars($motivoClienteRecomendado, ENT_QUOTES, 'UTF-8') ?></span>
+                <div class="col-12 col-md-6">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-body">
+                            <div class="text-muted small mb-1">SIGUIENTE ACCI&Oacute;N</div>
+                            <h5 class="fw-bold mb-2">
+                                <?= htmlspecialchars($nombreClienteRecomendado ?? 'Sin recomendacion', ENT_QUOTES, 'UTF-8') ?>
+                            </h5>
+
+                            <div class="text-muted small">
+                                <?= htmlspecialchars($motivoClienteRecomendado ?? 'No hay datos disponibles', ENT_QUOTES, 'UTF-8') ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
