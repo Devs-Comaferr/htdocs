@@ -223,7 +223,8 @@ function obtenerSiguienteClienteRecomendado() {
             ORDER BY
                 MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) ASC,
                 CASE WHEN MAX(v.fecha_visita) IS NULL THEN 0 ELSE 1 END ASC,
-                MAX(v.fecha_visita) ASC
+                MAX(v.fecha_visita) ASC,
+                c.nombre_comercial ASC
         ";
 
         $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZona, 'zona');
@@ -245,7 +246,8 @@ function obtenerSiguienteClienteRecomendado() {
         ORDER BY
             MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) ASC,
             CASE WHEN MAX(v.fecha_visita) IS NULL THEN 0 ELSE 1 END ASC,
-            MAX(v.fecha_visita) ASC
+            MAX(v.fecha_visita) ASC,
+            c.nombre_comercial ASC
     ";
 
     $clienteGlobal = obtenerClienteRecomendadoPorQuery($conn, $queryGlobal, 'global');
