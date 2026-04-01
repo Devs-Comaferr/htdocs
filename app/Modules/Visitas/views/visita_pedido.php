@@ -567,7 +567,7 @@ function formatoHora($horaSql)
   <div class="modal fade" id="visitaModal" tabindex="-1" role="dialog" aria-labelledby="visitaModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <form action="<?= BASE_URL ?>/visitas.php?action=crear" method="POST">
+        <form action="<?= BASE_URL ?>/registrar_visita.php" method="POST">
           <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             <h5 class="modal-title" id="visitaModalLabel">Registrar Visita</h5>

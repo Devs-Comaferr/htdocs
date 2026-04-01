@@ -16,7 +16,11 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 header('Content-Type: text/html; charset=utf-8');
 require_once BASE_PATH . '/app/Support/functions.php';
-require_once BASE_PATH . '/app/Modules/Visitas/services/registrar_visita_handler.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasValidationService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasAjaxService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasQueryService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasCalendarioService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasService.php';
 
 if (!isset($_GET['id_visita'])) {
     echo "No se ha especificado la visita.";

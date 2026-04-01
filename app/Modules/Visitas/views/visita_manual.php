@@ -4,7 +4,11 @@
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
-require_once BASE_PATH . '/app/Modules/Visitas/services/registrar_visita_handler.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasValidationService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasAjaxService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasQueryService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasCalendarioService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasService.php';
 
 $codigo_vendedor = isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
 $ui_version = 'bs5';
@@ -124,7 +128,7 @@ extract(prepararVistaVisitaManual($_POST, $codigo_vendedor));
             <?php endif; ?>
         </div>
 
-        <form method="POST" action="<?= BASE_URL ?>/visitas.php?action=crear" class="form" id="flujoVisitaManual">
+        <form method="POST" action="<?= BASE_URL ?>/registrar_visita.php" class="form" id="flujoVisitaManual">
             <input type="hidden" name="origen" value="manual">
             <input type="hidden" name="cod_cliente" id="cod_cliente" value="<?php echo $cod_cliente > 0 ? htmlspecialchars((string)$cod_cliente) : ''; ?>">
             <input type="hidden" name="cod_seccion" id="cod_seccion" value="<?php echo $cod_seccion !== null ? htmlspecialchars((string)$cod_seccion) : ''; ?>">

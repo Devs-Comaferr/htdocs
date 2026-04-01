@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__DIR__) . '/bootstrap/init.php';
 
-$action = $_GET['action'] ?? null;
+$action = $_POST['action'] ?? $_GET['action'] ?? null;
 
 if ($action === 'crear') {
     $origen = $_POST['origen'] ?? 'visita';
@@ -32,4 +32,15 @@ if ($action === 'crear') {
     exit;
 }
 
-require_once BASE_PATH . '/app/Modules/Visitas/controllers/visitas.php';
+if ($action === 'editar') {
+    require_once BASE_PATH . '/app/Modules/Visitas/controllers/editar_visita.php';
+    exit;
+}
+
+if ($action === 'eliminar') {
+    require_once BASE_PATH . '/app/Modules/Visitas/controllers/eliminar_visita.php';
+    exit;
+}
+
+header('Location: ' . BASE_URL . '/index.php');
+exit;

@@ -14,7 +14,11 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 }
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
-require_once BASE_PATH . '/app/Modules/Visitas/services/registrar_visita_handler.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasValidationService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasAjaxService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasQueryService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasCalendarioService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasService.php';
 
 $cod_venta = isset($_POST['cod_venta']) ? intval($_POST['cod_venta']) : 0;
 $origen = isset($_POST['origen']) ? (string)$_POST['origen'] : '';

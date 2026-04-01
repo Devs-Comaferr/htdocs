@@ -16,7 +16,11 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 require_once BASE_PATH . '/app/Support/functions.php';
-require_once BASE_PATH . '/app/Modules/Visitas/services/registrar_visita_handler.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasValidationService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasAjaxService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasQueryService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasCalendarioService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasService.php';
 
 $ui_version = 'bs5';
 $ui_requires_jquery = false;
@@ -102,7 +106,7 @@ extract($viewData);
     <?php if (!empty($error)): ?>
         <div class="alert alert-danger"><?php echo $error; ?></div>
     <?php endif; ?>
-    <form action="<?= BASE_URL ?>/visitas.php?action=editar&amp;id_visita=<?php echo $id_visita; ?><?php echo isset($_GET['origen']) ? '&amp;origen=' . $_GET['origen'] : ''; ?>" method="POST">
+    <form action="<?= BASE_URL ?>/editar_visita.php?id_visita=<?php echo $id_visita; ?><?php echo isset($_GET['origen']) ? '&amp;origen=' . $_GET['origen'] : ''; ?>" method="POST">
         <input type="hidden" name="id_visita" value="<?php echo $id_visita; ?>">
 
         <div class="mb-3">
@@ -158,7 +162,7 @@ extract($viewData);
         ?>
         <a href="<?php echo $cancelUrl; ?>" class="btn btn-secondary">Cancelar</a>
 
-        <a href="<?= BASE_URL ?>/visitas.php?action=eliminar&amp;id_visita=<?php echo $id_visita; ?>" class="btn btn-danger boton-derecha">
+        <a href="<?= BASE_URL ?>/eliminar_visita.php?id_visita=<?php echo $id_visita; ?>" class="btn btn-danger boton-derecha">
             Eliminar Visita
         </a>
 

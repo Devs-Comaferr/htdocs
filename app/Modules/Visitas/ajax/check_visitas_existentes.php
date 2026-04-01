@@ -3,7 +3,11 @@ declare(strict_types=1);
 
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
-require_once BASE_PATH . '/app/Modules/Visitas/services/registrar_visita_handler.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasValidationService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasAjaxService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasQueryService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasCalendarioService.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasService.php';
 
 requierePermiso('perm_planificador');
 
