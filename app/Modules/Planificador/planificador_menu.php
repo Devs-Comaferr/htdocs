@@ -80,9 +80,6 @@ if ($nombreZonaActiva === '') {
 }
 $clienteRecomendado = obtenerSiguienteClienteRecomendadoService();
 $nombreClienteRecomendado = trim((string)($clienteRecomendado['nombre'] ?? ''));
-if ($nombreClienteRecomendado === '') {
-    $nombreClienteRecomendado = 'Sin recomendaciones';
-}
 $motivoClienteRecomendado = trim((string)($clienteRecomendado['motivo'] ?? ''));
 
 $pedidosSinAsignarCriticos = ($totalPedidosSinAsignar ?? 0) > 0;
@@ -681,13 +678,21 @@ unset($card);
                     <div class="card shadow-sm h-100 border-0">
                         <div class="card-body">
                             <div class="text-muted small mb-1">SIGUIENTE ACCI&Oacute;N</div>
-                            <h5 class="fw-bold mb-2">
-                                <?= htmlspecialchars($nombreClienteRecomendado ?? 'Sin recomendacion', ENT_QUOTES, 'UTF-8') ?>
-                            </h5>
+                            <?php if (!empty($nombreClienteRecomendado)): ?>
+                                <h5 class="fw-bold mb-2">
+                                    <?= htmlspecialchars($nombreClienteRecomendado, ENT_QUOTES, 'UTF-8') ?>
+                                </h5>
 
-                            <div class="text-muted small">
-                                <?= htmlspecialchars($motivoClienteRecomendado ?? 'No hay datos disponibles', ENT_QUOTES, 'UTF-8') ?>
-                            </div>
+                                <div class="text-muted small">
+                                    <?= htmlspecialchars($motivoClienteRecomendado ?: 'No hay datos disponibles', ENT_QUOTES, 'UTF-8') ?>
+                                </div>
+                            <?php else: ?>
+                                <h5 class="fw-bold mb-2">Dia sin urgencias</h5>
+
+                                <div class="text-muted small">
+                                    No hay clientes prioritarios ahora mismo.
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
