@@ -303,10 +303,8 @@ function obtenerSiguienteClienteRecomendado() {
 
     $orderByBase = "
         ORDER BY
-            MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) ASC,
             CASE WHEN MAX(v.fecha_visita) IS NULL THEN 0 ELSE 1 END ASC,
-            MAX(v.fecha_visita) ASC,
-            c.nombre_comercial ASC
+            MAX(v.fecha_visita) ASC
     ";
 
     $filtrosOperativos = "
@@ -364,10 +362,8 @@ function obtenerSiguienteClienteRecomendado() {
           $filtrosOperativos
         GROUP BY c.cod_cliente, c.nombre_comercial
         ORDER BY
-            MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) ASC,
             CASE WHEN MAX(v.fecha_visita) IS NULL THEN 0 ELSE 1 END ASC,
-            MAX(v.fecha_visita) ASC,
-            c.nombre_comercial ASC
+            MAX(v.fecha_visita) ASC
     ";
 
     $clienteGlobal = obtenerClienteRecomendadoPorQuery($conn, $queryGlobal, 'global');
