@@ -9,65 +9,112 @@ if (!esAdmin()) {
 }
 
 header('Content-Type: text/html; charset=utf-8');
-$pageTitle = 'Configuración';
+$pageTitle = 'Configuracion';
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= htmlspecialchars($pageTitle) ?></title>
-<link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/fontawesome/css/all.min.css">
+  <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/fontawesome/css/all.min.css">
   <style>
+    :root {
+      --bg: #eef2f6;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d8e0ea;
+      --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+      --violet: #6f42c1;
+      --violet-soft: #f4ecff;
+      --blue: #1570ef;
+      --blue-soft: #eaf2ff;
+    }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      background: linear-gradient(180deg, #f7f9fc 0%, var(--bg) 100%);
+      color: var(--text);
     }
     .config-container {
-      padding: 80px 15px 20px 15px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 88px 16px 32px 16px;
+    }
+    .hero {
+      margin-bottom: 22px;
+    }
+    .hero h1 {
+      margin: 0 0 8px 0;
+      font-size: 30px;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
     }
     .config-grid {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 15px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 320px));
+      gap: 18px;
+      justify-content: start;
     }
     .config-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
+      display: block;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 20px;
       text-decoration: none;
-      color: #333;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-      transition: 0.2s ease;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
     }
     .config-card:hover {
       transform: translateY(-3px);
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+      border-color: #c6d3e1;
     }
-    .config-card i {
-      font-size: 32px;
-      margin-bottom: 10px;
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
     }
-    .config-card h3 {
-      margin: 0;
+    .card-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .card-icon.app {
+      background: var(--violet-soft);
+      color: var(--violet);
+    }
+    .card-icon.users {
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+    .card-arrow {
+      color: #94a3b8;
       font-size: 18px;
     }
-    .card-usuarios { border-left: 6px solid #007bff; }
-    .card-planificador { border-left: 6px solid #28a745; }
-    .card-estadisticas { border-left: 6px solid #3fb8af; }
-    .card-seguridad { border-left: 6px solid #dc3545; }
-    .card-aplicacion { border-left: 6px solid #6f42c1; }
-
-    @media (min-width: 600px) {
-      .config-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+    .config-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 22px;
     }
-    @media (min-width: 1024px) {
-      .config-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
+    .config-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -75,31 +122,28 @@ $pageTitle = 'Configuración';
   <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
 
   <div class="config-container">
+    <div class="hero">
+      <h1>Configuracion</h1>
+      <p>Accesos activos del panel de administracion. Iremos ampliando este indice conforme se cierren modulos reales.</p>
+    </div>
+
     <div class="config-grid">
-      <a href="usuarios.php" class="config-card card-usuarios">
-        <i class="fas fa-users"></i>
+      <a href="aplicacion.php" class="config-card">
+        <div class="card-top">
+          <span class="card-icon app"><i class="fas fa-palette"></i></span>
+          <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+        </div>
+        <h3>Aplicacion</h3>
+        <p>Personalizacion visual y parametros basicos del sistema.</p>
+      </a>
+
+      <a href="usuarios.php" class="config-card">
+        <div class="card-top">
+          <span class="card-icon users"><i class="fas fa-users"></i></span>
+          <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+        </div>
         <h3>Usuarios</h3>
-      </a>
-
-      <a href="#" class="config-card card-planificador">
-        <i class="fas fa-calendar-alt"></i>
-        <h3>Planificador</h3>
-      </a>
-
-      <a href="#" class="config-card card-estadisticas">
-        <i class="fas fa-chart-bar"></i>
-        <h3>Estadsticas</h3>
-      </a>
-
-      <a href="#" class="config-card card-seguridad">
-        <i class="fas fa-shield-alt"></i>
-        <h3>Seguridad</h3>
-      </a>
-
-      <a href="aplicacion.php" class="config-card card-aplicacion">
-        <i class="fas fa-palette"></i>
-        <h3>Aplicaci&oacute;n</h3>
-        <p style="margin:8px 0 0 0; color:#666; font-size:14px;">Personalizaci&oacute;n del sistema</p>
+        <p>Gestion de accesos, permisos, passwords y altas/bajas de usuarios.</p>
       </a>
     </div>
   </div>

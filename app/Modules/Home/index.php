@@ -1326,12 +1326,12 @@ $ui_requires_jquery = false;
           <?php if ($count_pedidos_sin_visita > 0) { ?>
             <span class="badge-app"><?php echo $count_pedidos_sin_visita; ?></span>
           <?php } ?>
-          <i class="fa fa-calendar"></i> Planificador
+          <i class="fa fa-calendar-alt"></i> Planificador
         </a>
       <?php } ?>
       <?php if ($puedeVerEstadisticas) { ?>
                     <a href="<?= BASE_URL ?>/estadisticas.php" class="btn btn-estadisticas">
-          <i class="fa fa-bar-chart"></i> Estad&iacute;sticas
+          <i class="fa fa-chart-line"></i> Estad&iacute;sticas
         </a>
       <?php } ?>
       <a href="altaClientes/alta_cliente.php" class="btn btn-nuevocliente" >
@@ -1829,12 +1829,12 @@ $ui_requires_jquery = false;
       <?php if ($count_pedidos_sin_visita > 0) { ?>
         <span class="badge"><?php echo $count_pedidos_sin_visita; ?></span>
       <?php } ?>
-      <i class="fa fa-calendar"></i><span>Planificador</span>
+      <i class="fa fa-calendar-alt"></i><span>Planificador</span>
     </a>
   <?php } ?>
   <?php if ($puedeVerEstadisticas) { ?>
     <a href="<?= BASE_URL ?>/estadisticas.php" class="app-btn app-estadisticas">
-      <i class="fa fa-bar-chart"></i><span>Estad&iacute;sticas</span>
+      <i class="fa fa-chart-line"></i><span>Estad&iacute;sticas</span>
     </a>
   <?php } ?>
   <a href="altaClientes/alta_cliente.php" class="app-btn app-nuevo">
