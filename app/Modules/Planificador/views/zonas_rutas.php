@@ -203,9 +203,9 @@ $zonas_disponibles = $zonasRutasViewData['zonas_disponibles'];
             <h2>Rutas Asignadas</h2>
             <table>
                 <tr>
-                    <th>CÃ³digo de Ruta</th>
+                    <th>C&oacute;digo de Ruta</th>
                     <th>Nombre de Ruta</th>
-                    <th>Accion</th>
+                    <th>Acci&oacute;n</th>
                 </tr>
                 <?php if (!empty($rutas_asignadas)): ?>
                     <?php foreach ($rutas_asignadas as $ruta): ?>
@@ -258,7 +258,7 @@ $zonas_disponibles = $zonasRutasViewData['zonas_disponibles'];
                     <table>
                         <tr>
                             <th>Cliente</th>
-                            <th>SecciÃ³n</th>
+                            <th>Secci&oacute;n</th>
                             <th>Frecuencia</th>
                         </tr>
                         <?php if (!empty($clientes_ruta)): ?>
@@ -273,7 +273,7 @@ $zonas_disponibles = $zonasRutasViewData['zonas_disponibles'];
                                             }
                                         ?>
                                     </td>
-                                    <td><?php echo htmlspecialchars(toUTF8((string)($clienteRuta['nombre_seccion'] ?? 'Sin secciÃ³n')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars(toUTF8((string)($clienteRuta['nombre_seccion'] ?? 'Sin seccion')), ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo htmlspecialchars((string)($clienteRuta['frecuencia_visita'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
                                 </tr>
                             <?php endforeach; ?>
@@ -310,3 +310,5 @@ $zonas_disponibles = $zonasRutasViewData['zonas_disponibles'];
     <!-- jQuery + Bootstrap JS -->
 </body>
 </html>
+
+
