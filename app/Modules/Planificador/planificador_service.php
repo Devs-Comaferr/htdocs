@@ -278,10 +278,17 @@ function obtenerSiguienteClienteRecomendado() {
             c.nombre_comercial ASC
     ";
 
+    $filtrosOperativos = "
+          AND c.zona_principal IS NOT NULL
+          AND c.zona_principal > 0
+          AND c.fecha_alta < DATEADD(DAY, -7, GETDATE())
+    ";
+
     if ($codZona > 0) {
         $whereZona = "
             WHERE c.cod_vendedor = '$codVendedor'
               AND z.cod_cliente IS NOT NULL
+              $filtrosOperativos
         ";
 
         $groupByZona = "
@@ -319,6 +326,7 @@ function obtenerSiguienteClienteRecomendado() {
         LEFT JOIN cmf_visitas_cliente v
             ON v.cod_cliente = c.cod_cliente
         WHERE c.cod_vendedor = '$codVendedor'
+          $filtrosOperativos
         GROUP BY c.cod_cliente, c.nombre_comercial
         ORDER BY
             MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) ASC,
@@ -339,6 +347,7 @@ function obtenerSiguienteClienteRecomendado() {
             NULL AS ultima_visita
         FROM clientes c
         WHERE c.cod_vendedor = '$codVendedor'
+          $filtrosOperativos
         ORDER BY
             c.nombre_comercial ASC
     ";
