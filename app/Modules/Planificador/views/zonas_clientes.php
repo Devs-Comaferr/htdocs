@@ -307,6 +307,7 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
                 <div id="error-message" class="alert alert-danger error-message d-none" role="alert">Por favor, completa todos los campos obligatorios.</div>
                 
                 <form id="assign-form" action="procesar_asignar_cliente_zona.php" method="post">
+                    <?= csrfInput() ?>
                     <input type="hidden" name="cod_zona" value="<?php echo $cod_zona; ?>">
                     
                     <label for="cod_cliente">Selecciona el Cliente:</label>
@@ -454,6 +455,7 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
 
     <!-- Botón de Eliminar -->
     <form action="borrar_asignacion.php" method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta asignación?');">
+        <?= csrfInput() ?>
         <input type="hidden" name="cod_cliente" value="<?php echo htmlspecialchars($asignacion['cod_cliente']); ?>">
         <input type="hidden" name="cod_zona" value="<?php echo htmlspecialchars($cod_zona); ?>">
         <input type="hidden" name="cod_seccion" value="<?php echo htmlspecialchars($asignacion['cod_seccion']); ?>">
@@ -477,6 +479,7 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <form action="actualizar_asignacion.php" method="post">
+                            <?= csrfInput() ?>
                             <div class="modal-header">
                                 <h5 class="modal-title">Editar Asignación</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>

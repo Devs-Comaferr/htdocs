@@ -154,10 +154,49 @@ $zonas_disponibles = $zonasRutasViewData['zonas_disponibles'];
         .zonas-list .zona-item a:hover {
             background-color: #218838;
         }
+        .flash-message {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 12px 16px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .flash-message.ok {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .flash-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .route-actions {
+            display: flex;
+            justify-content: center;
+        }
+        .btn-delete-route {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            background-color: #dc3545;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-delete-route:hover {
+            background-color: #bb2d3b;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <?php $flashMensaje = trim((string)($_GET['mensaje'] ?? '')); ?>
+        <?php $flashEstado = trim((string)($_GET['estado'] ?? '')); ?>
+        <?php if ($flashMensaje !== ''): ?>
+            <div class="flash-message <?= $flashEstado === 'ok' ? 'ok' : 'error' ?>">
+                <?= htmlspecialchars($flashMensaje, ENT_QUOTES, 'UTF-8') ?>
+            </div>
+        <?php endif; ?>
         <?php if (isset($cod_zona)): ?>
             <h1><?php echo htmlspecialchars(toUTF8((string)$zona_actual['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?></h1>
 
@@ -166,6 +205,7 @@ $zonas_disponibles = $zonasRutasViewData['zonas_disponibles'];
                 <tr>
                     <th>CÃ³digo de Ruta</th>
                     <th>Nombre de Ruta</th>
+                    <th>Accion</th>
                 </tr>
                 <?php if (!empty($rutas_asignadas)): ?>
                     <?php foreach ($rutas_asignadas as $ruta): ?>
@@ -173,11 +213,21 @@ $zonas_disponibles = $zonasRutasViewData['zonas_disponibles'];
                         <tr class="route-row<?php echo $esRutaActiva ? ' route-row-active' : ''; ?>" onclick="window.location.href='zonas_rutas.php?cod_zona=<?php echo htmlspecialchars((string)$cod_zona, ENT_QUOTES, 'UTF-8'); ?>&cod_ruta=<?php echo htmlspecialchars((string)$ruta['cod_ruta'], ENT_QUOTES, 'UTF-8'); ?>'">
                             <td><?php echo htmlspecialchars((string)$ruta['cod_ruta'], ENT_QUOTES, 'UTF-8'); ?></td>
                             <td><?php echo htmlspecialchars(toUTF8((string)$ruta['nombre_ruta']), ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td onclick="event.stopPropagation();">
+                                <div class="route-actions">
+                                    <form action="eliminar_ruta_zona.php" method="post" onsubmit="return confirm('Seguro que deseas quitar esta ruta de la zona?');">
+                                        <?= csrfInput() ?>
+                                        <input type="hidden" name="cod_zona" value="<?php echo htmlspecialchars((string)$cod_zona, ENT_QUOTES, 'UTF-8'); ?>">
+                                        <input type="hidden" name="cod_ruta" value="<?php echo htmlspecialchars((string)$ruta['cod_ruta'], ENT_QUOTES, 'UTF-8'); ?>">
+                                        <button type="submit" class="btn-delete-route">Quitar</button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="2" class="no-data">No hay rutas asignadas a esta zona.</td>
+                        <td colspan="3" class="no-data">No hay rutas asignadas a esta zona.</td>
                     </tr>
                 <?php endif; ?>
             </table>
@@ -185,6 +235,7 @@ $zonas_disponibles = $zonasRutasViewData['zonas_disponibles'];
             <div class="assign-form">
                 <h2>Asignar Nueva Ruta a la Zona</h2>
                 <form action="procesar_asignar_ruta_zona.php" method="post">
+                    <?= csrfInput() ?>
                     <input type="hidden" name="cod_zona" value="<?php echo $cod_zona; ?>">
 
                     <label for="cod_ruta">Selecciona la Ruta:</label>

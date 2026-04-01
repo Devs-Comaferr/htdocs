@@ -239,6 +239,141 @@ function asignarRutaZona($cod_zona, $cod_ruta) {
     return true;
 }
 
+function zonaTieneRutas($cod_zona): bool {
+    $conn = db();
+    $cod_zona = intval($cod_zona);
+
+    if ($cod_zona <= 0) {
+        return false;
+    }
+
+    $stmt = odbc_prepare($conn, "SELECT COUNT(*) AS total FROM cmf_zonas_rutas WHERE cod_zona = ?");
+    if (!$stmt || !odbc_execute($stmt, [$cod_zona])) {
+        return false;
+    }
+
+    $fila = odbc_fetch_array($stmt);
+    return $fila && (int)($fila['total'] ?? $fila['TOTAL'] ?? 0) > 0;
+}
+
+function zonaTieneClientesAsignados($cod_zona): bool {
+    $conn = db();
+    $cod_zona = intval($cod_zona);
+
+    if ($cod_zona <= 0) {
+        return false;
+    }
+
+    $stmt = odbc_prepare($conn, "SELECT COUNT(*) AS total FROM cmf_asignacion_zonas_clientes WHERE zona_principal = ? OR zona_secundaria = ?");
+    if (!$stmt || !odbc_execute($stmt, [$cod_zona, $cod_zona])) {
+        return false;
+    }
+
+    $fila = odbc_fetch_array($stmt);
+    return $fila && (int)($fila['total'] ?? $fila['TOTAL'] ?? 0) > 0;
+}
+
+function rutaZonaTieneClientesAsignados($cod_zona, $cod_ruta): bool {
+    $conn = db();
+    $cod_zona = intval($cod_zona);
+    $cod_ruta = intval($cod_ruta);
+
+    if ($cod_zona <= 0 || $cod_ruta <= 0) {
+        return false;
+    }
+
+    $sql = "
+        SELECT COUNT(*) AS total
+        FROM cmf_asignacion_zonas_clientes azc
+        INNER JOIN clientes c
+            ON c.cod_cliente = azc.cod_cliente
+        WHERE (azc.zona_principal = ? OR azc.zona_secundaria = ?)
+          AND c.cod_ruta = ?
+    ";
+
+    $stmt = odbc_prepare($conn, $sql);
+    if (!$stmt || !odbc_execute($stmt, [$cod_zona, $cod_zona, $cod_ruta])) {
+        return false;
+    }
+
+    $fila = odbc_fetch_array($stmt);
+    return $fila && (int)($fila['total'] ?? $fila['TOTAL'] ?? 0) > 0;
+}
+
+function eliminarRutaZona($cod_zona, $cod_ruta): bool {
+    $conn = db();
+    $cod_zona = intval($cod_zona);
+    $cod_ruta = intval($cod_ruta);
+
+    if ($cod_zona <= 0 || $cod_ruta <= 0) {
+        return false;
+    }
+
+    $stmt = odbc_prepare($conn, "DELETE FROM cmf_zonas_rutas WHERE cod_zona = ? AND cod_ruta = ?");
+    if (!$stmt) {
+        return false;
+    }
+
+    return odbc_execute($stmt, [$cod_zona, $cod_ruta]);
+}
+
+function eliminarRutaZonaSegura($cod_zona, $cod_ruta): array {
+    $cod_zona = intval($cod_zona);
+    $cod_ruta = intval($cod_ruta);
+
+    if ($cod_zona <= 0 || $cod_ruta <= 0) {
+        return ['ok' => false, 'message' => 'Ruta o zona no validas.'];
+    }
+
+    if (rutaZonaTieneClientesAsignados($cod_zona, $cod_ruta)) {
+        return ['ok' => false, 'message' => 'No se puede quitar la ruta porque tiene clientes asignados en esta zona.'];
+    }
+
+    $ok = eliminarRutaZona($cod_zona, $cod_ruta);
+    if (!$ok) {
+        return ['ok' => false, 'message' => 'No se pudo eliminar la ruta de la zona.'];
+    }
+
+    return ['ok' => true, 'message' => 'Ruta eliminada correctamente.'];
+}
+
+function eliminarZonaSegura($cod_zona, $cod_vendedor = null): array {
+    $conn = db();
+    $cod_zona = intval($cod_zona);
+    $cod_vendedor = $cod_vendedor !== null ? intval($cod_vendedor) : obtenerCodVendedorPlanificacionService();
+
+    if ($cod_zona <= 0 || $cod_vendedor <= 0) {
+        return ['ok' => false, 'message' => 'Zona no válida.'];
+    }
+
+    if (zonaTieneRutas($cod_zona)) {
+        return ['ok' => false, 'message' => 'No se puede eliminar la zona porque tiene rutas asignadas.'];
+    }
+
+    if (zonaTieneClientesAsignados($cod_zona)) {
+        return ['ok' => false, 'message' => 'No se puede eliminar la zona porque tiene clientes asignados.'];
+    }
+
+    $stmt = odbc_prepare($conn, "DELETE FROM cmf_zonas_visita WHERE cod_zona = ? AND cod_vendedor = ?");
+    if (!$stmt) {
+        return ['ok' => false, 'message' => 'No se pudo preparar la eliminación de la zona.'];
+    }
+
+    $ok = odbc_execute($stmt, [$cod_zona, $cod_vendedor]);
+    if (!$ok) {
+        return ['ok' => false, 'message' => 'No se pudo eliminar la zona.'];
+    }
+
+    if (function_exists('odbc_num_rows')) {
+        $filas = @odbc_num_rows($stmt);
+        if (is_int($filas) && $filas === 0) {
+            return ['ok' => false, 'message' => 'La zona no existe o no pertenece al vendedor actual.'];
+        }
+    }
+
+    return ['ok' => true, 'message' => 'Zona eliminada correctamente.'];
+}
+
 function obtenerSeccionesPorCliente($cod_cliente) {
     $conn = db();
     
@@ -1738,6 +1873,24 @@ if (!function_exists('asignarClienteZonaService')) {
 if (!function_exists('asignarRutaZonaService')) {
     function asignarRutaZonaService($cod_zona, $cod_ruta) {
         return asignarRutaZona($cod_zona, $cod_ruta);
+    }
+}
+
+if (!function_exists('eliminarRutaZonaService')) {
+    function eliminarRutaZonaService($cod_zona, $cod_ruta) {
+        return eliminarRutaZona($cod_zona, $cod_ruta);
+    }
+}
+
+if (!function_exists('eliminarRutaZonaSeguraService')) {
+    function eliminarRutaZonaSeguraService($cod_zona, $cod_ruta) {
+        return eliminarRutaZonaSegura($cod_zona, $cod_ruta);
+    }
+}
+
+if (!function_exists('eliminarZonaSeguraService')) {
+    function eliminarZonaSeguraService($cod_zona) {
+        return eliminarZonaSegura($cod_zona);
     }
 }
 

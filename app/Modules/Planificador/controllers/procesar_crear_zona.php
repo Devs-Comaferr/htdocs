@@ -27,6 +27,8 @@ $globalHeaderHead = ob_get_clean();
 
 // Verificar que se ha enviado el formulario
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    csrfValidateRequest('planificador.procesar_crear_zona');
+
     $nombre_zona = isset($_POST['nombre_zona']) ? trim($_POST['nombre_zona']) : '';
     $descripcion = isset($_POST['descripcion']) ? trim($_POST['descripcion']) : '';
     $duracion_semanas = isset($_POST['duracion_semanas']) ? intval($_POST['duracion_semanas']) : 0;

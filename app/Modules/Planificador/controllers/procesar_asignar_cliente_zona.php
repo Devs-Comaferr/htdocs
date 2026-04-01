@@ -19,6 +19,8 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Modules/Planificador/services/planificador_service.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrfValidateRequest('planificador.procesar_asignar_cliente_zona');
+
     // Obtener y sanitizar los datos del formulario
     $cod_zona = isset($_POST['cod_zona']) ? intval($_POST['cod_zona']) : 0;
     $cod_cliente = isset($_POST['cod_cliente']) ? intval($_POST['cod_cliente']) : 0;

@@ -124,6 +124,39 @@ $zonas = $zonasViewData['zonas'];
         .back-button:hover {
             background-color: #5a6268;
         }
+        .flash-message {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 12px 16px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .flash-message.ok {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .flash-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .zona-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .btn-delete-zone {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            background-color: #dc3545;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-delete-zone:hover {
+            background-color: #bb2d3b;
+        }
         /* Estilos para dispositivos móviles */
         @media (max-width: 1024px) {
             .btn-zona {
@@ -150,15 +183,31 @@ $zonas = $zonasViewData['zonas'];
     </style>
 </head>
 <body>
+    <?php $flashMensaje = trim((string)($_GET['mensaje'] ?? '')); ?>
+    <?php $flashEstado = trim((string)($_GET['estado'] ?? '')); ?>
     <div class="container">
+        <?php if ($flashMensaje !== ''): ?>
+            <div class="flash-message <?= $flashEstado === 'ok' ? 'ok' : 'error' ?>">
+                <?= htmlspecialchars($flashMensaje, ENT_QUOTES, 'UTF-8') ?>
+            </div>
+        <?php endif; ?>
         <!-- Sección 1: Listado de Zonas como Botones -->
         <?php if (!empty($zonas)): ?>
             <div class="buttons-container">
                 <?php foreach ($zonas as $zona): ?>
-                    <a href="zonas_rutas.php?cod_zona=<?php echo htmlspecialchars($zona['cod_zona']); ?>" class="btn-zona">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <?php echo htmlspecialchars(toUTF8((string)$zona['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?>
-                    </a>
+                    <div>
+                        <a href="zonas_rutas.php?cod_zona=<?php echo htmlspecialchars($zona['cod_zona']); ?>" class="btn-zona">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <?php echo htmlspecialchars(toUTF8((string)$zona['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?>
+                        </a>
+                        <div class="zona-actions">
+                            <form action="eliminar_zona.php" method="post" onsubmit="return confirm('¿Seguro que deseas eliminar esta zona? Solo se eliminará si está vacía.');">
+                                <?= csrfInput() ?>
+                                <input type="hidden" name="cod_zona" value="<?php echo htmlspecialchars((string)$zona['cod_zona'], ENT_QUOTES, 'UTF-8'); ?>">
+                                <button type="submit" class="btn-delete-zone">Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
@@ -169,6 +218,7 @@ $zonas = $zonasViewData['zonas'];
         <div class="create-form">
             <h2>Crear Nueva Zona</h2>
             <form action="procesar_crear_zona.php" method="post">
+                <?= csrfInput() ?>
                 <label for="nombre_zona">Nombre de la Zona:</label>
                 <input type="text" id="nombre_zona" name="nombre_zona" required>
 

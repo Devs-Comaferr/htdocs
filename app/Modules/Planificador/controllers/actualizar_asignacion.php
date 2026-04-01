@@ -23,6 +23,8 @@ if (!isset($_POST['cod_cliente'], $_POST['cod_zona'], $_POST['cod_seccion'], $_P
     appExitTextError('Error: Datos insuficientes para actualizar la asignacion.', 400);
 }
 
+csrfValidateRequest('planificador.actualizar_asignacion');
+
 $cod_cliente = intval($_POST['cod_cliente']);
 $cod_zona = intval($_POST['cod_zona']);
 $cod_seccion = isset($_POST['cod_seccion']) && $_POST['cod_seccion'] !== 'NULL' ? intval($_POST['cod_seccion']) : null;

@@ -22,6 +22,8 @@ if (!isset($_SESSION['codigo'], $_POST['cod_cliente'], $_POST['cod_zona'], $_POS
     appExitTextError('Acceso no autorizado o datos incompletos.', 400);
 }
 
+csrfValidateRequest('planificador.borrar_asignacion');
+
 $cod_cliente = intval($_POST['cod_cliente']);
 $cod_zona = intval($_POST['cod_zona']);
 $cod_seccion = ($_POST['cod_seccion'] === '' ? 'NULL' : intval($_POST['cod_seccion']));

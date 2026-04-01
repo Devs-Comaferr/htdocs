@@ -27,6 +27,8 @@ $globalHeaderHead = ob_get_clean();
 
 // Verificar que se ha enviado el formulario
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    csrfValidateRequest('planificador.procesar_asignar_ruta_zona');
+
     $cod_zona = isset($_POST['cod_zona']) ? intval($_POST['cod_zona']) : 0;
     $cod_ruta = isset($_POST['cod_ruta']) ? intval($_POST['cod_ruta']) : 0;
     
