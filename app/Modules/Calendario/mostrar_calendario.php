@@ -139,11 +139,11 @@ include(BASE_PATH . '/resources/views/layouts/header.php');
     </div>
     <!-- rea derecha: columna de botones -->
     <div class="buttons-container">
-      <a href="pedidos_visitas.php" class="btn btn-pedidos-visitas" aria-label="Visita por Pedidos">
+      <a href="visita_pedido.php" class="btn btn-pedidos-visitas" aria-label="Visita por Pedidos">
         <i class="fa-solid fa-pen-to-square"></i>
         <span>Visita por Pedidos</span>
       </a>
-      <a href="registrar_visita_manual.php" class="btn btn-manual" aria-label="Visita Manual">
+      <a href="visita_manual.php" class="btn btn-manual" aria-label="Visita Manual">
         <i class="fas fa-edit"></i>
         <span>Visita Manual</span>
       </a>
@@ -163,7 +163,7 @@ include(BASE_PATH . '/resources/views/layouts/header.php');
   </div>
   <script>
     function cambiarVista(vista) {
-      document.getElementById('calendarioIframe').src = 'calendario.php?view=' + vista + '&origen=pedidos_visitas';
+      document.getElementById('calendarioIframe').src = 'calendario.php?view=' + vista + '&origen=visita_pedido';
     }
   </script>
 </body>

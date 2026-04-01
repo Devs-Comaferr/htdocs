@@ -24,7 +24,7 @@ require_once BASE_PATH . '/app/Support/functions.php';
 $conn = db();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: pedidos_visitas.php?msg=error');
+    header('Location: visita_pedido.php?msg=error');
     exit();
 }
 
@@ -45,7 +45,7 @@ $ampliacion = (isset($_POST['ampliacion']) && (string)$_POST['ampliacion'] === '
 $previous_id_visita = isset($_POST['previous_id_visita']) ? (int)$_POST['previous_id_visita'] : 0;
 
 if ($cod_venta <= 0 || $cod_cliente <= 0 || $cod_vendedor <= 0 || $fecha_visita === '' || $hora_inicio_visita === '') {
-    header('Location: pedidos_visitas.php?msg=error_formato_fecha');
+    header('Location: visita_pedido.php?msg=error_formato_fecha');
     exit();
 }
 
@@ -72,12 +72,12 @@ try {
     asegurarRelacionVisitaPedido($conn, $cod_venta, 'WhatsApp', $opciones);
 
     odbc_commit($conn);
-    header('Location: pedidos_visitas.php?msg=whatsapp_ok');
+    header('Location: visita_pedido.php?msg=whatsapp_ok');
     exit();
 } catch (Exception $e) {
     odbc_rollback($conn);
     appLogTechnicalError('registrar_whatsapp', $e->getMessage());
-    header('Location: pedidos_visitas.php?msg=error');
+    header('Location: visita_pedido.php?msg=error');
     exit();
 } finally {
 }

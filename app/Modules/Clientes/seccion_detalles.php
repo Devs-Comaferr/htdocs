@@ -1304,7 +1304,7 @@ include_once BASE_PATH . '/resources/views/layouts/header.php';
             <?php endif; ?>
             <tr>
                 <td colspan="2" align="center" style="padding:8px;">
-                    <a href="registrar_visita_manual.php?cod_cliente=<?php echo urlencode($cod_cliente); ?>&cod_seccion=<?php echo urlencode($cod_seccion); ?>" 
+                    <a href="visita_manual.php?cod_cliente=<?php echo urlencode($cod_cliente); ?>&cod_seccion=<?php echo urlencode($cod_seccion); ?>" 
                        class="btn btn-primary">
                        Registrar Visita Manual
                     </a>

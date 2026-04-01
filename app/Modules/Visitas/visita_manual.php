@@ -17,12 +17,12 @@ function registrarVisitaManualPrepareExecute($conn, string $sql, array $params =
 {
     $stmt = odbc_prepare($conn, $sql);
     if (!$stmt) {
-        appLogTechnicalError('registrar_visita_manual.prepare', odbc_errormsg($conn) ?: odbc_errormsg());
+        appLogTechnicalError('visita_manual.prepare', odbc_errormsg($conn) ?: odbc_errormsg());
         return false;
     }
 
     if (!odbc_execute($stmt, $params)) {
-        appLogTechnicalError('registrar_visita_manual.execute', odbc_errormsg($conn) ?: odbc_errormsg());
+        appLogTechnicalError('visita_manual.execute', odbc_errormsg($conn) ?: odbc_errormsg());
         return false;
     }
 
@@ -269,7 +269,7 @@ if ($cod_cliente > 0 && $assignment) {
                 <div class="mb-3">
                     <label for="buscar">Nombre del Cliente:</label>
                     <input type="text" name="buscar" id="buscar" class="form-control" value="<?php echo htmlspecialchars($busqueda); ?>" placeholder="Introduce el nombre del cliente">
-                    <button type="submit" name="accion" value="buscar" formaction="<?= BASE_URL ?>/registrar_visita_manual.php" class="btn btn-primary w-100 btn-submit">Buscar</button>
+                    <button type="submit" name="accion" value="buscar" formaction="<?= BASE_URL ?>/visita_manual.php" class="btn btn-primary w-100 btn-submit">Buscar</button>
                     <p class="text-center" style="margin-top:20px;">Solo se mostrarán clientes asignados a tu usuario.</p>
                 </div>
             <?php endif; ?>
@@ -293,7 +293,7 @@ if ($cod_cliente > 0 && $assignment) {
                             type="submit"
                             name="accion"
                             value="seleccionar_cliente"
-                            formaction="<?= BASE_URL ?>/registrar_visita_manual.php"
+                            formaction="<?= BASE_URL ?>/visita_manual.php"
                             class="result-button"
                             onclick="document.getElementById('cod_cliente').value='<?php echo htmlspecialchars((string)$clienteCod, ENT_QUOTES, 'UTF-8'); ?>'; document.getElementById('cod_seccion').value='<?php echo htmlspecialchars($clienteSeccion, ENT_QUOTES, 'UTF-8'); ?>';"
                         >
@@ -311,7 +311,7 @@ if ($cod_cliente > 0 && $assignment) {
                         <?php echo htmlspecialchars($nombreCliente); ?>
                         <span class="badge bg-light text-dark ms-2">#<?php echo htmlspecialchars((string)$cod_cliente); ?></span>
                     </div>
-                    <button type="button" class="btn btn-secondary" onclick="window.location='<?= BASE_URL ?>/registrar_visita_manual.php'">Cambiar cliente</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location='<?= BASE_URL ?>/visita_manual.php'">Cambiar cliente</button>
                 </div>
 
                 <?php if (count($citas) > 0): ?>
@@ -389,6 +389,7 @@ if ($cod_cliente > 0 && $assignment) {
                     <label for="fecha_visita">Fecha de la Visita:</label>
                     <input type="date" class="form-control" name="fecha_visita" id="fecha_visita" value="<?php echo htmlspecialchars($fecha_visita); ?>">
                 </div>
+                <div id="warning_visitas_existentes" class="alert alert-warning d-none" role="alert"></div>
                 <div class="mb-3">
                     <label for="hora_inicio_visita">Hora de Inicio:</label>
                     <input type="time" class="form-control" name="hora_inicio_visita" id="hora_inicio_visita" value="<?php echo htmlspecialchars($hora_inicio_visita); ?>">
@@ -442,8 +443,12 @@ if ($cod_cliente > 0 && $assignment) {
             var modalClose = modalDefinirHorario ? modalDefinirHorario.querySelector('.close') : null;
             var guardarHorarioBtn = document.querySelector('#horario_guardarHorarioBtn');
             var flujoVisitaManual = document.querySelector('#flujoVisitaManual');
+            var submitRegistrarBtn = flujoVisitaManual ? flujoVisitaManual.querySelector('button[type="submit"][value="registrar"]') : null;
             var formDefinirHorario = document.querySelector('#formDefinirHorario');
             var estadoVisitaInput = document.querySelector('#estado_visita');
+            var clienteInput = document.querySelector('#cod_cliente');
+            var seccionInput = document.querySelector('#cod_seccion');
+            var warningVisitasExistentes = document.querySelector('#warning_visitas_existentes');
             var promedio = <?php echo json_encode($tiempo_promedio_minutes); ?>;
             var horarioCliente = {
                 mananaInicio: <?php echo json_encode($hora_inicio_manana); ?>,
@@ -454,11 +459,130 @@ if ($cod_cliente > 0 && $assignment) {
             var emptyStateHtml = "<div class='alert alert-info'>Seleccione una fecha para ver las visitas programadas.</div>";
             var errorStateHtml = "<div class='alert alert-danger'>Error al cargar las visitas.</div>";
             var usuarioTocoHoraInicio = !!(horaInicioInput && horaInicioInput.value);
+            var comprobacionVisitasRequestId = 0;
+            var horarioAutoCompletado = false;
 
             function setVisitasContent(html) {
                 if (visitasDelDia) {
                     visitasDelDia.innerHTML = html;
                 }
+            }
+
+            function actualizarEstadoBotonSubmit() {
+                if (!submitRegistrarBtn) {
+                    return;
+                }
+
+                submitRegistrarBtn.disabled = !horarioAutoCompletado;
+            }
+
+            function setHorarioAutoCompletado(valor) {
+                horarioAutoCompletado = valor;
+                actualizarEstadoBotonSubmit();
+            }
+
+            function ocultarWarningVisitasExistentes() {
+                if (!warningVisitasExistentes) {
+                    return;
+                }
+
+                warningVisitasExistentes.textContent = '';
+                warningVisitasExistentes.classList.add('d-none');
+            }
+
+            function mostrarWarningVisitasExistentes(texto) {
+                if (!warningVisitasExistentes) {
+                    return;
+                }
+
+                warningVisitasExistentes.innerHTML = '&#9888; ' + texto;
+                warningVisitasExistentes.classList.remove('d-none');
+            }
+
+            function obtenerPayloadComprobacionVisitas() {
+                var codCliente = clienteInput ? clienteInput.value.trim() : '';
+                var codSeccion = seccionInput ? seccionInput.value.trim() : '';
+                var fecha = fechaInput ? fechaInput.value.trim() : '';
+
+                if (!codCliente || !fecha) {
+                    return null;
+                }
+
+                return {
+                    cod_cliente: codCliente,
+                    cod_seccion: codSeccion,
+                    fecha_visita: fecha
+                };
+            }
+
+            function resolverMensajeVisitasExistentes(estados) {
+                if (!Array.isArray(estados) || estados.length === 0) {
+                    return '';
+                }
+
+                var estadosNormalizados = estados.map(function(estado) {
+                    return String(estado || '').trim().toLowerCase();
+                });
+
+                if (estadosNormalizados.indexOf('realizada') !== -1) {
+                    return 'Ya existe una visita REALIZADA para este cliente en este día.';
+                }
+
+                if (
+                    estadosNormalizados.indexOf('planificada') !== -1 ||
+                    estadosNormalizados.indexOf('pendiente') !== -1
+                ) {
+                    return 'Ya existe una visita PLANIFICADA o PENDIENTE para este cliente en este día.';
+                }
+
+                return '';
+            }
+
+            function comprobarVisitasExistentes() {
+                var payload = obtenerPayloadComprobacionVisitas();
+                var requestId = comprobacionVisitasRequestId + 1;
+                comprobacionVisitasRequestId = requestId;
+
+                if (!payload) {
+                    ocultarWarningVisitasExistentes();
+                    return;
+                }
+
+                var params = new URLSearchParams();
+                params.set('cod_cliente', payload.cod_cliente);
+                params.set('cod_seccion', payload.cod_seccion);
+                params.set('fecha_visita', payload.fecha_visita);
+
+                fetch("<?= BASE_URL ?>/ajax/check_visitas_existentes.php?" + params.toString(), {
+                    credentials: 'same-origin'
+                })
+                    .then(function(response) {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        if (requestId !== comprobacionVisitasRequestId) {
+                            return;
+                        }
+
+                        var mensaje = (data && data.existe) ? resolverMensajeVisitasExistentes(data.estados) : '';
+                        if (mensaje) {
+                            mostrarWarningVisitasExistentes(mensaje);
+                            return;
+                        }
+
+                        ocultarWarningVisitasExistentes();
+                    })
+                    .catch(function(error) {
+                        if (requestId !== comprobacionVisitasRequestId) {
+                            return;
+                        }
+
+                        console.error('Error comprobando visitas existentes:', error);
+                        ocultarWarningVisitasExistentes();
+                    });
             }
 
             function mostrarMensaje(tipo, texto) {
@@ -576,22 +700,26 @@ if ($cod_cliente > 0 && $assignment) {
 
             function aplicarSiguienteHuecoAutomatico() {
                 if (usuarioTocoHoraInicio || !horaInicioInput || !horaFinInput) {
+                    setHorarioAutoCompletado(true);
                     return;
                 }
 
                 var duracionMinutos = parseInt(promedio, 10);
                 if (!duracionMinutos || duracionMinutos <= 0) {
+                    setHorarioAutoCompletado(true);
                     return;
                 }
 
                 var visitas = parsearVisitasDesdeHtml();
                 var hueco = calcularSiguienteHueco(visitas, duracionMinutos);
                 if (!hueco) {
+                    setHorarioAutoCompletado(true);
                     return;
                 }
 
                 horaInicioInput.value = hueco.inicio;
                 horaFinInput.value = hueco.fin;
+                setHorarioAutoCompletado(true);
             }
 
             function haySolapeConVisitasExistentes(nuevoInicio, nuevoFin, visitas) {
@@ -645,7 +773,6 @@ if ($cod_cliente > 0 && $assignment) {
                 marcarCampoError(horaInicioInput, false);
                 marcarCampoError(horaFinInput, false);
 
-                var clienteInput = document.querySelector('#cod_cliente');
                 if (!clienteInput || !clienteInput.value) {
                     return { ok: false, tipo: 'error', mensaje: 'Debes seleccionar un cliente.', campos: [] };
                 }
@@ -678,7 +805,7 @@ if ($cod_cliente > 0 && $assignment) {
                 if (haySolapeConVisitasExistentes(nuevoInicio, nuevoFin, visitas)) {
                     marcarCampoError(horaInicioInput, true);
                     marcarCampoError(horaFinInput, true);
-                    return { ok: false, tipo: 'error', mensaje: 'Ya tienes una visita en ese horario', campos: [horaInicioInput, horaFinInput] };
+                    return { ok: false, tipo: 'error', mensaje: 'No hay tiempo disponible para esta visita en el horario seleccionado', campos: [horaInicioInput, horaFinInput] };
                 }
 
                 if (!estaDentroHorarioCliente(nuevoInicio, nuevoFin)) {
@@ -698,13 +825,17 @@ if ($cod_cliente > 0 && $assignment) {
                 if (usuarioTocoHoraInicio && !existeHuecoManualValido(nuevoInicio, nuevoFin, visitas)) {
                     marcarCampoError(horaInicioInput, true);
                     marcarCampoError(horaFinInput, true);
-                    return { ok: false, tipo: 'error', mensaje: 'La hora no encaja en un hueco disponible', campos: [horaInicioInput, horaFinInput] };
+                    return { ok: false, tipo: 'error', mensaje: 'No hay tiempo disponible para esta visita en el horario seleccionado', campos: [horaInicioInput, horaFinInput] };
                 }
 
                 return { ok: true };
             }
 
             function validarEnTiempoReal() {
+                if (!horarioAutoCompletado) {
+                    return false;
+                }
+
                 var resultado = evaluarValidacionesHorario();
                 if (resultado.ok) {
                     limpiarMensajes();
@@ -737,11 +868,13 @@ if ($cod_cliente > 0 && $assignment) {
 
             function cargarVisitasDelDia() {
                 if (!fechaInput) {
+                    setHorarioAutoCompletado(true);
                     return;
                 }
 
                 var fecha = fechaInput.value;
                 if (!fecha) {
+                    setHorarioAutoCompletado(true);
                     setVisitasContent(emptyStateHtml);
                     return;
                 }
@@ -765,6 +898,7 @@ if ($cod_cliente > 0 && $assignment) {
                     .catch(function(error) {
                         console.error('Error cargando visitas:', error);
                         setVisitasContent(errorStateHtml);
+                        setHorarioAutoCompletado(true);
                     });
             }
 
@@ -789,11 +923,27 @@ if ($cod_cliente > 0 && $assignment) {
             }
 
             if (fechaInput) {
-                fechaInput.addEventListener('change', cargarVisitasDelDia);
+                fechaInput.addEventListener('change', function() {
+                    setHorarioAutoCompletado(false);
+                    cargarVisitasDelDia();
+                });
+                fechaInput.addEventListener('change', comprobarVisitasExistentes);
                 fechaInput.addEventListener('change', validarEnTiempoReal);
                 if (fechaInput.value !== '') {
+                    setHorarioAutoCompletado(false);
                     cargarVisitasDelDia();
+                    comprobarVisitasExistentes();
                 }
+            }
+
+            actualizarEstadoBotonSubmit();
+
+            if (clienteInput) {
+                clienteInput.addEventListener('change', comprobarVisitasExistentes);
+            }
+
+            if (seccionInput) {
+                seccionInput.addEventListener('change', comprobarVisitasExistentes);
             }
 
             if (horaFinInput) {
@@ -862,6 +1012,12 @@ if ($cod_cliente > 0 && $assignment) {
                 flujoVisitaManual.addEventListener('submit', function(event) {
                     var submitter = event.submitter;
                     if (!submitter || submitter.value !== 'registrar') {
+                        return;
+                    }
+
+                    if (!horarioAutoCompletado) {
+                        event.preventDefault();
+                        mostrarMensaje('info', '⏳ Calculando horario automático, espera un momento...');
                         return;
                     }
 

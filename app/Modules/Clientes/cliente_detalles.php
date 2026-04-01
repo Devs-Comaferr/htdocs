@@ -1560,7 +1560,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
             <?php endif; ?>
             <tr>
                 <td colspan="2" align="center" style="padding:8px;">
-                    <a href="registrar_visita_manual.php?cod_cliente=<?= urlencode((string)$cod_cliente) ?>&cod_seccion=<?= urlencode((string)($cod_seccion ?? '')) ?>" class="btn btn-primary">Registrar Visita Manual</a>
+                    <a href="visita_manual.php?cod_cliente=<?= urlencode((string)$cod_cliente) ?>&cod_seccion=<?= urlencode((string)($cod_seccion ?? '')) ?>" class="btn btn-primary">Registrar Visita Manual</a>
                 </td>
             </tr>
         </table>

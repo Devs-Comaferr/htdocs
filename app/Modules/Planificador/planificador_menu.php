@@ -130,7 +130,7 @@ $cards = [
     ],
     [
         'key' => 'orders',
-        'href' => 'pedidos_visitas.php',
+        'href' => 'visita_pedido.php',
         'label' => 'Visita por pedidos',
         'icon_class' => 'fa-solid fa-pen-to-square',
         'icon_wrapper' => 'icon-green',
@@ -147,7 +147,7 @@ $cards = [
     ],
     [
         'key' => 'manual',
-        'href' => 'registrar_visita_manual.php',
+        'href' => 'visita_manual.php',
         'label' => 'Registrar visita manual',
         'icon_class' => 'fas fa-edit',
         'icon_wrapper' => 'icon-yellow',

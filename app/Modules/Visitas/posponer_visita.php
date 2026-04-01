@@ -29,7 +29,7 @@ if (!empty($_GET) && is_array($_GET)) {
     $query = $_POST;
 }
 
-$url = 'registrar_visita_manual.php';
+$url = 'visita_manual.php';
 if (!empty($query)) {
     $url .= '?' . http_build_query($query);
 }

@@ -421,7 +421,7 @@ function formatoHora($horaSql)
     <div class="content-wrapper">
       <!-- Calendario -->
       <div class="calendario-container">
-      <iframe src="calendario.php?view=timeGridDay&origen=pedidos_visitas" width="100%" height="480" style="border:none;"></iframe>
+      <iframe src="calendario.php?view=timeGridDay&origen=visita_pedido" width="100%" height="480" style="border:none;"></iframe>
       </div>
 
       <!-- Pedidos Pendientes -->

@@ -231,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!editarVisitaModernPrepareExecute($conn, $sql_update, [$fecha_visita, $hora_inicio_visita, $hora_fin_visita, $observaciones, $estado_visita, $id_visita])) {
             $error = 'Error al actualizar la visita.';
         } else {
-            if (isset($_GET['origen']) && $_GET['origen'] === 'pedidos_visitas') {
+            if (isset($_GET['origen']) && $_GET['origen'] === 'visita_pedido') {
                 header('Location: calendario.php?view=timeGridDay&msg=visita_actualizada');
             } else {
                 header('Location: calendario.php?msg=visita_actualizada');
@@ -339,7 +339,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <button type="submit" class="btn btn-primary">Guardar Cambios</button>
         <?php
-            if (isset($_GET['origen']) && $_GET['origen'] === 'pedidos_visitas') {
+            if (isset($_GET['origen']) && $_GET['origen'] === 'visita_pedido') {
                 $cancelUrl = 'calendario.php?view=timeGridDay';
             } else {
                 $cancelUrl = 'calendario.php';

@@ -14,7 +14,7 @@ class VisitasController
 
         switch ($action) {
             case 'crear':
-                require_once BASE_PATH . '/app/Modules/Visitas/registrar_visita_manual.php';
+                require_once BASE_PATH . '/app/Modules/Visitas/visita_manual.php';
                 exit;
 
             case 'editar':

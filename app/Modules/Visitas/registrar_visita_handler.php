@@ -97,7 +97,7 @@ function registrarVisitaManual(array $data, bool $forzar = false): array
 
     $stmt = odbc_prepare($conn, $sql_insert);
     if (!$stmt) {
-        appLogTechnicalError('registrar_visita_manual.prepare', odbc_errormsg($conn) ?: odbc_errormsg());
+        appLogTechnicalError('visita_manual.prepare', odbc_errormsg($conn) ?: odbc_errormsg());
         return [
             'ok' => false,
             'conflictos' => $conflictos,
@@ -118,7 +118,7 @@ function registrarVisitaManual(array $data, bool $forzar = false): array
     ];
 
     if (!odbc_execute($stmt, $params)) {
-        appLogTechnicalError('registrar_visita_manual.execute', odbc_errormsg($conn) ?: odbc_errormsg());
+        appLogTechnicalError('visita_manual.execute', odbc_errormsg($conn) ?: odbc_errormsg());
         return [
             'ok' => false,
             'conflictos' => $conflictos,

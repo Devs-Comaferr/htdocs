@@ -37,7 +37,7 @@ $previous_id_visita = isset($_POST['previous_id_visita']) ? intval($_POST['previ
 
 // Validar que los campos obligatorios no están vacíos
 if (empty($nombre_comercial) || $cod_cliente <= 0 || $seccion_visita <= 0 || $cod_vendedor <= 0 || empty($fecha_visita) || empty($hora_inicio_visita) || empty($hora_fin_visita)) {
-    header("Location: pedidos_visitas.php?msg=error");
+    header("Location: visita_pedido.php?msg=error");
     exit();
 }
 
@@ -45,7 +45,7 @@ if (empty($nombre_comercial) || $cod_cliente <= 0 || $seccion_visita <= 0 || $co
 if (!preg_match("/^\d{4}-\d{2}-\d{2}$/", $fecha_visita) || 
     !preg_match("/^\d{2}:\d{2}$/", $hora_inicio_visita) || 
     !preg_match("/^\d{2}:\d{2}$/", $hora_fin_visita)) {
-    header("Location: pedidos_visitas.php?msg=error_formato_fecha");
+    header("Location: visita_pedido.php?msg=error_formato_fecha");
     exit();
 }
 
@@ -54,7 +54,7 @@ $inicio = DateTime::createFromFormat('H:i', $hora_inicio_visita);
 $fin = DateTime::createFromFormat('H:i', $hora_fin_visita);
 
 if (!$inicio || !$fin) {
-    header("Location: pedidos_visitas.php?msg=error_formato_hora");
+    header("Location: visita_pedido.php?msg=error_formato_hora");
     exit();
 }
 
@@ -63,7 +63,7 @@ $diff_min = $diff / 60;
 
 // Validar diferencia mínima y máxima
 if ($diff_min < 15 || $diff_min > 300) {
-    header("Location: pedidos_visitas.php?msg=error_min_tiempo");
+    header("Location: visita_pedido.php?msg=error_min_tiempo");
     exit();
 }
 
@@ -76,7 +76,7 @@ $sql_insert_visita = "
 
 $stmt_insert = odbc_prepare($conn, $sql_insert_visita);
 if (!$stmt_insert) {
-    header("Location: pedidos_visitas.php?msg=error");
+    header("Location: visita_pedido.php?msg=error");
     exit();
 }
 
@@ -84,9 +84,9 @@ $params_insert = array($cod_cliente, $seccion_visita, $cod_vendedor, $fecha_visi
 $result_insert = odbc_execute($stmt_insert, $params_insert);
 
 if ($result_insert) {
-    header("Location: pedidos_visitas.php?msg=visita_ok");
+    header("Location: visita_pedido.php?msg=visita_ok");
 } else {
-    header("Location: pedidos_visitas.php?msg=error");
+    header("Location: visita_pedido.php?msg=error");
 }
 exit();
 ?>

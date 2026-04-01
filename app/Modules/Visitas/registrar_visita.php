@@ -21,7 +21,7 @@ require_once BASE_PATH . '/app/Support/db.php';
 $conn = db();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: pedidos_visitas.php?msg=error');
+    header('Location: visita_pedido.php?msg=error');
     exit();
 }
 
@@ -129,7 +129,7 @@ $previous_id_visita = isset($_POST['previous_id_visita']) ? (int)$_POST['previou
 $esVisitaManual = ($cod_venta <= 0);
 
 if ($cod_cliente <= 0 || $cod_vendedor <= 0 || $fecha_visita === '' || $hora_inicio_visita === '') {
-    header('Location: pedidos_visitas.php?msg=error_formato_fecha');
+    header('Location: visita_pedido.php?msg=error_formato_fecha');
     exit();
 }
 
@@ -142,7 +142,7 @@ $inicioMinutos = horaVisitaATotalMinutos($hora_inicio_visita);
 $finMinutos = horaVisitaATotalMinutos($horaFinValidacion);
 
 if ($finMinutos <= $inicioMinutos) {
-    header('Location: pedidos_visitas.php?msg=error');
+    header('Location: visita_pedido.php?msg=error');
     exit();
 }
 
@@ -264,12 +264,12 @@ try {
     recalcularTiempoPromedioVisita($conn, $cod_cliente, $cod_seccion);
     odbc_commit($conn);
 
-    header('Location: pedidos_visitas.php?msg=visita_ok');
+    header('Location: visita_pedido.php?msg=visita_ok');
     exit();
 } catch (Exception $e) {
     odbc_rollback($conn);
     appLogTechnicalError('registrar_visita', $e->getMessage());
-    header('Location: pedidos_visitas.php?msg=' . urlencode($e->getMessage()));
+    header('Location: visita_pedido.php?msg=' . urlencode($e->getMessage()));
     exit();
 } finally {
 }

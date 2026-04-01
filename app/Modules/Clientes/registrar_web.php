@@ -24,7 +24,7 @@ require_once BASE_PATH . '/app/Support/functions.php';
 $conn = db();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: pedidos_visitas.php?msg=error');
+    header('Location: visita_pedido.php?msg=error');
     exit();
 }
 
@@ -43,7 +43,7 @@ $hora_fin_visita = (isset($_POST['hora_fin_visita']) && $_POST['hora_fin_visita'
 $observaciones = isset($_POST['observaciones']) ? escape_string_web((string)$_POST['observaciones']) : null;
 
 if ($cod_venta <= 0 || $cod_cliente <= 0 || $cod_vendedor <= 0 || $fecha_visita === '' || $hora_inicio_visita === '') {
-    header('Location: pedidos_visitas.php?msg=error_formato_fecha');
+    header('Location: visita_pedido.php?msg=error_formato_fecha');
     exit();
 }
 
@@ -65,12 +65,12 @@ try {
     ]);
 
     odbc_commit($conn);
-    header('Location: pedidos_visitas.php?msg=web_ok');
+    header('Location: visita_pedido.php?msg=web_ok');
     exit();
 } catch (Exception $e) {
     odbc_rollback($conn);
     appLogTechnicalError('registrar_web', $e->getMessage());
-    header('Location: pedidos_visitas.php?msg=error');
+    header('Location: visita_pedido.php?msg=error');
     exit();
 } finally {
 }
