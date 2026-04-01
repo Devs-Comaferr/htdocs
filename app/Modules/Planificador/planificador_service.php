@@ -389,6 +389,17 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
             c.cod_cliente,
             c.nombre_comercial AS nombre,
             MAX(v.fecha_visita) AS ultima_visita,
+            MAX(
+                CASE
+                    WHEN v.id_visita IS NOT NULL
+                     AND (
+                        vp.id_visita IS NULL
+                        OR vp.origen = 'Visita'
+                     )
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS visita_real,
             z.frecuencia_visita,
             CASE
                 WHEN z.frecuencia_visita = 'TODOS' THEN 1
@@ -403,6 +414,9 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
             ON v.cod_cliente = c.cod_cliente
             AND v.cod_vendedor = c.cod_vendedor
             $filtroVisitasCicloActual
+            AND v.estado_visita = 'Realizada'
+        LEFT JOIN cmf_visita_pedidos vp
+            ON vp.id_visita = v.id_visita
     ";
 
     $orderByBase = "
@@ -434,7 +448,17 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
         $queryZonaNivel1 = $selectZonaBase
             . $whereZona
             . $groupByZona
-            . " HAVING MAX(v.fecha_visita) IS NULL "
+            . " HAVING MAX(
+                    CASE
+                        WHEN v.id_visita IS NOT NULL
+                         AND (
+                            vp.id_visita IS NULL
+                            OR vp.origen = 'Visita'
+                         )
+                        THEN 1
+                        ELSE 0
+                    END
+                ) = 0 "
             . $orderByBase;
 
         $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZonaNivel1, 'zona', $iteracionZona);
@@ -445,7 +469,17 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
         $queryZonaNivel2 = $selectZonaBase
             . $whereZona
             . $groupByZona
-            . " HAVING MAX(v.fecha_visita) IS NULL "
+            . " HAVING MAX(
+                    CASE
+                        WHEN v.id_visita IS NOT NULL
+                         AND (
+                            vp.id_visita IS NULL
+                            OR vp.origen = 'Visita'
+                         )
+                        THEN 1
+                        ELSE 0
+                    END
+                ) = 0 "
             . $orderByBase;
 
         $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZonaNivel2, 'zona', $iteracionZona);
