@@ -278,7 +278,7 @@ function obtenerSiguienteClienteRecomendado() {
     }
 
     $selectZonaBase = "
-        SELECT TOP 1
+        SELECT
             c.cod_cliente,
             c.nombre_comercial AS nombre,
             MAX(v.fecha_visita) AS ultima_visita
@@ -340,7 +340,7 @@ function obtenerSiguienteClienteRecomendado() {
     }
 
     $queryGlobal = "
-        SELECT TOP 1
+        SELECT
             c.cod_cliente,
             c.nombre_comercial AS nombre,
             MAX(v.fecha_visita) AS ultima_visita
@@ -364,7 +364,7 @@ function obtenerSiguienteClienteRecomendado() {
     }
 
     $queryFallback = "
-        SELECT TOP 1
+        SELECT
             c.cod_cliente,
             c.nombre_comercial AS nombre,
             NULL AS ultima_visita
