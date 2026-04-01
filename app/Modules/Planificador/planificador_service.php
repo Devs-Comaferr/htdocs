@@ -317,6 +317,7 @@ function obtenerSiguienteClienteRecomendado() {
         $whereZona = "
             WHERE c.cod_vendedor = '$codVendedor'
               AND z.cod_cliente IS NOT NULL
+              AND ISNULL(z.frecuencia_visita, '') <> 'NUNCA'
               AND (
                     z.zona_principal = '$codZona'
                     OR z.zona_secundaria = '$codZona'
