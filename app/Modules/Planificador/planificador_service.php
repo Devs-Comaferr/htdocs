@@ -249,49 +249,68 @@ function obtenerSiguienteClienteRecomendado() {
     $codZona = intval($zonaActiva['cod_zona'] ?? 0);
     $codVendedor = obtenerCodVendedorPlanificacionService();
     $conn = db();
-    $clienteZona = [];
-    $clienteGlobal = [];
-    $clienteFallback = [];
 
     if ($codVendedor <= 0) {
         return [];
     }
 
+    $selectZonaBase = "
+        SELECT TOP 1
+            c.cod_cliente,
+            c.nombre_comercial AS nombre,
+            MAX(v.fecha_visita) AS ultima_visita
+        FROM clientes c
+        LEFT JOIN secciones_cliente sc
+            ON sc.cod_cliente = c.cod_cliente
+        LEFT JOIN cmf_asignacion_zonas_clientes z
+            ON z.cod_cliente = c.cod_cliente
+            AND (
+                z.cod_seccion = sc.cod_seccion
+                OR z.cod_seccion IS NULL
+            )
+        LEFT JOIN cmf_visitas_cliente v
+            ON v.cod_cliente = c.cod_cliente
+    ";
+
+    $orderByBase = "
+        ORDER BY
+            MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) ASC,
+            CASE WHEN MAX(v.fecha_visita) IS NULL THEN 0 ELSE 1 END ASC,
+            MAX(v.fecha_visita) ASC,
+            c.nombre_comercial ASC
+    ";
+
     if ($codZona > 0) {
-        $queryZona = "
-            SELECT TOP 1
-                c.cod_cliente,
-                c.nombre_comercial AS nombre,
-                MAX(v.fecha_visita) AS ultima_visita
-            FROM clientes c
-            LEFT JOIN secciones_cliente sc
-                ON sc.cod_cliente = c.cod_cliente
-            LEFT JOIN cmf_asignacion_zonas_clientes z
-                ON z.cod_cliente = c.cod_cliente
-                AND (
-                    z.cod_seccion = sc.cod_seccion
-                    OR z.cod_seccion IS NULL
-                )
-            LEFT JOIN cmf_visitas_cliente v
-                ON v.cod_cliente = c.cod_cliente
+        $whereZona = "
             WHERE c.cod_vendedor = '$codVendedor'
               AND (
                     z.zona_principal = '$codZona'
                     OR z.zona_secundaria = '$codZona'
                     OR z.cod_cliente IS NULL
               )
-            GROUP BY c.cod_cliente, c.nombre_comercial
-            ORDER BY
-                MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) ASC,
-                CASE WHEN MAX(v.fecha_visita) IS NULL THEN 0 ELSE 1 END ASC,
-                MAX(v.fecha_visita) ASC,
-                c.nombre_comercial ASC
         ";
 
-        $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZona, 'zona');
-        echo '<pre>';
-        echo "ZONA:\n";
-        print_r($clienteZona);
+        $groupByZona = "
+            GROUP BY c.cod_cliente, c.nombre_comercial
+        ";
+
+        $queryZonaNivel1 = $selectZonaBase
+            . $whereZona
+            . $groupByZona
+            . " HAVING MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) = 0 "
+            . $orderByBase;
+
+        $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZonaNivel1, 'zona');
+        if (!empty($clienteZona)) {
+            return $clienteZona;
+        }
+
+        $queryZonaNivel2 = $selectZonaBase
+            . $whereZona
+            . $groupByZona
+            . $orderByBase;
+
+        $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZonaNivel2, 'zona');
         if (!empty($clienteZona)) {
             return $clienteZona;
         }
@@ -315,67 +334,8 @@ function obtenerSiguienteClienteRecomendado() {
     ";
 
     $clienteGlobal = obtenerClienteRecomendadoPorQuery($conn, $queryGlobal, 'global');
-    echo '<pre>';
-    echo "GLOBAL:\n";
-    print_r($clienteGlobal);
     if (!empty($clienteGlobal)) {
         return $clienteGlobal;
-    }
-
-    $queryFallback = "
-        SELECT TOP 1
-            c.cod_cliente,
-            c.nombre_comercial AS nombre,
-            (
-                SELECT MAX(v.fecha_visita)
-                FROM cmf_visitas_cliente v
-                WHERE v.cod_cliente = c.cod_cliente
-            ) AS ultima_visita
-        FROM clientes c
-        WHERE c.cod_vendedor = '$codVendedor'
-        ORDER BY
-            CASE
-                WHEN EXISTS (
-                    SELECT 1
-                    FROM cmf_visitas_cliente vh
-                    WHERE vh.cod_cliente = c.cod_cliente
-                      AND CONVERT(date, vh.fecha_visita) = CONVERT(date, GETDATE())
-                ) THEN 1
-                ELSE 0
-            END ASC,
-            CASE
-                WHEN (
-                    SELECT MAX(v2.fecha_visita)
-                    FROM cmf_visitas_cliente v2
-                    WHERE v2.cod_cliente = c.cod_cliente
-                ) IS NULL THEN 0
-                ELSE 1
-            END ASC,
-            (
-                SELECT MAX(v3.fecha_visita)
-                FROM cmf_visitas_cliente v3
-                WHERE v3.cod_cliente = c.cod_cliente
-            ) ASC,
-            c.nombre_comercial ASC
-    ";
-
-    $clienteFallback = obtenerClienteRecomendadoPorQuery($conn, $queryFallback, 'fallback');
-    echo '<pre>';
-    echo "FALLBACK:\n";
-    print_r($clienteFallback);
-    exit;
-    if (!empty($clienteFallback)) {
-        return $clienteFallback;
-    }
-
-    if (!empty($clienteZona)) {
-        return $clienteZona;
-    }
-    if (!empty($clienteGlobal)) {
-        return $clienteGlobal;
-    }
-    if (!empty($clienteFallback)) {
-        return $clienteFallback;
     }
 
     return [];
