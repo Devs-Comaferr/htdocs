@@ -209,6 +209,62 @@ function calcularTocaVisitaPlanificador($frecuenciaVisita, int $iteracionZona): 
     return 0;
 }
 
+function registrarDebugClientesRecomendador($conn, string $queryDebug): void {
+    planificadorConfigurarDebugLog();
+
+    error_log('DEBUG RECOMENDADOR SQL:');
+    error_log($queryDebug);
+
+    $resultadoDebug = odbc_exec($conn, $queryDebug);
+    if (!$resultadoDebug) {
+        error_log('Error en debug del recomendador: ' . odbc_errormsg($conn));
+        return;
+    }
+
+    while ($row = odbc_fetch_array($resultadoDebug)) {
+        $codCliente = (int)($row['cod_cliente'] ?? 0);
+        $nombre = trim((string)($row['nombre'] ?? ''));
+        $zonaOk = (int)($row['zona_ok'] ?? 0);
+        $frecuenciaVisita = trim((string)($row['frecuencia_visita'] ?? ''));
+        $frecuenciaNormalizada = strtoupper($frecuenciaVisita);
+        $iteracionReal = (int)($row['iteracion_real'] ?? 0);
+        $tocaVisita = (int)($row['toca_visita'] ?? 0);
+        $visitaReal = (int)($row['visita_real'] ?? 0);
+        $visitadoHoy = (int)($row['visitado_hoy'] ?? 0);
+        $ultimaVisita = trim((string)($row['ultima_visita'] ?? ''));
+        $motivo = array();
+
+        if ($zonaOk !== 1) {
+            $motivo[] = 'FUERA_ZONA';
+        }
+        if ($frecuenciaNormalizada === 'NUNCA') {
+            $motivo[] = 'FREC_NUNCA';
+        }
+        if ($tocaVisita !== 1) {
+            $motivo[] = 'NO_TOCA';
+        }
+        if ($visitaReal === 1) {
+            $motivo[] = 'YA_VISITADO_CICLO';
+        }
+        if ($visitadoHoy === 1) {
+            $motivo[] = 'YA_HOY';
+        }
+        if (empty($motivo)) {
+            $motivo[] = 'ENTRA';
+        }
+
+        error_log("DEBUG CLIENTE {$codCliente} - {$nombre}");
+        error_log("  zona_ok: {$zonaOk}");
+        error_log("  frecuencia: {$frecuenciaVisita}");
+        error_log("  iteracion: {$iteracionReal}");
+        error_log("  toca: {$tocaVisita}");
+        error_log("  visita_real: {$visitaReal}");
+        error_log("  visitado_hoy: {$visitadoHoy}");
+        error_log("  ultima_visita: {$ultimaVisita}");
+        error_log('  MOTIVO: ' . implode(', ', $motivo));
+    }
+}
+
 function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenRecomendacion, ?int $iteracionZona = null) {
     planificadorConfigurarDebugLog();
 
@@ -338,6 +394,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
     $codVendedor = obtenerCodVendedorPlanificacionService();
     $conn = db();
     $iteracionZona = 0;
+    $iteracionZonaReal = 1;
     $fechaInicioCiclo = '';
 
     if ($codVendedor <= 0) {
@@ -373,9 +430,11 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
         }
     }
 
+    $iteracionZonaReal = $iteracionZona + 1;
+
     error_log('ZONA ACTIVA ID: ' . $codZona);
     error_log('ITERACION ZONA: ' . $iteracionZona);
-    error_log('ITERACION REAL: ' . ($iteracionZona + 1));
+    error_log('ITERACION REAL: ' . $iteracionZonaReal);
 
     $filtroVisitasCicloActual = '';
     if ($fechaInicioCiclo !== '') {
@@ -430,6 +489,60 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
     ";
 
     if ($codZona > 0) {
+        $queryZonaDebug = "
+            SELECT TOP 50
+                c.cod_cliente,
+                c.nombre_comercial AS nombre,
+                CASE
+                    WHEN z.zona_principal = '$codZona'
+                      OR z.zona_secundaria = '$codZona'
+                    THEN 1 ELSE 0
+                END AS zona_ok,
+                z.frecuencia_visita,
+                $iteracionZonaReal AS iteracion_real,
+                CASE
+                    WHEN UPPER(ISNULL(z.frecuencia_visita, '')) = 'TODOS' THEN 1
+                    WHEN UPPER(ISNULL(z.frecuencia_visita, '')) = 'CADA2' AND ($iteracionZonaReal % 2) = 0 THEN 1
+                    WHEN UPPER(ISNULL(z.frecuencia_visita, '')) = 'CADA3' AND ($iteracionZonaReal % 3) = 0 THEN 1
+                    ELSE 0
+                END AS toca_visita,
+                MAX(CASE
+                    WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE())
+                    THEN 1 ELSE 0 END) AS visitado_hoy,
+                MAX(
+                    CASE
+                        WHEN v.id_visita IS NOT NULL
+                         AND (
+                            vp.id_visita IS NULL
+                            OR vp.origen = 'Visita'
+                         )
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS visita_real,
+                MAX(v.fecha_visita) AS ultima_visita
+            FROM clientes c
+            LEFT JOIN cmf_asignacion_zonas_clientes z
+                ON z.cod_cliente = c.cod_cliente
+            LEFT JOIN cmf_visitas_comerciales v
+                ON v.cod_cliente = c.cod_cliente
+                AND v.cod_vendedor = c.cod_vendedor
+                $filtroVisitasCicloActual
+                AND v.estado_visita = 'Realizada'
+            LEFT JOIN cmf_visita_pedidos vp
+                ON vp.id_visita = v.id_visita
+            WHERE c.cod_vendedor = '$codVendedor'
+              $filtrosOperativos
+            GROUP BY
+                c.cod_cliente,
+                c.nombre_comercial,
+                z.zona_principal,
+                z.zona_secundaria,
+                z.frecuencia_visita
+            ORDER BY c.nombre_comercial ASC
+        ";
+        registrarDebugClientesRecomendador($conn, $queryZonaDebug);
+
         $whereZona = "
             WHERE c.cod_vendedor = '$codVendedor'
               AND z.cod_cliente IS NOT NULL
