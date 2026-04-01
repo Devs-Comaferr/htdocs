@@ -930,12 +930,11 @@ function registrarDebugClientesRecomendador($conn, string $queryDebug): void {
     }
 }
 
-function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenRecomendacion, ?int $iteracionZona = null) {
+function obtenerUniversoCandidatos($conn, string $query, ?int $iteracionZona = null) {
     planificadorConfigurarDebugLog();
 
-
     error_log('RECOMENDADOR SQL:');
-    error_log($sql);
+    error_log($query);
     error_log('PARAMS:');
     error_log(print_r(array(), true));
 
@@ -968,10 +967,18 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
     error_log(print_r($clientes, true));
     error_log('TOTAL FILAS: ' . count($clientes));
 
+    return $clientes;
+}
+
+function filtrarElegibles($clientes, ?int $iteracionZona = null) {
+    if (!is_array($clientes)) {
+        return null;
+    }
+
     error_log('Clientes candidatos: ' . count($clientes));
 
     if (empty($clientes)) {
-        return null;
+        return array();
     }
 
     if ($iteracionZona !== null) {
@@ -980,10 +987,14 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
         }));
 
         error_log('Clientes candidatos tras filtro de frecuencia: ' . count($clientes));
+    }
 
-        if (empty($clientes)) {
-            return null;
-        }
+    return $clientes;
+}
+
+function calcularScoreClientes($clientes) {
+    if (!is_array($clientes)) {
+        return null;
     }
 
     foreach ($clientes as &$c) {
@@ -991,12 +1002,16 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
 
         if (empty($c['ultima_visita'])) {
             $score += 1000;
+            $c['motivo_score'] = 'Nunca visitado';
         } else {
             $ultima = strtotime((string)$c['ultima_visita']);
             $hoy = strtotime(date('Y-m-d'));
             if ($ultima !== false && $hoy !== false) {
                 $dias = ($hoy - $ultima) / 86400;
                 $score += min($dias, 365);
+                $c['motivo_score'] = 'Ultima visita';
+            } else {
+                $c['motivo_score'] = 'Sin fecha valida';
             }
         }
 
@@ -1008,6 +1023,18 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
         return $b['score'] <=> $a['score'];
     });
 
+    return $clientes;
+}
+
+function seleccionarMejorCliente($clientes, string $origenRecomendacion) {
+    if (!is_array($clientes)) {
+        return null;
+    }
+
+    if (empty($clientes)) {
+        return null;
+    }
+
     $top5Resumen = array_map(function ($cliente) {
         return array(
             'cod_cliente' => $cliente['cod_cliente'] ?? null,
@@ -1016,6 +1043,7 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
             'iteracion_zona' => $cliente['iteracion_zona'] ?? null,
             'toca_visita' => $cliente['toca_visita'] ?? null,
             'score' => $cliente['score'] ?? 0,
+            'motivo_score' => $cliente['motivo_score'] ?? '',
         );
     }, array_slice($clientes, 0, 5));
 
@@ -1050,6 +1078,24 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
         'motivo' => 'Sin clientes disponibles',
         'origen_recomendacion' => $origenRecomendacion,
     );
+}
+
+function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenRecomendacion, ?int $iteracionZona = null) {
+    planificadorConfigurarDebugLog();
+
+    $universo = obtenerUniversoCandidatos($conn, $query, $iteracionZona);
+    if ($universo === null) {
+        return null;
+    }
+
+    $elegibles = filtrarElegibles($universo, $iteracionZona);
+    if (empty($elegibles)) {
+        return null;
+    }
+
+    $scored = calcularScoreClientes($elegibles);
+
+    return seleccionarMejorCliente($scored, $origenRecomendacion);
 }
 
 function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = null) {
@@ -1245,7 +1291,10 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
                 ) = 0 "
             . $orderByBase;
 
-        $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZonaNivel1, 'zona', $iteracionZona);
+        $universo = obtenerUniversoCandidatos($conn, $queryZonaNivel1, $iteracionZona);
+        $elegibles = filtrarElegibles($universo, $iteracionZona);
+        $scored = calcularScoreClientes($elegibles);
+        $clienteZona = seleccionarMejorCliente($scored, 'zona');
         if (!empty($clienteZona)) {
             return $clienteZona;
         }
@@ -1266,7 +1315,10 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
                 ) = 0 "
             . $orderByBase;
 
-        $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZonaNivel2, 'zona', $iteracionZona);
+        $universo = obtenerUniversoCandidatos($conn, $queryZonaNivel2, $iteracionZona);
+        $elegibles = filtrarElegibles($universo, $iteracionZona);
+        $scored = calcularScoreClientes($elegibles);
+        $clienteZona = seleccionarMejorCliente($scored, 'zona');
         if (!empty($clienteZona)) {
             return $clienteZona;
         }
@@ -1291,7 +1343,10 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
             MAX(v.fecha_visita) ASC
     ";
 
-    $clienteGlobal = obtenerClienteRecomendadoPorQuery($conn, $queryGlobal, 'global');
+    $universo = obtenerUniversoCandidatos($conn, $queryGlobal);
+    $elegibles = filtrarElegibles($universo);
+    $scored = calcularScoreClientes($elegibles);
+    $clienteGlobal = seleccionarMejorCliente($scored, 'global');
     if (!empty($clienteGlobal)) {
         return $clienteGlobal;
     }
@@ -1310,7 +1365,10 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
             c.nombre_comercial ASC
     ";
 
-    $clienteFallback = obtenerClienteRecomendadoPorQuery($conn, $queryFallback, 'fallback');
+    $universo = obtenerUniversoCandidatos($conn, $queryFallback);
+    $elegibles = filtrarElegibles($universo);
+    $scored = calcularScoreClientes($elegibles);
+    $clienteFallback = seleccionarMejorCliente($scored, 'fallback');
     if (!empty($clienteFallback)) {
         return $clienteFallback;
     }
