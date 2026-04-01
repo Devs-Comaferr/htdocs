@@ -260,13 +260,11 @@ function obtenerSiguienteClienteRecomendado() {
             c.nombre_comercial AS nombre,
             MAX(v.fecha_visita) AS ultima_visita
         FROM clientes c
-        LEFT JOIN secciones_cliente sc
-            ON sc.cod_cliente = c.cod_cliente
         LEFT JOIN cmf_asignacion_zonas_clientes z
             ON z.cod_cliente = c.cod_cliente
             AND (
-                z.cod_seccion = sc.cod_seccion
-                OR z.cod_seccion IS NULL
+                z.zona_principal = '$codZona'
+                OR z.zona_secundaria = '$codZona'
             )
         LEFT JOIN cmf_visitas_cliente v
             ON v.cod_cliente = c.cod_cliente
@@ -283,11 +281,7 @@ function obtenerSiguienteClienteRecomendado() {
     if ($codZona > 0) {
         $whereZona = "
             WHERE c.cod_vendedor = '$codVendedor'
-              AND (
-                    z.zona_principal = '$codZona'
-                    OR z.zona_secundaria = '$codZona'
-                    OR z.cod_cliente IS NULL
-              )
+              AND z.cod_cliente IS NOT NULL
         ";
 
         $groupByZona = "
@@ -336,6 +330,22 @@ function obtenerSiguienteClienteRecomendado() {
     $clienteGlobal = obtenerClienteRecomendadoPorQuery($conn, $queryGlobal, 'global');
     if (!empty($clienteGlobal)) {
         return $clienteGlobal;
+    }
+
+    $queryFallback = "
+        SELECT TOP 1
+            c.cod_cliente,
+            c.nombre_comercial AS nombre,
+            NULL AS ultima_visita
+        FROM clientes c
+        WHERE c.cod_vendedor = '$codVendedor'
+        ORDER BY
+            c.nombre_comercial ASC
+    ";
+
+    $clienteFallback = obtenerClienteRecomendadoPorQuery($conn, $queryFallback, 'fallback');
+    if (!empty($clienteFallback)) {
+        return $clienteFallback;
     }
 
     return [];
