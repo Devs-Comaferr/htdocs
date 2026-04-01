@@ -79,7 +79,7 @@ if ($nombreZonaActiva === '') {
     $nombreZonaActiva = 'No definida';
 }
 $clienteRecomendado = obtenerSiguienteClienteRecomendadoService();
-$nombreClienteRecomendado = trim((string)($clienteRecomendado['nombre'] ?? ''));
+$nombreClienteRecomendado = trim((string)toUTF8($clienteRecomendado['nombre'] ?? ''));
 $motivoClienteRecomendado = trim((string)($clienteRecomendado['motivo'] ?? ''));
 
 $pedidosSinAsignarCriticos = ($totalPedidosSinAsignar ?? 0) > 0;
@@ -689,15 +689,9 @@ unset($card);
                     <div class="card shadow-sm h-100 border-0">
                         <div class="card-body">
                             <div class="text-muted small mb-1">SIGUIENTE ACCI&Oacute;N</div>
-                            <?php
-                            error_log('DEBUG NOMBRE CLIENTE:');
-                            error_log(print_r($nombreClienteRecomendado, true));
-                            error_log('DEBUG CLIENTE COMPLETO:');
-                            error_log(print_r($clienteRecomendado, true));
-                            ?>
                             <?php if (!empty($nombreClienteRecomendado)): ?>
                                 <h5 class="fw-bold mb-2">
-                                    <pre><?= print_r($nombreClienteRecomendado, true) ?></pre>
+                                    <?= htmlspecialchars($nombreClienteRecomendado, ENT_QUOTES, 'UTF-8') ?>
                                 </h5>
 
                                 <div class="text-muted small">
