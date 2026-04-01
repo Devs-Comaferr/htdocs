@@ -1,5 +1,49 @@
 ﻿<?php
 
+// ========================================
+// PLANIFICADOR SERVICE - INDICE
+// ========================================
+//
+// DATOS:
+// - crearZonaVisita
+// - obtenerZonasVisita
+// - obtenerZonaPorCodigo
+// - obtenerRutasPorZona
+// - obtenerTodasRutas
+// - asignarRutaZona
+// - obtenerSeccionesPorCliente
+// - obtenerClientesDisponiblesParaAsignar
+// - asignarClienteZona
+// - obtenerClientesPorZona
+// - obtenerClientesPorZonaYRuta
+// - obtenerNombreCliente
+// - obtenerZonaPorCodigoEditar
+// - obtenerAsignacion
+// - actualizarAsignacion
+//
+// MOTOR:
+// - obtenerZonaActivaHoy
+// - construirClienteRecomendadoDesdeFila
+// - calcularTocaVisitaPlanificador
+// - registrarDebugClientesRecomendador
+// - obtenerSiguienteClienteRecomendado
+// - pipeline:
+//     - obtenerUniversoCandidatosPlanificador
+//     - filtrarClientesElegiblesPlanificador
+//     - calcularScoreClientesPlanificador
+//     - seleccionarMejorClientePlanificador
+//
+// VIEW HELPERS:
+// - obtenerDatosZonasView
+// - obtenerDatosZonasClientesView
+// - obtenerDatosZonasRutasView
+// - obtenerDatosCompletarDia
+//
+// COMPATIBILIDAD:
+// - obtenerClienteRecomendadoPorQuery
+// - *Service wrappers
+//
+// ========================================
 if (!function_exists('planificadorConfigurarDebugLog')) {
     function planificadorConfigurarDebugLog() {
         if (defined('BASE_PATH')) {
@@ -1696,4 +1740,5 @@ if (!function_exists('asignarRutaZonaService')) {
         return asignarRutaZona($cod_zona, $cod_ruta);
     }
 }
+
 
