@@ -12,7 +12,7 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
-require_once BASE_PATH . '/app/Modules/Planificador/planificacion_service.php';
+require_once BASE_PATH . '/app/Modules/Planificador/planificador_service.php';
 requierePermiso('perm_planificador');
 
 $pageTitle = 'Planificacion de Rutas';

@@ -16,7 +16,7 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
 // procesar_asignar_cliente_zona.php
-require_once BASE_PATH . '/app/Modules/Planificador/planificacion_service.php';
+require_once BASE_PATH . '/app/Modules/Planificador/planificador_service.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Obtener y sanitizar los datos del formulario

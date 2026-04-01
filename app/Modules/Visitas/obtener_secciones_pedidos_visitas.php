@@ -12,7 +12,7 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/db.php';
 
 // obtener_secciones_pedidos_visitas.php
-require_once BASE_PATH . '/app/Modules/Planificador/planificacion_service.php';
+require_once BASE_PATH . '/app/Modules/Planificador/planificador_service.php';
 
 // FunciÃ³n personalizada de JSON encoding para PHP 5.2.3
 function json_encode_custom($data) {

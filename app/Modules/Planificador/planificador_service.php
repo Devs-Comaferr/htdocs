@@ -145,59 +145,9 @@ function obtenerZonaActivaHoy() {
  * Obtener un cliente recomendado de la zona activa priorizando clientes sin visita hoy
  * y, despues, por antiguedad de su ultima visita.
  *
- * @return array|null ['cod_cliente' => int, 'nombre' => string, 'motivo' => string]
+ * @return array|null ['cod_cliente' => int, 'nombre' => string, 'motivo' => string, 'origen_recomendacion' => string]
  */
-function obtenerSiguienteClienteRecomendado() {
-    $zonaActiva = obtenerZonaActivaHoyService();
-    $codZona = intval($zonaActiva['cod_zona'] ?? 0);
-    $codVendedor = obtenerCodVendedorPlanificacionService();
-    $conn = db();
-
-    if ($codZona <= 0 || $codVendedor <= 0) {
-        return null;
-    }
-
-    $query = "
-        SELECT TOP 1
-            base.cod_cliente,
-            base.nombre,
-            base.ultima_visita
-        FROM (
-            SELECT
-                c.cod_cliente,
-                c.nombre_comercial AS nombre,
-                MAX(v.fecha_visita) AS ultima_visita,
-                MAX(CASE
-                    WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1
-                    ELSE 0
-                END) AS tiene_visita_hoy
-            FROM clientes c
-            INNER JOIN cmf_asignacion_zonas_clientes z
-                ON z.cod_cliente = c.cod_cliente
-            LEFT JOIN cmf_visitas_cliente v
-                ON v.cod_cliente = c.cod_cliente
-            WHERE z.zona_principal = '$codZona'
-              AND c.cod_vendedor = '$codVendedor'
-            GROUP BY c.cod_cliente, c.nombre_comercial
-        ) AS base
-        ORDER BY
-            base.tiene_visita_hoy ASC,
-            CASE WHEN base.ultima_visita IS NULL THEN 0 ELSE 1 END ASC,
-            base.ultima_visita ASC,
-            base.nombre ASC
-    ";
-
-    $resultado = odbc_exec($conn, $query);
-    if (!$resultado) {
-        error_log('Error al obtener el cliente recomendado del planificador: ' . odbc_errormsg($conn));
-        return null;
-    }
-
-    $fila = odbc_fetch_array($resultado);
-    if (!$fila) {
-        return null;
-    }
-
+function construirClienteRecomendadoDesdeFila(array $fila, string $origenRecomendacion) {
     $nombre = trim((string)($fila['nombre'] ?? ''));
     if ($nombre === '') {
         return null;
@@ -227,7 +177,120 @@ function obtenerSiguienteClienteRecomendado() {
         'cod_cliente' => intval($fila['cod_cliente'] ?? 0),
         'nombre' => $nombre,
         'motivo' => $motivo,
+        'origen_recomendacion' => $origenRecomendacion,
     );
+}
+
+function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenRecomendacion) {
+    $resultado = odbc_exec($conn, $query);
+    if (!$resultado) {
+        error_log('Error al obtener el cliente recomendado del planificador: ' . odbc_errormsg($conn));
+        return null;
+    }
+
+    $fila = odbc_fetch_array($resultado);
+    if (!$fila) {
+        return null;
+    }
+
+    return construirClienteRecomendadoDesdeFila($fila, $origenRecomendacion);
+}
+
+function obtenerSiguienteClienteRecomendado() {
+    $zonaActiva = obtenerZonaActivaHoyService();
+    $codZona = intval($zonaActiva['cod_zona'] ?? 0);
+    $codVendedor = obtenerCodVendedorPlanificacionService();
+    $conn = db();
+
+    if ($codVendedor <= 0) {
+        return null;
+    }
+
+    if ($codZona > 0) {
+        $queryZona = "
+            SELECT TOP 1
+                c.cod_cliente,
+                c.nombre_comercial AS nombre,
+                MAX(v.fecha_visita) AS ultima_visita
+            FROM clientes c
+            INNER JOIN cmf_asignacion_zonas_clientes z
+                ON z.cod_cliente = c.cod_cliente
+            LEFT JOIN cmf_visitas_cliente v
+                ON v.cod_cliente = c.cod_cliente
+            WHERE z.zona_principal = '$codZona'
+              AND c.cod_vendedor = '$codVendedor'
+            GROUP BY c.cod_cliente, c.nombre_comercial
+            ORDER BY
+                MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) ASC,
+                CASE WHEN MAX(v.fecha_visita) IS NULL THEN 0 ELSE 1 END ASC,
+                MAX(v.fecha_visita) ASC
+        ";
+
+        $clienteZona = obtenerClienteRecomendadoPorQuery($conn, $queryZona, 'zona');
+        if ($clienteZona !== null) {
+            return $clienteZona;
+        }
+    }
+
+    $queryGlobal = "
+        SELECT TOP 1
+            c.cod_cliente,
+            c.nombre_comercial AS nombre,
+            MAX(v.fecha_visita) AS ultima_visita
+        FROM clientes c
+        LEFT JOIN cmf_visitas_cliente v
+            ON v.cod_cliente = c.cod_cliente
+        WHERE c.cod_vendedor = '$codVendedor'
+        GROUP BY c.cod_cliente, c.nombre_comercial
+        ORDER BY
+            MAX(CASE WHEN CONVERT(date, v.fecha_visita) = CONVERT(date, GETDATE()) THEN 1 ELSE 0 END) ASC,
+            CASE WHEN MAX(v.fecha_visita) IS NULL THEN 0 ELSE 1 END ASC,
+            MAX(v.fecha_visita) ASC
+    ";
+
+    $clienteGlobal = obtenerClienteRecomendadoPorQuery($conn, $queryGlobal, 'global');
+    if ($clienteGlobal !== null) {
+        return $clienteGlobal;
+    }
+
+    $queryFallback = "
+        SELECT TOP 1
+            c.cod_cliente,
+            c.nombre_comercial AS nombre,
+            (
+                SELECT MAX(v.fecha_visita)
+                FROM cmf_visitas_cliente v
+                WHERE v.cod_cliente = c.cod_cliente
+            ) AS ultima_visita
+        FROM clientes c
+        WHERE c.cod_vendedor = '$codVendedor'
+        ORDER BY
+            CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM cmf_visitas_cliente vh
+                    WHERE vh.cod_cliente = c.cod_cliente
+                      AND CONVERT(date, vh.fecha_visita) = CONVERT(date, GETDATE())
+                ) THEN 1
+                ELSE 0
+            END ASC,
+            CASE
+                WHEN (
+                    SELECT MAX(v2.fecha_visita)
+                    FROM cmf_visitas_cliente v2
+                    WHERE v2.cod_cliente = c.cod_cliente
+                ) IS NULL THEN 0
+                ELSE 1
+            END ASC,
+            (
+                SELECT MAX(v3.fecha_visita)
+                FROM cmf_visitas_cliente v3
+                WHERE v3.cod_cliente = c.cod_cliente
+            ) ASC,
+            c.nombre_comercial ASC
+    ";
+
+    return obtenerClienteRecomendadoPorQuery($conn, $queryFallback, 'fallback');
 }
 
 /**
