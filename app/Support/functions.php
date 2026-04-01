@@ -650,6 +650,7 @@ if (!function_exists('crearVisitaRealizada')) {
         $sqlInsVisita = "
             INSERT INTO [integral].[dbo].[cmf_visitas_comerciales]
                 (cod_cliente, cod_seccion, cod_vendedor, fecha_visita, hora_inicio_visita, hora_fin_visita, observaciones, estado_visita)
+            OUTPUT INSERTED.id_visita
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ";
         $stmtInsVisita = odbc_prepare($conn, $sqlInsVisita);
@@ -671,11 +672,7 @@ if (!function_exists('crearVisitaRealizada')) {
             throw new Exception('Error al crear visita: ' . odbc_errormsg($conn));
         }
 
-        $resId = odbc_exec($conn, "SELECT IDENT_CURRENT('cmf_visitas_comerciales') AS id_visita");
-        if (!$resId) {
-            throw new Exception('Error al obtener ID de visita creada: ' . odbc_errormsg($conn));
-        }
-        $idRow = odbc_fetch_array_utf8($resId);
+        $idRow = odbc_fetch_array_utf8($stmtInsVisita);
         $id_visita = $idRow ? (int)($idRow['id_visita'] ?? $idRow['ID_VISITA'] ?? 0) : 0;
         if ($id_visita <= 0) {
             throw new Exception('ID de visita inválido al crear asignación.');
