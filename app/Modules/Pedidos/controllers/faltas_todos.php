@@ -412,4 +412,4 @@ function buildPedidoUrlFaltas($pedido) {
 $pageTitle = "Pedidos Cerrados de Todos los Clientes";
 include BASE_PATH . '/resources/views/layouts/header.php';
 ?>
-require_once BASE_PATH . '/app/Modules/Visitas/views/faltas_todos.php';
+require_once BASE_PATH . '/app/Modules/Pedidos/views/faltas_todos.php';

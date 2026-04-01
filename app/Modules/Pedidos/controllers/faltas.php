@@ -437,4 +437,4 @@ if ($nombre_seccion !== 'Sin Sección') {
     $pageTitle .= " - " . htmlspecialchars($nombre_seccion);
 }
 include BASE_PATH . '/resources/views/layouts/header.php';
-require_once BASE_PATH . '/app/Modules/Visitas/views/faltas.php';
+require_once BASE_PATH . '/app/Modules/Pedidos/views/faltas.php';
