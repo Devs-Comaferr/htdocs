@@ -247,8 +247,20 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
         return $b['score'] <=> $a['score'];
     });
 
+    $top5Resumen = array_map(function ($cliente) {
+        return array(
+            'cod_cliente' => $cliente['cod_cliente'] ?? null,
+            'nombre' => $cliente['nombre'] ?? '',
+            'frecuencia_visita' => $cliente['frecuencia_visita'] ?? null,
+            'toca_visita' => $cliente['toca_visita'] ?? null,
+            'score' => $cliente['score'] ?? 0,
+        );
+    }, array_slice($clientes, 0, 5));
+
     error_log('Top 5 recomendador:');
     error_log(print_r(array_slice($clientes, 0, 5), true));
+    error_log('Top 5 recomendador resumen:');
+    error_log(print_r($top5Resumen, true));
 
     $clienteElegido = $clientes[0] ?? null;
 
@@ -292,7 +304,14 @@ function obtenerSiguienteClienteRecomendado() {
         SELECT
             c.cod_cliente,
             c.nombre_comercial AS nombre,
-            MAX(v.fecha_visita) AS ultima_visita
+            MAX(v.fecha_visita) AS ultima_visita,
+            z.frecuencia_visita,
+            CASE
+                WHEN z.frecuencia_visita = 'TODOS' THEN 1
+                WHEN z.frecuencia_visita = 'CADA2' THEN 1
+                WHEN z.frecuencia_visita = 'CADA3' THEN 1
+                ELSE 0
+            END AS toca_visita
         FROM clientes c
         LEFT JOIN cmf_asignacion_zonas_clientes z
             ON z.cod_cliente = c.cod_cliente
@@ -324,7 +343,7 @@ function obtenerSiguienteClienteRecomendado() {
         ";
 
         $groupByZona = "
-            GROUP BY c.cod_cliente, c.nombre_comercial
+            GROUP BY c.cod_cliente, c.nombre_comercial, z.frecuencia_visita
         ";
 
         $queryZonaNivel1 = $selectZonaBase
@@ -353,7 +372,9 @@ function obtenerSiguienteClienteRecomendado() {
         SELECT
             c.cod_cliente,
             c.nombre_comercial AS nombre,
-            MAX(v.fecha_visita) AS ultima_visita
+            MAX(v.fecha_visita) AS ultima_visita,
+            NULL AS frecuencia_visita,
+            0 AS toca_visita
         FROM clientes c
         LEFT JOIN cmf_visitas_comerciales v
             ON v.cod_cliente = c.cod_cliente
@@ -375,7 +396,9 @@ function obtenerSiguienteClienteRecomendado() {
         SELECT
             c.cod_cliente,
             c.nombre_comercial AS nombre,
-            NULL AS ultima_visita
+            NULL AS ultima_visita,
+            NULL AS frecuencia_visita,
+            0 AS toca_visita
         FROM clientes c
         WHERE c.cod_vendedor = '$codVendedor'
           $filtrosOperativos
