@@ -188,12 +188,60 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
         return null;
     }
 
-    $fila = odbc_fetch_array($resultado);
-    if (!$fila) {
+    $clientes = array();
+    while ($fila = odbc_fetch_array($resultado)) {
+        if (!isset($fila['score']) || $fila['score'] === null) {
+            $fila['score'] = 0;
+        }
+        $clientes[] = $fila;
+    }
+
+    error_log('Clientes candidatos: ' . count($clientes));
+
+    if (empty($clientes)) {
         return null;
     }
 
-    return construirClienteRecomendadoDesdeFila($fila, $origenRecomendacion);
+    $mejor = null;
+    $mejorScore = -999999;
+
+    foreach ($clientes as $c) {
+        $score = isset($c['score']) ? (float)$c['score'] : 0;
+
+        if ($mejor === null || $score > $mejorScore) {
+            $mejor = $c;
+            $mejorScore = $score;
+        }
+    }
+
+    if ($mejor === null && !empty($clientes)) {
+        $mejor = $clientes[0];
+    }
+
+    if ($mejor !== null) {
+        $cliente = construirClienteRecomendadoDesdeFila($mejor, $origenRecomendacion);
+        if ($cliente !== null) {
+            error_log('Cliente elegido: ' . ($cliente['cod_cliente'] ?? 'NULL'));
+            return $cliente;
+        }
+    }
+
+    foreach ($clientes as $candidato) {
+        $cliente = construirClienteRecomendadoDesdeFila($candidato, $origenRecomendacion);
+        if ($cliente !== null) {
+            error_log('Cliente elegido: ' . ($cliente['cod_cliente'] ?? 'NULL'));
+            return $cliente;
+        }
+    }
+
+    error_log('Cliente elegido: NULL');
+
+    return array(
+        'cod_cliente' => null,
+        'nombre' => '',
+        'motivo' => 'Sin clientes disponibles',
+        'origen_recomendacion' => $origenRecomendacion,
+    );
 }
 
 function obtenerSiguienteClienteRecomendado() {
