@@ -7,7 +7,9 @@ function requiereLogin() {
     }
 
     if (!isset($_SESSION['email'])) {
-        header('Location: ' . BASE_URL . '/login.php');
+        echo '<pre>';
+        echo "BLOQUEADO EN: requiereLogin\n";
+        print_r($_SESSION);
         exit;
     }
 }
@@ -15,8 +17,9 @@ function requiereLogin() {
 //  Verifica que el usuario está activo
 function requiereActivo() {
     if (!isset($_SESSION['activo']) || $_SESSION['activo'] != 1) {
-        session_destroy();
-        header('Location: ' . BASE_URL . '/login.php');
+        echo '<pre>';
+        echo "BLOQUEADO EN: requiereActivo\n";
+        print_r($_SESSION);
         exit;
     }
 }
@@ -34,14 +37,18 @@ function requierePermiso($permiso) {
     }
 
     if (!isset($_SESSION[$permiso]) || $_SESSION[$permiso] != 1) {
-        header('Location: ' . BASE_URL . '/index.php');
+        echo '<pre>';
+        echo "BLOQUEADO EN: requierePermiso ($permiso)\n";
+        print_r($_SESSION['permisos'] ?? []);
         exit;
     }
 
     // Planificador requiere permiso explicito y plan premium.
     if ($permiso === 'perm_planificador') {
         if (!isset($_SESSION['tipo_plan']) || $_SESSION['tipo_plan'] !== 'premium') {
-            header('Location: ' . BASE_URL . '/index.php');
+            echo '<pre>';
+            echo "BLOQUEADO EN: requierePermiso (perm_planificador)\n";
+            print_r($_SESSION['permisos'] ?? []);
             exit;
         }
     }

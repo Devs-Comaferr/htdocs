@@ -13,6 +13,7 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Modules/Planificador/planificador_service.php';
+error_log('ENTRANDO A PLANIFICADOR');
 requierePermiso('perm_planificador');
 
 $pageTitle = 'Planificacion de Rutas';
@@ -79,6 +80,10 @@ if ($nombreZonaActiva === '') {
     $nombreZonaActiva = 'No definida';
 }
 $clienteRecomendado = obtenerSiguienteClienteRecomendadoService();
+echo '<pre>';
+echo "DEBUG CLIENTE:\n";
+print_r($clienteRecomendado);
+exit;
 $nombreClienteRecomendado = trim((string)($clienteRecomendado['nombre'] ?? ''));
 if ($nombreClienteRecomendado === '') {
     $nombreClienteRecomendado = 'Sin recomendaciones';
