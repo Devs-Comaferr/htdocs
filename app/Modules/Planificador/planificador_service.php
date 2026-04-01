@@ -1,5 +1,14 @@
 <?php
 
+if (!function_exists('planificadorConfigurarDebugLog')) {
+    function planificadorConfigurarDebugLog() {
+        if (defined('BASE_PATH')) {
+            @ini_set('log_errors', '1');
+            @ini_set('error_log', BASE_PATH . '/storage/logs/php_debug.log');
+        }
+    }
+}
+
 function obtenerCodVendedorPlanificacionService() {
     return isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
 }
@@ -182,6 +191,16 @@ function construirClienteRecomendadoDesdeFila(array $fila, string $origenRecomen
 }
 
 function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenRecomendacion) {
+    planificadorConfigurarDebugLog();
+
+    $sql = $query;
+    $params = array();
+
+    error_log('RECOMENDADOR SQL:');
+    error_log($sql);
+    error_log('PARAMS:');
+    error_log(print_r($params ?? array(), true));
+
     $resultado = odbc_exec($conn, $query);
     if (!$resultado) {
         error_log('Error al obtener el cliente recomendado del planificador: ' . odbc_errormsg($conn));
@@ -195,6 +214,10 @@ function obtenerClienteRecomendadoPorQuery($conn, string $query, string $origenR
         }
         $clientes[] = $fila;
     }
+
+    error_log('RESULTADO RECOMENDADOR:');
+    error_log(print_r($clientes, true));
+    error_log('TOTAL FILAS: ' . count($clientes));
 
     error_log('Clientes candidatos: ' . count($clientes));
 
@@ -266,8 +289,9 @@ function obtenerSiguienteClienteRecomendado() {
                 z.zona_principal = '$codZona'
                 OR z.zona_secundaria = '$codZona'
             )
-        LEFT JOIN cmf_visitas_cliente v
+        LEFT JOIN cmf_visitas_comerciales v
             ON v.cod_cliente = c.cod_cliente
+            AND v.cod_vendedor = c.cod_vendedor
     ";
 
     $orderByBase = "
@@ -279,8 +303,6 @@ function obtenerSiguienteClienteRecomendado() {
     ";
 
     $filtrosOperativos = "
-          AND c.zona_principal IS NOT NULL
-          AND c.zona_principal > 0
           AND c.fecha_alta < DATEADD(DAY, -7, GETDATE())
     ";
 
@@ -323,8 +345,9 @@ function obtenerSiguienteClienteRecomendado() {
             c.nombre_comercial AS nombre,
             MAX(v.fecha_visita) AS ultima_visita
         FROM clientes c
-        LEFT JOIN cmf_visitas_cliente v
+        LEFT JOIN cmf_visitas_comerciales v
             ON v.cod_cliente = c.cod_cliente
+            AND v.cod_vendedor = c.cod_vendedor
         WHERE c.cod_vendedor = '$codVendedor'
           $filtrosOperativos
         GROUP BY c.cod_cliente, c.nombre_comercial
