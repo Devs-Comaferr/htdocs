@@ -14,46 +14,20 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 }
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
-require_once BASE_PATH . '/app/Support/db.php';
-
-// obtener_secciones.php
+require_once BASE_PATH . '/app/Modules/Visitas/services/registrar_visita_handler.php';
 require_once BASE_PATH . '/app/Modules/Planificador/planificador_service.php';
 
 if (isset($_GET['cod_cliente'])) {
     $cod_cliente = intval($_GET['cod_cliente']);
-    
-    $conn = db();
-    
-    // Obtener secciones que no estÃ¡n asignadas a ninguna zona
-    $query = "SELECT sc.cod_seccion, sc.nombre 
-              FROM secciones_cliente sc
-              WHERE sc.cod_cliente = '$cod_cliente' 
-                AND sc.cod_seccion NOT IN (
-                    SELECT azc.cod_seccion 
-                    FROM cmf_asignacion_zonas_clientes azc 
-                    WHERE azc.cod_cliente = sc.cod_cliente
-                )
-              ORDER BY sc.cod_seccion ASC";
-              
-    $resultado = odbc_exec($conn, $query);
-    
-    if (!$resultado) {
-        error_log('Error al obtener secciones: ' . odbc_errormsg($conn));
+
+    try {
+        $secciones = obtenerSeccionesDisponiblesVisita($cod_cliente, false, false);
+        echo json_encode($secciones);
+    } catch (Exception $e) {
+        error_log('Error al obtener secciones: ' . $e->getMessage());
         echo 'Error interno';
-        return;
     }
-    
-    $secciones = array();
-    while ($fila = odbc_fetch_array($resultado)) {
-        $secciones[] = $fila;
-    }
-    
-    echo json_encode($secciones);
 } else {
     echo json_encode(array());
 }
 ?>
-
-
-
-

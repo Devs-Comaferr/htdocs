@@ -15,67 +15,31 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
-// visita_sin_venta.php
+require_once BASE_PATH . '/app/Modules/Visitas/services/registrar_visita_handler.php';
 
 $ui_version = 'bs5';
 $ui_requires_jquery = false;
 
-$conn = db();
-
 $codigo_vendedor = isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
 
-// Manejar el envio del formulario
+$errors = array();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $estado_visita = 'Realizada';
-    $cod_vendedor = $codigo_vendedor;
-    $cod_cliente = isset($_POST['cod_cliente']) ? intval($_POST['cod_cliente']) : 0;
-    $cod_seccion = isset($_POST['cod_seccion']) ? intval($_POST['cod_seccion']) : 0;
-    $fecha_visita = isset($_POST['fecha_visita']) ? $_POST['fecha_visita'] : '';
-    $hora_inicio_visita = isset($_POST['hora_inicio_visita']) ? $_POST['hora_inicio_visita'] : '';
-    $hora_fin_visita = isset($_POST['hora_fin_visita']) ? $_POST['hora_fin_visita'] : '';
-    $observaciones = isset($_POST['observaciones']) ? $_POST['observaciones'] : '';
+    $resultado = procesarVisitaSimple([
+        'cod_vendedor' => $codigo_vendedor,
+        'cod_cliente' => isset($_POST['cod_cliente']) ? intval($_POST['cod_cliente']) : 0,
+        'cod_seccion' => isset($_POST['cod_seccion']) ? intval($_POST['cod_seccion']) : 0,
+        'fecha_visita' => isset($_POST['fecha_visita']) ? $_POST['fecha_visita'] : '',
+        'hora_inicio_visita' => isset($_POST['hora_inicio_visita']) ? $_POST['hora_inicio_visita'] : '',
+        'hora_fin_visita' => isset($_POST['hora_fin_visita']) ? $_POST['hora_fin_visita'] : '',
+        'observaciones' => isset($_POST['observaciones']) ? $_POST['observaciones'] : '',
+    ], 'Realizada');
 
-    // Validar datos
-    $errors = array();
-    if ($cod_cliente === 0 || $cod_seccion === 0 || empty($fecha_visita) || empty($hora_inicio_visita) || empty($hora_fin_visita)) {
-        $errors[] = 'Todos los campos son obligatorios.';
+    if ($resultado['ok']) {
+        header('Location: index.php?msg=visita_realizada');
+        exit;
     }
 
-    // Validar formatos
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_visita)) {
-        $errors[] = 'Formato de fecha invalido.';
-    }
-    if (!preg_match('/^\d{2}:\d{2}$/', $hora_inicio_visita) || !preg_match('/^\d{2}:\d{2}$/', $hora_fin_visita)) {
-        $errors[] = 'Formato de hora invalido.';
-    }
-
-    // Validar diferencia de tiempo
-    if (!empty($hora_inicio_visita) && !empty($hora_fin_visita)) {
-        list($inicio_h, $inicio_m) = explode(':', $hora_inicio_visita);
-        list($fin_h, $fin_m) = explode(':', $hora_fin_visita);
-
-        $inicio_total = intval($inicio_h) * 60 + intval($inicio_m);
-        $fin_total = intval($fin_h) * 60 + intval($fin_m);
-        $diff = $fin_total - $inicio_total;
-
-        if ($diff < 15 || $diff > 300) {
-            $errors[] = 'La diferencia entre la hora de inicio y la hora de fin debe ser de al menos 15 minutos y no exceder las 5 horas.';
-        }
-    }
-
-    if (empty($errors)) {
-        $sql = "INSERT INTO cmf_visitas_comerciales 
-                (estado_visita, cod_vendedor, cod_cliente, cod_seccion, fecha_visita, hora_inicio_visita, hora_fin_visita, observaciones)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = odbc_prepare($conn, $sql);
-        if (odbc_execute($stmt, array($estado_visita, $cod_vendedor, $cod_cliente, $cod_seccion, $fecha_visita, $hora_inicio_visita, $hora_fin_visita, $observaciones))) {
-            header('Location: index.php?msg=visita_realizada');
-            exit;
-        } else {
-            $errors[] = 'Ocurrio un error al registrar la visita.';
-        }
-        odbc_free_result($stmt);
-    }
+    $errors = $resultado['errors'];
 }
 ?>
 <!DOCTYPE html>

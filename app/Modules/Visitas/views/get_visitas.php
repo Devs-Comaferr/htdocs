@@ -1,39 +1,18 @@
 <?php
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
-require_once BASE_PATH . '/app/Support/db.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/registrar_visita_handler.php';
 
 $ui_version = 'bs5';
 $ui_requires_jquery = false;
-
-$conn = db();
 
 if (!isset($_GET['fecha']) || empty($_GET['fecha'])) {
     appExitTextError('Fecha no especificada.', 400);
 }
 
-$fecha = addslashes((string)$_GET['fecha']);
-
-$sql = "SELECT v.id_visita,
-               v.cod_cliente,
-               v.cod_seccion,
-               v.estado_visita,
-               v.fecha_visita,
-               v.hora_inicio_visita,
-               v.hora_fin_visita,
-               v.observaciones,
-               c.nombre_comercial,
-               c.cod_cliente,
-               sc.nombre AS nombre_seccion
-        FROM [integral].[dbo].[cmf_visitas_comerciales] v
-        LEFT JOIN [integral].[dbo].[clientes] c ON v.cod_cliente = c.cod_cliente
-        LEFT JOIN [integral].[dbo].[secciones_cliente] sc ON v.cod_cliente = sc.cod_cliente AND v.cod_seccion = sc.cod_seccion
-        WHERE CONVERT(varchar(10), v.fecha_visita, 120) = '$fecha'
-        ORDER BY v.hora_inicio_visita ASC";
-$result = odbc_exec($conn, $sql);
-if (!$result) {
-    appExitTextError('No se pudieron cargar las visitas.', 500, 'get_visitas', odbc_errormsg($conn) ?: odbc_errormsg());
-}
+$visitasData = obtenerVisitasDiaData((string)$_GET['fecha']);
+$fecha = $visitasData['fecha'];
+$visitas = $visitasData['visitas'];
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -111,29 +90,14 @@ if (!$result) {
     <h2>Visitas programadas para el <?php echo htmlspecialchars(date('d/m/Y', strtotime($fecha))); ?></h2>
     <div class="visitas-container">
     <?php
-    if (odbc_num_rows($result) == 0) {
+    if (count($visitas) == 0) {
         echo '<p>No hay visitas registradas para este dia.</p>';
     } else {
-        while ($visita = odbc_fetch_array($result)) {
-            $sql_pedido_principal = "SELECT TOP 1 vp.origen
-                                     FROM [integral].[dbo].[cmf_visita_pedidos] vp
-                                     WHERE vp.id_visita = '" . addslashes($visita['id_visita']) . "'
-                                     ORDER BY vp.id_visita_pedido ASC";
-            $result_pedido_principal = odbc_exec($conn, $sql_pedido_principal);
-            $origenPrincipal = '';
-            if ($result_pedido_principal && $pedidoPrincipal = odbc_fetch_array($result_pedido_principal)) {
-                $origenPrincipal = $pedidoPrincipal['origen'];
-            }
-
-            $colorVisita = determinarColorVisita($visita['estado_visita'], $origenPrincipal);
-            $clientName = !empty($visita['nombre_comercial']) ? $visita['nombre_comercial'] : 'Cliente ' . $visita['cod_cliente'];
-            if (!empty($visita['nombre_seccion'])) {
-                $clientName .= ' - ' . $visita['nombre_seccion'];
-            }
+        foreach ($visitas as $visita) {
             ?>
-            <div class="visita-item" style="background-color: <?php echo $colorVisita; ?>;">
+            <div class="visita-item" style="background-color: <?php echo $visita['colorVisita']; ?>;">
                 <div class="visita-linea">
-                    <span class="visita-cliente" style="font-weight:bold;"><?php echo htmlspecialchars($clientName); ?></span>
+                    <span class="visita-cliente" style="font-weight:bold;"><?php echo htmlspecialchars($visita['clientName']); ?></span>
                     <span class="visita-fecha"><?php echo htmlspecialchars(date('d/m/Y', strtotime($visita['fecha_visita']))); ?> (<?php echo obtenerDiaSemana($visita['fecha_visita']); ?>)</span>
                     <span class="visita-horas"><?php echo htmlspecialchars(date('H:i', strtotime($visita['hora_inicio_visita']))); ?> - <?php echo htmlspecialchars(date('H:i', strtotime($visita['hora_fin_visita']))); ?></span>
                 </div>
@@ -142,27 +106,9 @@ if (!$result) {
                 <?php endif; ?>
             </div>
             <?php
-            $sql_pedidos = "SELECT
-                                vp.cod_venta AS cod_pedido,
-                                vp.origen,
-                                hvc.fecha_venta,
-                                hvc.hora_venta,
-                                hvc.importe,
-                                avc.observacion_interna
-                            FROM [integral].[dbo].[cmf_visita_pedidos] vp
-                            INNER JOIN [integral].[dbo].[hist_ventas_cabecera] hvc
-                                ON vp.cod_venta = hvc.cod_venta
-                            LEFT JOIN [integral].[dbo].[anexo_ventas_cabecera] avc
-                                ON hvc.cod_anexo = avc.cod_anexo
-                            WHERE vp.id_visita = '" . addslashes($visita['id_visita']) . "'
-                              AND hvc.tipo_venta = 1
-                            ORDER BY vp.id_visita_pedido ASC";
-            $result_pedidos = odbc_exec($conn, $sql_pedidos);
-            if ($result_pedidos) {
-                while ($pedido = odbc_fetch_array($result_pedidos)) {
-                    $colorPedido = determinarColorPedido($pedido['origen']);
+            foreach ($visita['pedidos'] as $pedido) {
                     ?>
-                    <div class="pedido-item" style="border-left-color: <?php echo $colorPedido; ?>;">
+                    <div class="pedido-item" style="border-left-color: <?php echo $pedido['colorPedido']; ?>;">
                         <div class="pedido-info">
                             <div><?php echo htmlspecialchars($pedido['cod_pedido']); ?></div>
                             <div><?php echo htmlspecialchars(date('d/m/Y', strtotime($pedido['fecha_venta']))); ?></div>
@@ -174,14 +120,11 @@ if (!$result) {
                         <?php endif; ?>
                     </div>
                     <?php
-                }
             }
         }
     }
     ?>
     </div>
 </div>
-<?php
-?>
 </body>
 </html>

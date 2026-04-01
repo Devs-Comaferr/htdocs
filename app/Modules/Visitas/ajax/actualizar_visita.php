@@ -9,11 +9,8 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 }
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
-
 require_once BASE_PATH . '/app/Support/functions.php';
-require_once BASE_PATH . '/app/Support/db.php';
-
-$conn = db();
+require_once BASE_PATH . '/app/Modules/Visitas/services/registrar_visita_handler.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     appExitTextError('Metodo no permitido.', 405);
@@ -26,19 +23,8 @@ $hora_fin_visita = (string)($_POST['hora_fin_visita'] ?? '');
 $observaciones = (string)($_POST['observaciones'] ?? '');
 $estado_visita = normalizarEstadoVisita((string)($_POST['estado_visita'] ?? ''));
 
-$sql = "
-    UPDATE [integral].[dbo].[cmf_visitas_comerciales]
-    SET fecha_visita = ?,
-        hora_inicio_visita = ?,
-        hora_fin_visita = ?,
-        observaciones = ?,
-        estado_visita = ?
-    WHERE id_visita = ?
-";
-
-    $stmt = odbc_prepare($conn, $sql);
-if (!$stmt || !odbc_execute($stmt, [$fecha_visita, $hora_inicio_visita, $hora_fin_visita, $observaciones, $estado_visita, $id_visita])) {
-    appExitTextError('No se pudo actualizar la visita.', 500, 'actualizar_visita', odbc_errormsg($conn) ?: odbc_errormsg());
+if (!actualizarVisitaService($id_visita, $fecha_visita, $hora_inicio_visita, $hora_fin_visita, $observaciones, $estado_visita)) {
+    appExitTextError('No se pudo actualizar la visita.', 500, 'actualizar_visita');
 }
 
 echo 'OK';
