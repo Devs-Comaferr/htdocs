@@ -214,7 +214,7 @@ if ($cod_cliente > 0 && $assignment) {
             padding: 10px 20px;
         }
 
-        #modalDefinirHorario {
+        #horario_modalDefinirHorario {
             display: none;
             position: fixed;
             z-index: 1050;
@@ -226,7 +226,7 @@ if ($cod_cliente > 0 && $assignment) {
             background-color: rgba(0, 0, 0, 0.6);
         }
 
-        #modalDefinirHorario .modal-content {
+        #horario_modalDefinirHorario .modal-content {
             background-color: #fff;
             margin: 10% auto;
             padding: 20px;
@@ -238,7 +238,7 @@ if ($cod_cliente > 0 && $assignment) {
             position: relative;
         }
 
-        #modalDefinirHorario .close {
+        #horario_modalDefinirHorario .close {
             position: absolute;
             top: 10px;
             right: 15px;
@@ -257,6 +257,14 @@ if ($cod_cliente > 0 && $assignment) {
 
         <h1>Registrar Visita Manual</h1>
 
+        <div class="mb-3">
+            <span class="badge <?php echo $cod_cliente == 0 ? 'bg-primary' : 'bg-secondary'; ?>">Paso 1: Buscar cliente</span>
+            <?php if ($cod_cliente > 0): ?>
+                <span class="badge bg-primary ms-1">Paso 2: Cliente seleccionado</span>
+                <span class="badge bg-primary ms-1">Paso 3: Registrar visita</span>
+            <?php endif; ?>
+        </div>
+
         <form method="POST" action="<?= BASE_URL ?>/registrar_visita_manual.php" class="form" id="flujoVisitaManual">
             <input type="hidden" name="accion" id="accion" value="<?php echo htmlspecialchars((string)$accion); ?>">
             <input type="hidden" name="origen" value="manual">
@@ -266,7 +274,7 @@ if ($cod_cliente > 0 && $assignment) {
             <?php if ($cod_cliente == 0): ?>
                 <div class="mb-3">
                     <label for="buscar">Nombre del Cliente:</label>
-                    <input type="text" name="buscar" id="buscar" class="form-control" value="<?php echo htmlspecialchars($busqueda); ?>" placeholder="Ingrese el nombre del cliente">
+                    <input type="text" name="buscar" id="buscar" class="form-control" value="<?php echo htmlspecialchars($busqueda); ?>" placeholder="Introduce el nombre del cliente">
                     <button type="submit" name="accion" value="buscar" class="btn btn-primary w-100 btn-submit">Buscar</button>
                     <p class="text-center" style="margin-top:20px;">Solo se mostrarán clientes asignados a tu usuario.</p>
                 </div>
@@ -435,6 +443,7 @@ if ($cod_cliente > 0 && $assignment) {
             var modalDefinirHorario = document.querySelector('#horario_modalDefinirHorario');
             var modalClose = modalDefinirHorario ? modalDefinirHorario.querySelector('.close') : null;
             var guardarHorarioBtn = document.querySelector('#horario_guardarHorarioBtn');
+            var flujoVisitaManual = document.querySelector('#flujoVisitaManual');
             var promedio = <?php echo json_encode($tiempo_promedio_minutes); ?>;
             var emptyStateHtml = "<div class='alert alert-info'>Seleccione una fecha para ver las visitas programadas.</div>";
             var errorStateHtml = "<div class='alert alert-danger'>Error al cargar las visitas.</div>";
@@ -539,10 +548,10 @@ if ($cod_cliente > 0 && $assignment) {
                     var payload = new URLSearchParams();
                     payload.append('cod_cliente', document.querySelector('#horario_modal_cod_cliente').value);
                     payload.append('cod_seccion', document.querySelector('#horario_modal_cod_seccion').value);
-                    payload.append('hora_inicio_manana', document.querySelector('#horario_inicio_manana').value);
-                    payload.append('hora_fin_manana', document.querySelector('#horario_fin_manana').value);
-                    payload.append('hora_inicio_tarde', document.querySelector('#horario_inicio_tarde').value);
-                    payload.append('hora_fin_tarde', document.querySelector('#horario_fin_tarde').value);
+                    payload.append('horario_inicio_manana', document.querySelector('#horario_inicio_manana').value);
+                    payload.append('horario_fin_manana', document.querySelector('#horario_fin_manana').value);
+                    payload.append('horario_inicio_tarde', document.querySelector('#horario_inicio_tarde').value);
+                    payload.append('horario_fin_tarde', document.querySelector('#horario_fin_tarde').value);
 
                     fetch("<?= BASE_URL ?>/definir_horario.php", {
                         method: 'POST',
@@ -570,6 +579,26 @@ if ($cod_cliente > 0 && $assignment) {
                             console.error('Error guardando horario:', error);
                             alert('Error en la petición.');
                         });
+                });
+            }
+
+            if (flujoVisitaManual) {
+                flujoVisitaManual.addEventListener('submit', function(event) {
+                    var submitter = event.submitter;
+                    if (!submitter || submitter.value !== 'registrar') {
+                        return;
+                    }
+
+                    if (!fechaInput || !fechaInput.value) {
+                        alert('La fecha de la visita es obligatoria.');
+                        event.preventDefault();
+                        return;
+                    }
+
+                    if (!horaInicioInput || !horaInicioInput.value) {
+                        alert('La hora de inicio de la visita es obligatoria.');
+                        event.preventDefault();
+                    }
                 });
             }
         });
