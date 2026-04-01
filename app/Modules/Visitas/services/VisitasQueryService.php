@@ -55,51 +55,99 @@ function obtenerVisitasDiaData(string $fecha): array
     }
 
     $visitas = [];
+    $visitasIndex = [];
     while ($visita = odbc_fetch_array($result)) {
-        $sql_pedido_principal = "SELECT TOP 1 vp.origen
-                                 FROM [integral].[dbo].[cmf_visita_pedidos] vp
-                                 WHERE vp.id_visita = '" . addslashes($visita['id_visita']) . "'
-                                 ORDER BY vp.id_visita_pedido ASC";
-        $result_pedido_principal = odbc_exec($conn, $sql_pedido_principal);
-        $origenPrincipal = '';
-        if ($result_pedido_principal && $pedidoPrincipal = odbc_fetch_array($result_pedido_principal)) {
-            $origenPrincipal = $pedidoPrincipal['origen'];
-        }
-
-        $colorVisita = determinarColorVisita($visita['estado_visita'], $origenPrincipal);
         $clientName = !empty($visita['nombre_comercial']) ? $visita['nombre_comercial'] : 'Cliente ' . $visita['cod_cliente'];
         if (!empty($visita['nombre_seccion'])) {
             $clientName .= ' - ' . $visita['nombre_seccion'];
         }
 
-        $pedidos = [];
-        $sql_pedidos = "SELECT
-                            vp.cod_venta AS cod_pedido,
-                            vp.origen,
-                            hvc.fecha_venta,
-                            hvc.hora_venta,
-                            hvc.importe,
-                            avc.observacion_interna
-                        FROM [integral].[dbo].[cmf_visita_pedidos] vp
-                        INNER JOIN [integral].[dbo].[hist_ventas_cabecera] hvc
-                            ON vp.cod_venta = hvc.cod_venta
-                        LEFT JOIN [integral].[dbo].[anexo_ventas_cabecera] avc
-                            ON hvc.cod_anexo = avc.cod_anexo
-                        WHERE vp.id_visita = '" . addslashes($visita['id_visita']) . "'
-                          AND hvc.tipo_venta = 1
-                        ORDER BY vp.id_visita_pedido ASC";
-        $result_pedidos = odbc_exec($conn, $sql_pedidos);
-        if ($result_pedidos) {
-            while ($pedido = odbc_fetch_array($result_pedidos)) {
-                $pedido['colorPedido'] = determinarColorPedido($pedido['origen']);
-                $pedidos[] = $pedido;
-            }
-        }
-
-        $visita['colorVisita'] = $colorVisita;
+        $visita['colorVisita'] = determinarColorVisita($visita['estado_visita'], '');
         $visita['clientName'] = $clientName;
-        $visita['pedidos'] = $pedidos;
+        $visita['pedidos'] = [];
         $visitas[] = $visita;
+        $visitasIndex[(string) $visita['id_visita']] = count($visitas) - 1;
+    }
+
+    if (count($visitas) === 0) {
+        return ['fecha' => $fecha, 'visitas' => $visitas];
+    }
+
+    $ids = array_keys($visitasIndex);
+    $idsSql = "'" . implode("','", array_map('addslashes', $ids)) . "'";
+
+    $sqlOrigenes = "
+        SELECT
+            t.id_visita,
+            t.origen
+        FROM (
+            SELECT
+                vp.id_visita,
+                vp.origen,
+                ROW_NUMBER() OVER (PARTITION BY vp.id_visita ORDER BY vp.id_visita_pedido ASC) AS rn
+            FROM [integral].[dbo].[cmf_visita_pedidos] vp
+            WHERE vp.id_visita IN ($idsSql)
+        ) t
+        WHERE t.rn = 1
+    ";
+    $resultOrigenes = odbc_exec($conn, $sqlOrigenes);
+    if ($resultOrigenes) {
+        while ($row = odbc_fetch_array($resultOrigenes)) {
+            $idVisita = (string) $row['id_visita'];
+            if (!isset($visitasIndex[$idVisita])) {
+                continue;
+            }
+            $idx = $visitasIndex[$idVisita];
+            $origenPrincipal = (string) ($row['origen'] ?? '');
+            $visitas[$idx]['origenPrincipal'] = $origenPrincipal;
+            $visitas[$idx]['colorVisita'] = determinarColorVisita($visitas[$idx]['estado_visita'], $origenPrincipal);
+        }
+    }
+
+    $sqlPedidos = "
+        SELECT
+            vp.id_visita,
+            vp.cod_venta AS cod_pedido,
+            vp.origen,
+            hvc.fecha_venta,
+            hvc.hora_venta,
+            hvc.importe,
+            avc.observacion_interna,
+            ISNULL(hlc.numero_lineas, 0) AS numero_lineas
+        FROM [integral].[dbo].[cmf_visita_pedidos] vp
+        INNER JOIN [integral].[dbo].[hist_ventas_cabecera] hvc
+            ON vp.cod_venta = hvc.cod_venta
+        LEFT JOIN [integral].[dbo].[anexo_ventas_cabecera] avc
+            ON hvc.cod_anexo = avc.cod_anexo
+        LEFT JOIN (
+            SELECT cod_venta, COUNT(*) AS numero_lineas
+            FROM [integral].[dbo].[hist_ventas_linea]
+            WHERE tipo_venta = 1
+            GROUP BY cod_venta
+        ) hlc
+            ON vp.cod_venta = hlc.cod_venta
+        WHERE vp.id_visita IN ($idsSql)
+          AND hvc.tipo_venta = 1
+        ORDER BY vp.id_visita ASC, vp.id_visita_pedido ASC
+    ";
+    $resultPedidos = odbc_exec($conn, $sqlPedidos);
+    if ($resultPedidos) {
+        while ($pedido = odbc_fetch_array($resultPedidos)) {
+            $idVisita = (string) $pedido['id_visita'];
+            if (!isset($visitasIndex[$idVisita])) {
+                continue;
+            }
+            $pedido['colorPedido'] = determinarColorPedido($pedido['origen']);
+            if (!isset($visitas[$visitasIndex[$idVisita]]['importe_total'])) {
+                $visitas[$visitasIndex[$idVisita]]['importe_total'] = 0.0;
+            }
+            if (!isset($visitas[$visitasIndex[$idVisita]]['numero_lineas_total'])) {
+                $visitas[$visitasIndex[$idVisita]]['numero_lineas_total'] = 0;
+            }
+            $visitas[$visitasIndex[$idVisita]]['importe_total'] += (float) ($pedido['importe'] ?? 0);
+            $visitas[$visitasIndex[$idVisita]]['numero_lineas_total'] += (int) ($pedido['numero_lineas'] ?? 0);
+            $visitas[$visitasIndex[$idVisita]]['pedidos'][] = $pedido;
+        }
     }
 
     return ['fecha' => $fecha, 'visitas' => $visitas];
