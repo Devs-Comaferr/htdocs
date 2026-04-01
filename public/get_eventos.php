@@ -1,3 +1,3 @@
 <?php
 require_once dirname(__DIR__) . '/bootstrap/init.php';
-require_once BASE_PATH . '/app/Modules/Visitas/get_eventos.php';
+require_once BASE_PATH . '/app/Modules/Visitas/ajax/get_eventos.php';

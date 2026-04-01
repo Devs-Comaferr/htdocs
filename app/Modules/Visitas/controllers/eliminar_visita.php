@@ -14,7 +14,7 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/db.php';
-require_once BASE_PATH . '/app/Modules/Visitas/eliminar_visita_handler.php';
+require_once BASE_PATH . '/app/Modules/Visitas/services/eliminar_visita_handler.php';
 requierePermiso('perm_planificador');
 
 $ui_version = 'bs5';

@@ -25,11 +25,11 @@ if ($action === 'crear') {
 
         case 'visita':
         default:
-            require BASE_PATH . '/app/Modules/Visitas/registrar_visita.php';
+            require BASE_PATH . '/app/Modules/Visitas/controllers/registrar_visita.php';
             break;
     }
 
     exit;
 }
 
-require_once BASE_PATH . '/app/Modules/Visitas/visitas.php';
+require_once BASE_PATH . '/app/Modules/Visitas/controllers/visitas.php';
