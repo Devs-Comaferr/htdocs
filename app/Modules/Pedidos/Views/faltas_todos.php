@@ -4,10 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?php echo $pageTitle; ?></title>
-  <!-- Bootstrap CSS -->
-    <!-- noUiSlider CSS -->
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.css" />
-  
+
   <style type="text/css">
     body {
       font-family: Arial, sans-serif;
@@ -204,11 +202,10 @@
       }
     }
   </style>
-  
-  <!-- jQuery, noUiSlider y wNumb -->
-    <script src="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.js"></script>
+
+  <script src="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.js"></script>
   <script src="<?= BASE_URL ?>/assets/vendor/wnumb/wNumb.min.js"></script>
-  
+
   <script type="text/javascript">
     function timestampToISO(ts) {
       var date = new Date(ts * 1000);
@@ -224,13 +221,21 @@
       var year = date.getFullYear();
       return day + '/' + month + '/' + year;
     }
-    $(function(){
+    document.addEventListener('DOMContentLoaded', function() {
       var slider = document.getElementById('date-slider');
+      var startInput = document.getElementById('start_date');
+      var endInput = document.getElementById('end_date');
+      var filtrosForm = document.getElementById('filtrosForm');
+
+      if (!slider || !startInput || !endInput || !filtrosForm || typeof noUiSlider === 'undefined') {
+        return;
+      }
+
       var minTimestamp = Date.parse("2024-10-01") / 1000;
       var maxTimestamp = Date.now() / 1000;
-      var initialStart = Date.parse($("#start_date").val()) / 1000;
-      var initialEnd   = Date.parse($("#end_date").val()) / 1000;
-      
+      var initialStart = Date.parse(startInput.value) / 1000;
+      var initialEnd = Date.parse(endInput.value) / 1000;
+
       noUiSlider.create(slider, {
           start: [initialStart, initialEnd],
           connect: true,
@@ -238,16 +243,14 @@
           step: 86400,
           tooltips: [wNumb({ decimals: 0, edit: timestampToSpanish }), wNumb({ decimals: 0, edit: timestampToSpanish })]
       });
-      
-      slider.noUiSlider.on('change', function(values, handle) {
-          var startDate = timestampToISO(parseFloat(values[0]));
-          var endDate   = timestampToISO(parseFloat(values[1]));
-          $("#start_date").val(startDate);
-          $("#end_date").val(endDate);
-          $("#filtrosForm").submit();
+
+      slider.noUiSlider.on('change', function(values) {
+          startInput.value = timestampToISO(parseFloat(values[0]));
+          endInput.value = timestampToISO(parseFloat(values[1]));
+          filtrosForm.submit();
       });
     });
-    
+
     function submitMobileSort(form) {
       if (!form) return;
       form.submit();
@@ -264,7 +267,6 @@
 </head>
 <body>
   <div class="container">
-    <!-- Formulario de Filtros con Slider -->
     <form method="GET" action="<?php echo $_SERVER['PHP_SELF']; ?>" id="filtrosForm" class="mb-4">
       <div class="mb-3">
         <label for="date-slider" class="form-label">Rango de Fechas:</label>
@@ -274,7 +276,7 @@
       </div>
       <div class="mb-3">
         <div class="d-flex align-items-center">
-          <input type="text" id="cliente" name="cliente" class="form-control" value="<?php echo htmlspecialchars($cliente_filtro); ?>" placeholder="Buscar por código o nombre del cliente..." />
+          <input type="text" id="cliente" name="cliente" class="form-control" value="<?php echo htmlspecialchars($cliente_filtro); ?>" placeholder="Buscar por codigo o nombre del cliente..." />
           <button type="submit" class="btn btn-primary ms-2 d-flex align-items-center">
             <i class="fas fa-search"></i> <span class="ms-1">Filtrar</span>
           </button>
@@ -283,7 +285,7 @@
           </button>
         </div>
       </div>
-            <div class="mb-3 d-md-none">
+      <div class="mb-3 d-md-none">
         <div class="mobile-sort-controls">
           <input type="hidden" name="direccion" value="<?php echo htmlspecialchars($direccion); ?>">
           <select name="orden" class="form-control" onchange="submitMobileSort(this.form)">
@@ -291,7 +293,7 @@
             <option value="Fecha_Pedido" <?php echo ($orden === 'Fecha_Pedido') ? 'selected' : ''; ?>>Ordenar por Fecha</option>
             <option value="Cliente" <?php echo ($orden === 'Cliente') ? 'selected' : ''; ?>>Ordenar por Cliente</option>
             <option value="Importe" <?php echo ($orden === 'Importe') ? 'selected' : ''; ?>>Ordenar por Importe</option>
-            <option value="Articulos_Pendientes" <?php echo ($orden === 'Articulos_Pendientes') ? 'selected' : ''; ?>>Ordenar por Líneas Pdtes.</option>
+            <option value="Articulos_Pendientes" <?php echo ($orden === 'Articulos_Pendientes') ? 'selected' : ''; ?>>Ordenar por Lineas Pdtes.</option>
             <option value="Importe_Pendiente" <?php echo ($orden === 'Importe_Pendiente') ? 'selected' : ''; ?>>Ordenar por Importe Pdte.</option>
             <option value="Importe_Disponible" <?php echo ($orden === 'Importe_Disponible') ? 'selected' : ''; ?>>Ordenar por Importe Disponible</option>
             <option value="Importe_Pdte_Recibir" <?php echo ($orden === 'Importe_Pdte_Recibir') ? 'selected' : ''; ?>>Ordenar por Importe Pdte. Recibir</option>
@@ -300,22 +302,19 @@
         </div>
       </div>
     </form>
-    
-    <!-- Tabla de Resultados -->
+
     <div class="table-container desktop-table">
       <?php if (!empty($pedidos)): ?>
         <table class="table table-bordered">
           <thead>
             <tr>
-              <!-- Columna para el icono (camión o eliminado) -->
               <th></th>
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Pedido', 'direccion' => $direccion_invertida))); ?>">Pedido</a></th>
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Fecha_Pedido', 'direccion' => $direccion_invertida))); ?>">Fecha</a></th>
-              <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Cod_Cliente', 'direccion' => $direccion_invertida))); ?>">Código Cliente</a></th>
+              <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Cod_Cliente', 'direccion' => $direccion_invertida))); ?>">Codigo Cliente</a></th>
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Cliente', 'direccion' => $direccion_invertida))); ?>">Nombre Cliente</a></th>
-              <!-- Nueva columna Importe -->
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Importe', 'direccion' => $direccion_invertida))); ?>">Importe del Pedido</a></th>
-              <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Articulos_Pendientes', 'direccion' => $direccion_invertida))); ?>">Líneas Pdtes.</a></th>
+              <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Articulos_Pendientes', 'direccion' => $direccion_invertida))); ?>">Lineas Pdtes.</a></th>
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Importe_Pendiente', 'direccion' => $direccion_invertida))); ?>">Importe Pdte.</a></th>
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Importe_Disponible', 'direccion' => $direccion_invertida))); ?>">Importe Disponible</a></th>
               <th><a href="?<?php echo http_build_query(array_merge($_GET, array('orden' => 'Importe_Pdte_Recibir', 'direccion' => $direccion_invertida))); ?>">Importe Pdte. Recibir</a></th>
@@ -323,99 +322,13 @@
           </thead>
           <tbody>
             <?php foreach ($pedidos as $pedido): ?>
-              <?php
-                $pedidoUrl = buildPedidoUrlFaltas($pedido);
-                // Para cada pedido, recalcular los importes para visualización
-                $pedidoId = addslashes($pedido['Pedido']);
-                $importeDisponibleTotal = 0;
-                $importePdteRecibirTotal = 0;
-                $sql_lineas = "
-                    SELECT 
-                        hvl.cantidad AS Cantidad_Pedida,
-                        (hvl.cantidad - ISNULL(SUM(elv.cantidad),0)) AS Cantidad_Restante,
-                        hvl.precio AS Precio,
-                        ISNULL(
-                          (SELECT TOP 1 s.existencias 
-                           FROM integral.dbo.stocks s 
-                           WHERE s.cod_articulo = hvl.cod_articulo), 0
-                        ) AS Stock,
-                        ISNULL(
-                          (SELECT TOP 1 s.cantidad_pendiente_recibir
-                           FROM integral.dbo.stocks s 
-                           WHERE s.cod_articulo = hvl.cod_articulo), 0
-                        ) AS PdteRecibir
-                    FROM integral.dbo.hist_ventas_linea hvl
-                    LEFT JOIN integral.dbo.entrega_lineas_venta elv 
-                        ON hvl.cod_venta = elv.cod_venta_origen AND hvl.linea = elv.linea_origen
-                    WHERE hvl.cod_venta = '$pedidoId' AND hvl.tipo_venta = 1
-                    GROUP BY hvl.cantidad, hvl.precio, hvl.cod_articulo
-                ";
-                $result_lineas = odbc_exec($conn, $sql_lineas);
-                if ($result_lineas) {
-                    while ($linea = odbc_fetch_array($result_lineas)) {
-                        $cantidadPedida   = (float)$linea['Cantidad_Pedida'];
-                        $cantidadRestante = (float)$linea['Cantidad_Restante'];
-                        $precio           = (float)$linea['Precio'];
-                        
-                        $importeRestanteLinea = $cantidadRestante * $precio;
-                        $price_unit = ($cantidadRestante > 0 && $importeRestanteLinea > 0) ? $importeRestanteLinea / $cantidadRestante : 0;
-                        
-                        $stockDisponible = (float)$linea['Stock'];
-                        if ($stockDisponible < 0) {
-                            $stockDisponible = 0;
-                        }
-                        
-                        $servibleStock = min($stockDisponible, $cantidadRestante);
-                        $importeDisponibleLinea = $servibleStock * $price_unit;
-                        
-                        $resto = $cantidadRestante - $servibleStock;
-                        $pdteRecibirValor = (float)$linea['PdteRecibir'];
-                        $pdteRecibirDisponible = min($resto, $pdteRecibirValor);
-                        $importePdteRecibirLinea = $pdteRecibirDisponible * $price_unit;
-                        
-                        $importeDisponibleTotal += $importeDisponibleLinea;
-                        $importePdteRecibirTotal += $importePdteRecibirLinea;
-                    }
-                }
-                
-                $impDisponible_formatted = number_format($importeDisponibleTotal, 2, ',', '.') . " ";
-                $impPdteRecibir_formatted = number_format($importePdteRecibirTotal, 2, ',', '.') . " ";
-              ?>
-              <?php
-                $rowClass = '';
-                if ((float)$pedido['Importe_Pendiente'] > 70) {
-                    $rowClass .= ' high-pending-row';
-                }
-                if ($importeDisponibleTotal > 70) {
-                    $rowClass .= ' high-disponible-row';
-                }
-              ?>
-              <tr class="<?php echo trim($rowClass); ?>" onclick="window.location.href=<?php echo htmlspecialchars(json_encode($pedidoUrl), ENT_QUOTES); ?>">
-                <?php
-                  // Mostrar icono según el valor de la columna 'tabla'
-                  if ($pedido['tabla'] == 'vcelim') {
-                      $camionIcon = '<i class="fas fa-trash-alt text-danger"></i>';
-                  } else {
-                      // Icono del camión si existe registro en entrega_lineas_venta
-                      $queryEntrega = "
-                          SELECT TOP 1 cod_venta_origen 
-                          FROM integral.dbo.entrega_lineas_venta 
-                          WHERE cod_venta_origen = '" . addslashes($pedido['Pedido']) . "' 
-                            AND tipo_venta_origen = 1
-                      ";
-                      $rsEntrega = odbc_exec($conn, $queryEntrega);
-                      $camionIcon = "";
-                      if ($rsEntrega && odbc_fetch_row($rsEntrega)) {
-                          $camionIcon = '<i class="fas fa-truck text-success"></i>';
-                      }
-                  }
-                ?>
-                <td style="text-align: center;"><?php echo $camionIcon; ?></td>
-                <td><a href="<?php echo htmlspecialchars($pedidoUrl); ?>"><?php echo htmlspecialchars($pedido['Pedido']); ?></a></td>
+              <tr class="<?php echo htmlspecialchars($pedido['row_class']); ?>" onclick="window.location.href=<?php echo htmlspecialchars(json_encode($pedido['pedido_url']), ENT_QUOTES); ?>">
+                <td style="text-align: center;"><?php echo $pedido['estado_icon']; ?></td>
+                <td><a href="<?php echo htmlspecialchars($pedido['pedido_url']); ?>"><?php echo htmlspecialchars($pedido['Pedido']); ?></a></td>
                 <td><?php echo date("d/m/Y", strtotime($pedido['Fecha_Pedido'])); ?></td>
-                <td><a href="<?php echo htmlspecialchars($pedidoUrl); ?>"><?php echo htmlspecialchars($pedido['cod_cliente']); ?></a></td>
+                <td><a href="<?php echo htmlspecialchars($pedido['pedido_url']); ?>"><?php echo htmlspecialchars($pedido['cod_cliente']); ?></a></td>
                 <td>
-                  <a href="<?php echo htmlspecialchars($pedidoUrl); ?>"><?php echo htmlspecialchars(toUTF8($pedido['Cliente'])); ?></a>
+                  <a href="<?php echo htmlspecialchars($pedido['pedido_url']); ?>"><?php echo htmlspecialchars(toUTF8($pedido['Cliente'])); ?></a>
                   <?php if (!empty($pedido['ObservacionInterna'])): ?>
                     <br>
                     <span style="color: grey; font-style: italic; font-size: 0.85em;">
@@ -423,12 +336,11 @@
                     </span>
                   <?php endif; ?>
                 </td>
-                <!-- Nueva columna Importe -->
-                <td style="text-align: right;"><?php echo number_format($pedido['Importe'], 2, ',', '.') . " "; ?></td>
-                <td style="text-align: center;"><?php echo number_format((float)$pedido['Articulos_Pendientes'], 0, ',', '.'); ?></td>
-                <td style="text-align: right;"><?php echo number_format($pedido['Importe_Pendiente'], 2, ',', '.') . " "; ?></td>
-                <td style="text-align: right;"><?php echo $impDisponible_formatted; ?></td>
-                <td style="text-align: right;"><?php echo $impPdteRecibir_formatted; ?></td>
+                <td style="text-align: right;"><?php echo number_format((float) $pedido['Importe'], 2, ',', '.') . " "; ?></td>
+                <td style="text-align: center;"><?php echo number_format((float) $pedido['Articulos_Pendientes'], 0, ',', '.'); ?></td>
+                <td style="text-align: right;"><?php echo number_format((float) $pedido['Importe_Pendiente'], 2, ',', '.') . " "; ?></td>
+                <td style="text-align: right;"><?php echo number_format((float) $pedido['Importe_Disponible'], 2, ',', '.') . " "; ?></td>
+                <td style="text-align: right;"><?php echo number_format((float) $pedido['Importe_Pdte_Recibir'], 2, ',', '.') . " "; ?></td>
               </tr>
             <?php endforeach; ?>
           </tbody>
@@ -438,112 +350,30 @@
       <?php endif; ?>
     </div>
 
-    <!-- Vista móvil en formato item/card con todos los campos -->
     <div class="mobile-items">
       <?php if (!empty($pedidos)): ?>
         <?php foreach ($pedidos as $pedido): ?>
-          <?php
-            $pedidoUrl = buildPedidoUrlFaltas($pedido);
-            $pedidoId = addslashes($pedido['Pedido']);
-            $importeDisponibleTotal = 0;
-            $importePdteRecibirTotal = 0;
-            $sql_lineas_mobile = "
-                SELECT 
-                    hvl.cantidad AS Cantidad_Pedida,
-                    (hvl.cantidad - ISNULL(SUM(elv.cantidad),0)) AS Cantidad_Restante,
-                    hvl.precio AS Precio,
-                    ISNULL(
-                      (SELECT TOP 1 s.existencias 
-                       FROM integral.dbo.stocks s 
-                       WHERE s.cod_articulo = hvl.cod_articulo), 0
-                    ) AS Stock,
-                    ISNULL(
-                      (SELECT TOP 1 s.cantidad_pendiente_recibir
-                       FROM integral.dbo.stocks s 
-                       WHERE s.cod_articulo = hvl.cod_articulo), 0
-                    ) AS PdteRecibir
-                FROM integral.dbo.hist_ventas_linea hvl
-                LEFT JOIN integral.dbo.entrega_lineas_venta elv 
-                    ON hvl.cod_venta = elv.cod_venta_origen AND hvl.linea = elv.linea_origen
-                WHERE hvl.cod_venta = '$pedidoId' AND hvl.tipo_venta = 1
-                GROUP BY hvl.cantidad, hvl.precio, hvl.cod_articulo
-            ";
-            $result_lineas_mobile = odbc_exec($conn, $sql_lineas_mobile);
-            if ($result_lineas_mobile) {
-                while ($linea = odbc_fetch_array($result_lineas_mobile)) {
-                    $cantidadRestante = (float)$linea['Cantidad_Restante'];
-                    $precio           = (float)$linea['Precio'];
-
-                    $importeRestanteLinea = $cantidadRestante * $precio;
-                    $price_unit = ($cantidadRestante > 0 && $importeRestanteLinea > 0) ? $importeRestanteLinea / $cantidadRestante : 0;
-
-                    $stockDisponible = (float)$linea['Stock'];
-                    if ($stockDisponible < 0) {
-                        $stockDisponible = 0;
-                    }
-
-                    $servibleStock = min($stockDisponible, $cantidadRestante);
-                    $importeDisponibleLinea = $servibleStock * $price_unit;
-
-                    $resto = $cantidadRestante - $servibleStock;
-                    $pdteRecibirValor = (float)$linea['PdteRecibir'];
-                    $pdteRecibirDisponible = min($resto, $pdteRecibirValor);
-                    $importePdteRecibirLinea = $pdteRecibirDisponible * $price_unit;
-
-                    $importeDisponibleTotal += $importeDisponibleLinea;
-                    $importePdteRecibirTotal += $importePdteRecibirLinea;
-                }
-            }
-
-            $impDisponible_formatted = number_format($importeDisponibleTotal, 2, ',', '.') . " ";
-            $impPdteRecibir_formatted = number_format($importePdteRecibirTotal, 2, ',', '.') . " ";
-
-            if ($pedido['tabla'] == 'vcelim') {
-                $estadoIcon = '<i class="fas fa-trash-alt text-danger"></i>';
-            } else {
-                $queryEntrega = "
-                    SELECT TOP 1 cod_venta_origen 
-                    FROM integral.dbo.entrega_lineas_venta 
-                    WHERE cod_venta_origen = '" . addslashes($pedido['Pedido']) . "' 
-                      AND tipo_venta_origen = 1
-                ";
-                $rsEntrega = odbc_exec($conn, $queryEntrega);
-                $estadoIcon = ($rsEntrega && odbc_fetch_row($rsEntrega))
-                    ? '<i class="fas fa-truck text-success"></i>'
-                    : '';
-            }
-          ?>
-          <?php
-            $mobileItemClass = 'mobile-item';
-            if ((float)$pedido['Importe_Pendiente'] > 70) {
-                $mobileItemClass .= ' mobile-item-high-pending';
-            }
-            if ($importeDisponibleTotal > 70) {
-                $mobileItemClass .= ' mobile-item-high-disponible';
-            }
-          ?>
-          <div class="<?php echo $mobileItemClass; ?>" onclick="window.location.href=<?php echo htmlspecialchars(json_encode($pedidoUrl), ENT_QUOTES); ?>">
+          <div class="<?php echo htmlspecialchars($pedido['mobile_item_class']); ?>" onclick="window.location.href=<?php echo htmlspecialchars(json_encode($pedido['pedido_url']), ENT_QUOTES); ?>">
             <div class="mobile-item-title">
-              <?php echo $estadoIcon; ?> <a href="<?php echo htmlspecialchars($pedidoUrl); ?>">Pedido #<?php echo htmlspecialchars($pedido['Pedido']); ?></a>
+              <?php echo $pedido['estado_icon']; ?> <a href="<?php echo htmlspecialchars($pedido['pedido_url']); ?>">Pedido #<?php echo htmlspecialchars($pedido['Pedido']); ?></a>
             </div>
             <div class="mobile-item-line"><strong>Fecha:</strong> <?php echo date("d/m/Y", strtotime($pedido['Fecha_Pedido'])); ?></div>
-            <div class="mobile-item-line"><strong>Cliente:</strong> <a href="<?php echo htmlspecialchars($pedidoUrl); ?>"><?php echo htmlspecialchars($pedido['cod_cliente']); ?> - <?php echo htmlspecialchars(toUTF8($pedido['Cliente'])); ?></a></div>
+            <div class="mobile-item-line"><strong>Cliente:</strong> <a href="<?php echo htmlspecialchars($pedido['pedido_url']); ?>"><?php echo htmlspecialchars($pedido['cod_cliente']); ?> - <?php echo htmlspecialchars(toUTF8($pedido['Cliente'])); ?></a></div>
             <?php if (!empty($pedido['ObservacionInterna'])): ?>
               <div class="mobile-item-line obs-int"><?php echo htmlspecialchars(toUTF8($pedido['ObservacionInterna'])); ?></div>
             <?php endif; ?>
-            <div class="mobile-item-line"><strong>Importe Pedido:</strong> <?php echo number_format($pedido['Importe'], 2, ',', '.') . " "; ?></div>
-            <div class="mobile-item-line"><strong>Líneas Pdtes.:</strong> <?php echo number_format((float)$pedido['Articulos_Pendientes'], 0, ',', '.'); ?></div>
-            <div class="mobile-item-line"><strong>Importe Pdte.:</strong> <?php echo number_format($pedido['Importe_Pendiente'], 2, ',', '.') . " "; ?></div>
-            <div class="mobile-item-line"><strong>Importe Disponible:</strong> <?php echo $impDisponible_formatted; ?></div>
-            <div class="mobile-item-line"><strong>Importe Pdte. Recibir:</strong> <?php echo $impPdteRecibir_formatted; ?></div>
+            <div class="mobile-item-line"><strong>Importe Pedido:</strong> <?php echo number_format((float) $pedido['Importe'], 2, ',', '.') . " "; ?></div>
+            <div class="mobile-item-line"><strong>Lineas Pdtes.:</strong> <?php echo number_format((float) $pedido['Articulos_Pendientes'], 0, ',', '.'); ?></div>
+            <div class="mobile-item-line"><strong>Importe Pdte.:</strong> <?php echo number_format((float) $pedido['Importe_Pendiente'], 2, ',', '.') . " "; ?></div>
+            <div class="mobile-item-line"><strong>Importe Disponible:</strong> <?php echo number_format((float) $pedido['Importe_Disponible'], 2, ',', '.') . " "; ?></div>
+            <div class="mobile-item-line"><strong>Importe Pdte. Recibir:</strong> <?php echo number_format((float) $pedido['Importe_Pdte_Recibir'], 2, ',', '.') . " "; ?></div>
           </div>
         <?php endforeach; ?>
       <?php else: ?>
         <p>No se encontraron pedidos pendientes.</p>
       <?php endif; ?>
     </div>
-    
-    <!-- Paginación -->
+
     <?php if ($totalPages > 1): ?>
       <div class="d-flex justify-content-center">
         <div class="pagination">
@@ -552,7 +382,7 @@
               $prevQuery = http_build_query(array_merge($_GET, array('page' => $page - 1)));
               echo '<a href="' . $_SERVER['PHP_SELF'] . '?' . $prevQuery . '">&laquo; Anterior</a>';
           }
-          
+
           $adjacents = 2;
           if ($totalPages <= (1 + ($adjacents * 2))) {
               for ($p = 1; $p <= $totalPages; $p++) {
@@ -597,17 +427,7 @@
         </div>
       </div>
     <?php endif; ?>
-    
   </div>
-  <!-- Bootstrap JS (opcional) -->
   <script src="<?= BASE_URL ?>/assets/js/app-navigation.js"></script>
 </body>
 </html>
-<?php
-if ($conn) {
-}
-?>
-
-
-
-
