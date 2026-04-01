@@ -39,7 +39,7 @@ try {
         throw new Exception('Error al eliminar la asignacion.');
     }
 
-    header("Location: asignacion_clientes_zonas.php?cod_zona=$cod_zona&mensaje=Eliminado con exito");
+    header("Location: zonas_clientes.php?cod_zona=$cod_zona&mensaje=Eliminado con exito");
     exit();
 } catch (Exception $e) {
     appExitTextError('No se pudo eliminar la asignacion.', 500, 'borrar_asignacion', $e->getMessage());

@@ -13,21 +13,21 @@ requierePermiso('perm_planificador');
 // zonas.php
 require_once BASE_PATH . '/app/Modules/Planificador/planificador_service.php';
 require_once BASE_PATH . '/app/Support/functions.php';
-$pageTitle = 'GestiÃ³n de Zonas';
+$pageTitle = 'Gestión de Zonas';
 include BASE_PATH . '/resources/views/layouts/header.php';
 $zonas = obtenerZonasVisitaService();
 
-// Verificar si el usuario ha iniciado sesiÃ³n
+// Verificar si el usuario ha iniciado sesión
 
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>GestiÃ³n de Zonas</title>
+    <title>Gestión de Zonas</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        /* Estilos mejorados para dispositivos tctiles */
+        /* Estilos mejorados para dispositivos táctiles */
         body {
             font-family: Arial, sans-serif;
             padding-top: 20px;
@@ -123,7 +123,7 @@ $zonas = obtenerZonasVisitaService();
         .back-button:hover {
             background-color: #5a6268;
         }
-        /* Estilos para dispositivos mÃ³viles */
+        /* Estilos para dispositivos móviles */
         @media (max-width: 1024px) {
             .btn-zona {
                 width: 150px;
@@ -150,48 +150,43 @@ $zonas = obtenerZonasVisitaService();
 </head>
 <body>
     <div class="container">
-        
-        
-        <!-- SecciÃ³n 1: Listado de Zonas como Botones -->
-        
+        <!-- Sección 1: Listado de Zonas como Botones -->
         <?php if (!empty($zonas)): ?>
             <div class="buttons-container">
                 <?php foreach ($zonas as $zona): ?>
                     <a href="zonas_rutas.php?cod_zona=<?php echo htmlspecialchars($zona['cod_zona']); ?>" class="btn-zona">
                         <i class="fas fa-map-marker-alt"></i>
-                        <?php echo htmlspecialchars($zona['nombre_zona']); ?>
+                        <?php echo htmlspecialchars(toUTF8((string)$zona['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?>
                     </a>
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
             <div class="no-data">No tienes zonas disponibles.</div>
         <?php endif; ?>
-        
-        <!-- SecciÃ³n 2: Formulario para Crear Nueva Zona -->
+
+        <!-- Sección 2: Formulario para Crear Nueva Zona -->
         <div class="create-form">
             <h2>Crear Nueva Zona</h2>
             <form action="procesar_crear_zona.php" method="post">
                 <label for="nombre_zona">Nombre de la Zona:</label>
                 <input type="text" id="nombre_zona" name="nombre_zona" required>
-                
-                <label for="descripcion">DescripciÃ³n:</label>
+
+                <label for="descripcion">Descripción:</label>
                 <textarea id="descripcion" name="descripcion"></textarea>
-                
-                <label for="duracion_semanas">DuraciÃ³n (semanas):</label>
+
+                <label for="duracion_semanas">Duración (semanas):</label>
                 <input type="number" id="duracion_semanas" name="duracion_semanas" min="1" required>
-                
+
                 <label for="orden">Orden en el Ciclo:</label>
                 <input type="number" id="orden" name="orden" min="1" required>
-                
+
                 <input type="submit" value="Crear Zona">
             </form>
         </div>
-        
+
         <a href="planificador_menu.php" class="back-button">Volver al Planificador de Visitas</a>
     </div>
-    
+
     <!-- jQuery + Bootstrap JS -->
-        </body>
+</body>
 </html>
-
-

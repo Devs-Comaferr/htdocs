@@ -785,6 +785,64 @@ function obtenerClientesPorZona($cod_zona) {
     return $clientes_asignados;
 }
 
+/**
+ * Obtener clientes de una ruta concreta que no pertenecen al vendedor en sesión.
+ *
+ * @param int $cod_zona Código de la zona.
+ * @param int $cod_ruta Código de la ruta.
+ * @return array Lista de clientes de la ruta fuera del vendedor en sesión.
+ */
+function obtenerClientesPorZonaYRuta($cod_zona, $cod_ruta) {
+    $conn = db();
+    $cod_vendedor = obtenerCodVendedorPlanificacionService();
+
+    $cod_zona = intval($cod_zona);
+    $cod_ruta = intval($cod_ruta);
+
+    if ($cod_zona <= 0 || $cod_ruta <= 0 || $cod_vendedor <= 0) {
+        return array();
+    }
+
+    $query = "
+        SELECT
+            c.cod_cliente,
+            c.nombre_comercial AS nombre_cliente,
+            c.poblacion AS poblacion_cliente,
+            c.cod_ruta,
+            NULL AS cod_seccion,
+            '' AS nombre_seccion,
+            '' AS poblacion_seccion,
+            '' AS frecuencia_visita,
+            '' AS observaciones,
+            '' AS tipo_asignacion
+        FROM clientes c
+        LEFT JOIN secciones_cliente sc
+            ON c.cod_cliente = sc.cod_cliente
+        WHERE (c.cod_vendedor IS NULL OR c.cod_vendedor <> '$cod_vendedor')
+          AND c.cod_ruta = '$cod_ruta'
+          AND c.fecha_baja IS NULL
+        GROUP BY
+            c.cod_cliente,
+            c.nombre_comercial,
+            c.poblacion,
+            c.cod_ruta
+        ORDER BY c.nombre_comercial ASC
+    ";
+
+    $resultado = odbc_exec($conn, $query);
+    if (!$resultado) {
+        error_log('Error al obtener clientes por zona y ruta: ' . odbc_errormsg($conn));
+        return array();
+    }
+
+    $clientes = array();
+    while ($fila = odbc_fetch_array($resultado)) {
+        $clientes[] = $fila;
+    }
+
+    return $clientes;
+}
+
 
 
 /**
@@ -908,7 +966,7 @@ function actualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secun
     // Sanitizar las entradas
     $cod_cliente = intval($cod_cliente);
     $cod_zona = intval($cod_zona);
-    $cod_seccion = intval($cod_seccion);
+    $condicionCodSeccion = is_null($cod_seccion) ? 'IS NULL' : '= ' . intval($cod_seccion);
     $zona_secundaria = is_null($zona_secundaria) ? 'NULL' : intval($zona_secundaria);
     $tiempo_promedio_visita = is_null($tiempo_promedio_visita) ? 'NULL' : floatval($tiempo_promedio_visita);
     $preferencia_horaria = is_null($preferencia_horaria) ? 'NULL' : "'" . addslashes($preferencia_horaria) . "'";
@@ -927,7 +985,7 @@ function actualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secun
         WHERE
             cod_cliente = $cod_cliente
             AND zona_principal = $cod_zona
-            AND cod_seccion = $cod_seccion
+            AND cod_seccion $condicionCodSeccion
     ";
 
     // Ejecutar la consulta
@@ -970,6 +1028,12 @@ if (!function_exists('obtenerSiguienteClienteRecomendadoService')) {
 if (!function_exists('obtenerRutasPorZonaService')) {
     function obtenerRutasPorZonaService($cod_zona) {
         return obtenerRutasPorZona($cod_zona);
+    }
+}
+
+if (!function_exists('obtenerClientesPorZonaYRutaService')) {
+    function obtenerClientesPorZonaYRutaService($cod_zona, $cod_ruta) {
+        return obtenerClientesPorZonaYRuta($cod_zona, $cod_ruta);
     }
 }
 

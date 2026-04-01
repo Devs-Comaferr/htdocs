@@ -13,7 +13,6 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Modules/Planificador/planificador_service.php';
-error_log('ENTRANDO A PLANIFICADOR');
 requierePermiso('perm_planificador');
 
 $pageTitle = 'Planificacion de Rutas';
@@ -212,7 +211,7 @@ $cards = [
     ],
     [
         'key' => 'assign',
-        'href' => 'asignacion_clientes_zonas.php',
+        'href' => 'zonas_clientes.php',
         'label' => 'Asignar clientes a zonas',
         'icon_class' => 'fas fa-user-plus',
         'icon_wrapper' => 'icon-cyan',

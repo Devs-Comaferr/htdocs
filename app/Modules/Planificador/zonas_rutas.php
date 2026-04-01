@@ -13,29 +13,30 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 require_once BASE_PATH . '/app/Modules/Planificador/planificador_service.php';
 require_once BASE_PATH . '/app/Support/functions.php';
-$pageTitle = "Gestionar Rutas de la Zona";
+$pageTitle = 'Gestionar Rutas de la Zona';
 include BASE_PATH . '/resources/views/layouts/header.php';
-// Iniciar sesiÃ³n si no estÃ¡ ya iniciada
+// Iniciar sesión si no está ya iniciada
 
 
-// Verificar si el usuario ha iniciado sesiÃ³n
+// Verificar si el usuario ha iniciado sesión
 
 
-// Verificar si el usuario est autenticado
+// Verificar si el usuario está autenticado
 if (!isset($_SESSION['codigo'])) {
     error_log('Acceso no autorizado.');
     echo 'Error interno';
-}
     return;
+}
 
-// Obtener el cÃ³digo del vendedor desde la sesiÃ³n
+// Obtener el código del vendedor desde la sesión
 $cod_vendedor = intval($_SESSION['codigo']);
 
-// Verificar si 'cod_zona' est presente en la URL
+// Verificar si 'cod_zona' está presente en la URL
 if (isset($_GET['cod_zona'])) {
     $cod_zona = intval($_GET['cod_zona']);
-    
-    // Obtener informaciÃ³n de la zona
+    $cod_ruta_seleccionada = isset($_GET['cod_ruta']) ? intval($_GET['cod_ruta']) : 0;
+
+    // Obtener información de la zona
     $zonas = obtenerZonasVisitaService();
     $zona_actual = null;
     foreach ($zonas as $zona) {
@@ -44,21 +45,34 @@ if (isset($_GET['cod_zona'])) {
             break;
         }
     }
-    
+
     if (!$zona_actual) {
         error_log('Zona no encontrada.');
         echo 'Error interno';
         return;
     }
-    
+
     // Obtener rutas asignadas a la zona
     $rutas_asignadas = obtenerRutasPorZonaService($cod_zona);
-    
+    $clientes_ruta = array();
+    $ruta_actual = null;
+    if ($cod_ruta_seleccionada > 0) {
+        foreach ($rutas_asignadas as $rutaAsignada) {
+            if ((int)($rutaAsignada['cod_ruta'] ?? 0) === $cod_ruta_seleccionada) {
+                $ruta_actual = $rutaAsignada;
+                break;
+            }
+        }
+        if ($ruta_actual !== null) {
+            $clientes_ruta = obtenerClientesPorZonaYRutaService($cod_zona, $cod_ruta_seleccionada);
+        }
+    }
+
     // Obtener todas las rutas disponibles
     $todas_rutas = obtenerTodasRutas();
-    
+
 } else {
-    // Si 'cod_zona' no est presente, mostrar la lista de zonas disponibles
+    // Si 'cod_zona' no está presente, mostrar la lista de zonas disponibles
     $zonas_disponibles = obtenerZonasVisitaService();
 }
 ?>
@@ -66,10 +80,10 @@ if (isset($_GET['cod_zona'])) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title><?php echo isset($cod_zona) ? "Gestionar Rutas de la Zona: " . htmlspecialchars($zona_actual['nombre_zona']) : "Zonas Disponibles"; ?></title>
+    <title><?php echo isset($cod_zona) ? 'Gestionar Rutas de la Zona: ' . htmlspecialchars(toUTF8((string)$zona_actual['nombre_zona']), ENT_QUOTES, 'UTF-8') : 'Zonas Disponibles'; ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        /* Estilos mejorados para dispositivos tctiles */
+        /* Estilos mejorados para dispositivos táctiles */
         body {
             font-family: Arial, sans-serif;
             padding-top: 20px;
@@ -134,6 +148,12 @@ if (isset($_GET['cod_zona'])) {
         tr:hover {
             background-color: #f1f1f1;
         }
+        .route-row {
+            cursor: pointer;
+        }
+        .route-row-active td {
+            background-color: #e0f2fe;
+        }
         .no-data {
             text-align: center;
             padding: 20px;
@@ -173,7 +193,7 @@ if (isset($_GET['cod_zona'])) {
             margin-bottom: 15px;
         }
         .zonas-list .zona-item a {
-            background-color: #28a745; /* Verde */
+            background-color: #28a745;
         }
         .zonas-list .zona-item a:hover {
             background-color: #218838;
@@ -183,20 +203,21 @@ if (isset($_GET['cod_zona'])) {
 <body>
     <div class="container">
         <?php if (isset($cod_zona)): ?>
-            <!-- Mostrar informaciÃ³n de la zona especÃ­fica -->
-            <h1><?php echo htmlspecialchars($zona_actual['nombre_zona']); ?></h1>
-            
+            <!-- Mostrar información de la zona específica -->
+            <h1><?php echo htmlspecialchars(toUTF8((string)$zona_actual['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?></h1>
+
             <h2>Rutas Asignadas</h2>
             <table>
                 <tr>
-                    <th>CÃ³digo de Ruta</th>
+                    <th>Código de Ruta</th>
                     <th>Nombre de Ruta</th>
                 </tr>
                 <?php if (!empty($rutas_asignadas)): ?>
                     <?php foreach ($rutas_asignadas as $ruta): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($ruta['cod_ruta']); ?></td>
-                            <td><?php echo htmlspecialchars($ruta['nombre_ruta']); ?></td>
+                        <?php $esRutaActiva = (int)($ruta['cod_ruta'] ?? 0) === (int)$cod_ruta_seleccionada; ?>
+                        <tr class="route-row<?php echo $esRutaActiva ? ' route-row-active' : ''; ?>" onclick="window.location.href='zonas_rutas.php?cod_zona=<?php echo htmlspecialchars((string)$cod_zona, ENT_QUOTES, 'UTF-8'); ?>&cod_ruta=<?php echo htmlspecialchars((string)$ruta['cod_ruta'], ENT_QUOTES, 'UTF-8'); ?>'">
+                            <td><?php echo htmlspecialchars((string)$ruta['cod_ruta'], ENT_QUOTES, 'UTF-8'); ?></td>
+                            <td><?php echo htmlspecialchars(toUTF8((string)$ruta['nombre_ruta']), ENT_QUOTES, 'UTF-8'); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -205,18 +226,18 @@ if (isset($_GET['cod_zona'])) {
                     </tr>
                 <?php endif; ?>
             </table>
-            
+
             <div class="assign-form">
                 <h2>Asignar Nueva Ruta a la Zona</h2>
                 <form action="procesar_asignar_ruta_zona.php" method="post">
                     <input type="hidden" name="cod_zona" value="<?php echo $cod_zona; ?>">
-                    
+
                     <label for="cod_ruta">Selecciona la Ruta:</label>
                     <select id="cod_ruta" name="cod_ruta" required>
                         <option value="">--Selecciona una Ruta--</option>
                         <?php foreach ($todas_rutas as $ruta): ?>
                             <?php
-                            // Verificar si la ruta ya est asignada
+                            // Verificar si la ruta ya está asignada
                             $ya_asignada = false;
                             foreach ($rutas_asignadas as $ra) {
                                 if ($ra['cod_ruta'] == $ruta['cod_ruta']) {
@@ -226,29 +247,63 @@ if (isset($_GET['cod_zona'])) {
                             }
                             if (!$ya_asignada):
                             ?>
-                                <option value="<?php echo htmlspecialchars($ruta['cod_ruta']); ?>">
-                                    <?php echo htmlspecialchars($ruta['nombre_ruta']) . " - (" . $ruta['cod_ruta'] .")"; ?>
+                                <option value="<?php echo htmlspecialchars((string)$ruta['cod_ruta'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php echo htmlspecialchars(toUTF8((string)$ruta['nombre_ruta']), ENT_QUOTES, 'UTF-8') . ' - (' . htmlspecialchars((string)$ruta['cod_ruta'], ENT_QUOTES, 'UTF-8') . ')'; ?>
                                 </option>
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </select>
-                    
+
                     <input type="submit" value="Asignar Ruta">
                 </form>
             </div>
-            
+
+            <?php if ($ruta_actual !== null): ?>
+                <div class="assign-form">
+                    <h2>Clientes de la Ruta <?php echo htmlspecialchars(toUTF8((string)$ruta_actual['nombre_ruta']), ENT_QUOTES, 'UTF-8'); ?> fuera del vendedor actual</h2>
+                    <table>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Sección</th>
+                            <th>Frecuencia</th>
+                        </tr>
+                        <?php if (!empty($clientes_ruta)): ?>
+                            <?php foreach ($clientes_ruta as $clienteRuta): ?>
+                                <tr>
+                                    <td>
+                                        <?php
+                                            $poblacionClienteRuta = trim((string)($clienteRuta['poblacion_cliente'] ?? ''));
+                                            echo htmlspecialchars(toUTF8((string)$clienteRuta['nombre_cliente']), ENT_QUOTES, 'UTF-8');
+                                            if ($poblacionClienteRuta !== '') {
+                                                echo ' - ' . htmlspecialchars(toUTF8($poblacionClienteRuta), ENT_QUOTES, 'UTF-8');
+                                            }
+                                        ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars(toUTF8((string)($clienteRuta['nombre_seccion'] ?? 'Sin sección')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars((string)($clienteRuta['frecuencia_visita'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="3" class="no-data">No hay clientes de esta ruta que pertenezcan a otro vendedor.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </table>
+                </div>
+            <?php endif; ?>
+
             <a href="zonas.php" class="back-button">Volver a Zonas</a>
-        
+
         <?php else: ?>
             <!-- Mostrar lista de zonas disponibles -->
             <h1>Zonas Disponibles</h1>
-            
+
             <?php if (!empty($zonas_disponibles)): ?>
                 <div class="zonas-list">
                     <?php foreach ($zonas_disponibles as $zona): ?>
                         <div class="zona-item">
-                            <a href="zonas_rutas.php?cod_zona=<?php echo htmlspecialchars($zona['cod_zona']); ?>" class="action-link">
-                                <?php echo htmlspecialchars($zona['nombre_zona']); ?>
+                            <a href="zonas_rutas.php?cod_zona=<?php echo htmlspecialchars((string)$zona['cod_zona'], ENT_QUOTES, 'UTF-8'); ?>" class="action-link">
+                                <?php echo htmlspecialchars(toUTF8((string)$zona['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?>
                             </a>
                         </div>
                     <?php endforeach; ?>
@@ -258,8 +313,7 @@ if (isset($_GET['cod_zona'])) {
             <?php endif; ?>
         <?php endif; ?>
     </div>
-    
-    <!-- jQuery + Bootstrap JS -->
-        </body>
-</html>
 
+    <!-- jQuery + Bootstrap JS -->
+</body>
+</html>

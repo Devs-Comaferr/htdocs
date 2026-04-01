@@ -15,15 +15,18 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
-// asignacion_clientes_zonas.php
+// zonas_clientes.php
 require_once BASE_PATH . '/app/Modules/Planificador/planificador_service.php';
 require_once BASE_PATH . '/app/Support/functions.php';
+
+$conn = db();
+
 $pageTitle = "Asignar Clientes a Zonas";
 $ui_version = 'bs5';
 $ui_requires_jquery = false;
 include BASE_PATH . '/resources/views/layouts/header.php';
 
-// Verificar si el usuario ha iniciado sesiÃ³n
+// Verificar si el usuario ha iniciado sesión
 
 // Obtener todas las zonas asignadas al vendedor
 $zonas = obtenerZonasVisitaService();
@@ -34,14 +37,14 @@ $clientes_desalineados = array();
 if (isset($_GET['cod_zona'])) {
     $cod_zona = intval($_GET['cod_zona']);
     
-    // Obtener informaciÃ³n de la zona
+    // Obtener información de la zona
     $zona_actual = obtenerZonaPorCodigo($cod_zona);
     
     if (!$zona_actual) {
         error_log('Zona no encontrada.');
         echo 'Error interno';
-    }
         return;
+    }
     
     // Obtener rutas asignadas a la zona
     $rutas_asignadas = obtenerRutasPorZonaService($cod_zona);
@@ -52,7 +55,7 @@ if (isset($_GET['cod_zona'])) {
     // Obtener asignaciones actuales de clientes a la zona
     $asignaciones_actuales = obtenerClientesPorZona($cod_zona);
 
-    // Clientes en la zona cuyo cod_vendedor no coincide con el vendedor en sesiÃ³n
+    // Clientes en la zona cuyo cod_vendedor no coincide con el vendedor en sesión
     $codigoSesion = isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
     if ($codigoSesion > 0 && !empty($asignaciones_actuales)) {
         $codigosClientes = array();
@@ -126,7 +129,7 @@ if (isset($_GET['cod_zona'])) {
     <meta charset="UTF-8">
     <title>Asignar Clientes a Zonas</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- Font Awesome para los Ã­conos -->
+        <!-- Font Awesome para los iconos -->
     <style>
         /* Estilos existentes... */
         body {
@@ -203,7 +206,7 @@ if (isset($_GET['cod_zona'])) {
             box-shadow: 0 1px 4px rgba(0,0,0,0.25);
         }
 
-        /* Responsividad para dispositivos mÃ³viles */
+        /* Responsividad para dispositivos móviles */
         @media (max-width: 1024px) {
             .btn-zona {
                 width: 150px;
@@ -328,7 +331,7 @@ if (isset($_GET['cod_zona'])) {
         .back-button:hover {
             background-color: #5a6268;
         }
-        /* Estilo para el campo de SecciÃ³n oculto */
+        /* Estilo para el campo de Sección oculto */
         .error-message {
             color: red;
             margin-bottom: 15px;
@@ -364,12 +367,12 @@ if (isset($_GET['cod_zona'])) {
                     $codZona = (string)($zona['cod_zona'] ?? '');
                     $totalDesalineados = (int)($zonas_alertas[$codZona] ?? 0);
                 ?>
-                <a href="asignacion_clientes_zonas.php?cod_zona=<?php echo htmlspecialchars($zona['cod_zona']); ?>" class="btn-zona">
+                <a href="zonas_clientes.php?cod_zona=<?php echo htmlspecialchars($zona['cod_zona']); ?>" class="btn-zona">
                     <?php if ($totalDesalineados > 0): ?>
                         <span class="zona-alerta-badge"><?php echo $totalDesalineados; ?></span>
                     <?php endif; ?>
                     <i class="fas fa-map-marker-alt"></i>
-                    <?php echo htmlspecialchars($zona['nombre_zona']); ?>
+                    <?php echo htmlspecialchars(toUTF8((string)$zona['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?>
                 </a>
             <?php endforeach; ?>
         </div>
@@ -377,7 +380,7 @@ if (isset($_GET['cod_zona'])) {
         <div class="no-data">No tienes zonas disponibles. <a href="zonas.php">Crear Zonas</a></div>
     <?php endif; ?>
 <?php else: ?>
-            <h2><?php echo htmlspecialchars($zona_actual['nombre_zona']); ?></h2>
+            <h2><?php echo htmlspecialchars(toUTF8((string)$zona_actual['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?></h2>
             
             <?php if (!empty($clientes_disponibles)): ?>
             <div class="assign-form">
@@ -395,7 +398,7 @@ if (isset($_GET['cod_zona'])) {
                         <?php if (!empty($clientes_disponibles)): ?>
                             <?php foreach ($clientes_disponibles as $cliente): ?>
                                 <option value="<?php echo $cliente['cod_cliente']; ?>">
-                                    <?php echo htmlspecialchars($cliente['nombre_cliente']); ?>
+                                    <?php echo htmlspecialchars(toUTF8((string)$cliente['nombre_cliente']), ENT_QUOTES, 'UTF-8'); ?>
                                 </option>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -403,12 +406,12 @@ if (isset($_GET['cod_zona'])) {
                         <?php endif; ?>
                     </select>
                     
-                    <!-- Campo de SecciÃ³n que se muestra dinÃ¡micamente -->
+                    <!-- Campo de Sección que se muestra dinámicamente -->
                     <div id="seccion-container" class="d-none">
-                        <label for="cod_seccion">Selecciona la SecciÃ³n:</label>
+                        <label for="cod_seccion">Selecciona la Sección:</label>
                         <select id="cod_seccion" name="cod_seccion" class="form-select">
-                            <option value="">--Selecciona una SecciÃ³n--</option>
-                            <!-- Las opciones se llenarÃ¡n mediante AJAX -->
+                            <option value="">--Selecciona una Sección--</option>
+                            <!-- Las opciones se llenarán mediante AJAX -->
                         </select>
                     </div>
                     
@@ -418,7 +421,7 @@ if (isset($_GET['cod_zona'])) {
                         <?php foreach ($zonas as $zona): ?>
                             <?php if ($zona['cod_zona'] != $cod_zona): ?>
                                 <option value="<?php echo htmlspecialchars($zona['cod_zona']); ?>">
-                                    <?php echo htmlspecialchars($zona['nombre_zona']); ?>
+                                    <?php echo htmlspecialchars(toUTF8((string)$zona['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?>
                                 </option>
                             <?php endif; ?>
                         <?php endforeach; ?>
@@ -430,7 +433,7 @@ if (isset($_GET['cod_zona'])) {
                     <label for="preferencia_horaria">Preferencia Horaria:</label>
                     <select id="preferencia_horaria" name="preferencia_horaria" class="form-select">
                         <option value="">--Selecciona una Preferencia--</option>
-                        <option value="M">MaÃ±ana</option>
+                        <option value="M">Mañana</option>
                         <option value="T">Tarde</option>
                     </select>
                     
@@ -484,7 +487,7 @@ if (isset($_GET['cod_zona'])) {
         ?>
         <?php foreach ($asignaciones_actuales as $asignacion): ?>
             <?php
-                // Determinar la clase CSS basada en el tipo de asignaciÃ³n
+                // Determinar la clase CSS basada en el tipo de asignación
                 $clase = '';
                 if ($asignacion['tipo_asignacion'] === 'secundaria') {
                     $clase = 'asignacion-secundaria';
@@ -504,18 +507,20 @@ if (isset($_GET['cod_zona'])) {
                         $municipioLineaPrincipal = !empty($asignacion['nombre_seccion'])
                             ? ($poblacionSeccion !== '' ? $poblacionSeccion : $poblacionCliente)
                             : $poblacionCliente;
-                        echo htmlspecialchars($asignacion['nombre_cliente']) . " - " . htmlspecialchars((string)$municipioLineaPrincipal);
+                        echo htmlspecialchars(toUTF8((string)$asignacion['nombre_cliente']), ENT_QUOTES, 'UTF-8')
+                            . " - " .
+                            htmlspecialchars(toUTF8((string)$municipioLineaPrincipal), ENT_QUOTES, 'UTF-8');
                     ?>
                     <?php
                     $codCliFila = (string)($asignacion['cod_cliente'] ?? '');
                     $tieneVariasSecciones = $codCliFila !== '' && isset($numSeccionesPorCliente[$codCliFila]) && count($numSeccionesPorCliente[$codCliFila]) > 1;
                     if ($tieneVariasSecciones && !empty($asignacion['nombre_seccion'])) {
-                        echo '<br>&nbsp;&nbsp;&nbsp;&nbsp; &#128204; '. htmlspecialchars($asignacion['nombre_seccion']);
+                        echo '<br>&nbsp;&nbsp;&nbsp;&nbsp; &#128204; ' . htmlspecialchars(toUTF8((string)$asignacion['nombre_seccion']), ENT_QUOTES, 'UTF-8');
                     }
                     ?>
                     <?php if (!empty($asignacion['observaciones'])) { ?>
                         <br>
-                        <span class="asignacion-secundaria">&#9997; <?php echo htmlspecialchars($asignacion['observaciones']); ?></span>
+                        <span class="asignacion-secundaria">&#9997; <?php echo htmlspecialchars(toUTF8((string)$asignacion['observaciones']), ENT_QUOTES, 'UTF-8'); ?></span>
                     <?php } ?>
 
                 </td>
@@ -524,23 +529,34 @@ if (isset($_GET['cod_zona'])) {
                 <?php if ($asignacion['tipo_asignacion'] === 'primaria') {?>
                     
                 
-    <!-- BotÃ³n de Editar -->
-    <!-- BotÃ³n de Editar -->
-<form action="editar_asignacion.php" method="get" style="display:inline;">
-    <input type="hidden" name="cod_cliente" value="<?php echo htmlspecialchars($asignacion['cod_cliente']); ?>">
-    <input type="hidden" name="cod_zona" value="<?php echo htmlspecialchars($cod_zona); ?>">
-    <input type="hidden" name="cod_seccion" value="<?php echo isset($asignacion['cod_seccion']) ? htmlspecialchars($asignacion['cod_seccion']) : 'NULL'; ?>">
-    <button type="submit" class="btn btn-sm btn-warning" title="Editar AsignaciÃ³n">
+    <!-- Botón de Editar -->
+    <!-- Botón de Editar -->
+    <button
+        type="button"
+        class="btn btn-sm btn-warning js-edit-asignacion"
+        title="Editar Asignación"
+        data-bs-toggle="modal"
+        data-bs-target="#editarAsignacionModal"
+        data-cod-cliente="<?php echo htmlspecialchars((string)$asignacion['cod_cliente'], ENT_QUOTES, 'UTF-8'); ?>"
+        data-cod-zona="<?php echo htmlspecialchars((string)$cod_zona, ENT_QUOTES, 'UTF-8'); ?>"
+        data-cod-seccion="<?php echo isset($asignacion['cod_seccion']) ? htmlspecialchars((string)$asignacion['cod_seccion'], ENT_QUOTES, 'UTF-8') : 'NULL'; ?>"
+        data-nombre-cliente="<?php echo htmlspecialchars(toUTF8((string)$asignacion['nombre_cliente']), ENT_QUOTES, 'UTF-8'); ?>"
+        data-nombre-seccion="<?php echo htmlspecialchars(toUTF8((string)($asignacion['nombre_seccion'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>"
+        data-nombre-zona="<?php echo htmlspecialchars(toUTF8((string)$zona_actual['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?>"
+        data-zona-secundaria="<?php echo htmlspecialchars((string)($asignacion['zona_secundaria'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+        data-tiempo-promedio-visita="<?php echo htmlspecialchars((string)($asignacion['tiempo_promedio_visita'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+        data-preferencia-horaria="<?php echo htmlspecialchars((string)($asignacion['preferencia_horaria'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+        data-frecuencia-visita="<?php echo htmlspecialchars((string)($asignacion['frecuencia_visita'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+        data-observaciones="<?php echo htmlspecialchars(toUTF8((string)($asignacion['observaciones'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>">
         <i class="fas fa-pencil"></i>
     </button>
-</form>
 
-    <!-- BotÃ³n de Eliminar -->
-    <form action="borrar_asignacion.php" method="post" style="display:inline;" onsubmit="return confirm('EstÃ¡s seguro de que deseas eliminar esta asignaciÃ³n?');">
+    <!-- Botón de Eliminar -->
+    <form action="borrar_asignacion.php" method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta asignación?');">
         <input type="hidden" name="cod_cliente" value="<?php echo htmlspecialchars($asignacion['cod_cliente']); ?>">
         <input type="hidden" name="cod_zona" value="<?php echo htmlspecialchars($cod_zona); ?>">
         <input type="hidden" name="cod_seccion" value="<?php echo htmlspecialchars($asignacion['cod_seccion']); ?>">
-        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar AsignaciÃ³n">
+        <button type="submit" class="btn btn-sm btn-danger" title="Eliminar Asignación">
             <i class="fas fa-trash"></i>
         </button>
     </form>
@@ -556,6 +572,71 @@ if (isset($_GET['cod_zona'])) {
     <?php endif; ?>
 </table>
 
+            <div class="modal fade" id="editarAsignacionModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="actualizar_asignacion.php" method="post">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Editar Asignación</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" name="cod_cliente" id="modal-cod-cliente">
+                                <input type="hidden" name="cod_zona" id="modal-cod-zona">
+                                <input type="hidden" name="cod_seccion" id="modal-cod-seccion">
+
+                                <label>Nombre del Cliente:</label>
+                                <input type="text" id="modal-nombre-cliente" class="form-control" disabled>
+
+                                <label>Sección:</label>
+                                <input type="text" id="modal-nombre-seccion" class="form-control" disabled>
+
+                                <label>Zona Principal:</label>
+                                <input type="text" id="modal-nombre-zona" class="form-control" disabled>
+
+                                <label for="modal-zona-secundaria">Zona Secundaria (Opcional):</label>
+                                <select name="zona_secundaria" id="modal-zona-secundaria" class="form-select">
+                                    <option value="">--Selecciona una Zona--</option>
+                                    <?php foreach ($zonas as $z): ?>
+                                        <?php if ($z['cod_zona'] != $cod_zona): ?>
+                                            <option value="<?php echo htmlspecialchars((string)$z['cod_zona'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                <?php echo htmlspecialchars(toUTF8((string)$z['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?>
+                                            </option>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </select>
+
+                                <label for="modal-tiempo-promedio-visita">Tiempo Promedio de Visita (horas):</label>
+                                <input type="number" name="tiempo_promedio_visita" id="modal-tiempo-promedio-visita" class="form-control" step="0.5">
+
+                                <label for="modal-preferencia-horaria">Preferencia Horaria:</label>
+                                <select name="preferencia_horaria" id="modal-preferencia-horaria" class="form-select">
+                                    <option value="">--Selecciona una Preferencia--</option>
+                                    <option value="M">Mañana</option>
+                                    <option value="T">Tarde</option>
+                                </select>
+
+                                <label for="modal-frecuencia-visita">Frecuencia de Visita:</label>
+                                <select name="frecuencia_visita" id="modal-frecuencia-visita" class="form-select" required>
+                                    <option value="">--Selecciona una Frecuencia--</option>
+                                    <option value="Todos">Todos los meses</option>
+                                    <option value="Cada2">Cada 2 meses</option>
+                                    <option value="Cada3">Cada 3 meses</option>
+                                    <option value="Nunca">Nunca</option>
+                                </select>
+
+                                <label for="modal-observaciones">Observaciones:</label>
+                                <textarea name="observaciones" id="modal-observaciones" class="form-control"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Actualizar Asignación</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
 
             <script>
     // Script para alternar la visibilidad de las filas con frecuencia "Nunca"
@@ -568,7 +649,7 @@ if (isset($_GET['cod_zona'])) {
         });
     });
 
-    // InicializaciÃ³n: Ocultar filas si el checkbox estÃ¡ desmarcado
+    // Inicialización: Ocultar filas si el checkbox está desmarcado
     document.addEventListener('DOMContentLoaded', function() {
         const mostrar = document.getElementById('mostrar-nunca').checked;
         const filas = document.querySelectorAll('.frecuencia-nunca');
@@ -580,10 +661,10 @@ if (isset($_GET['cod_zona'])) {
 </script>
 
             
-            <a href="asignacion_clientes_zonas.php" class="back-button">Volver a Zonas</a>
+            <a href="zonas_clientes.php" class="back-button">Volver a Zonas</a>
             
             <script>
-                // FunciÃ³n para verificar y cargar las secciones del cliente seleccionado
+                // Función para verificar y cargar las secciones del cliente seleccionado
                 function verificarSecciones(cod_cliente) {
                     var xhr = new XMLHttpRequest();
                     xhr.open('GET', 'obtener_secciones.php?cod_cliente=' + cod_cliente, true);
@@ -595,7 +676,7 @@ if (isset($_GET['cod_zona'])) {
                                 var seccionSelect = document.getElementById('cod_seccion');
                                 
                                 // Limpiar opciones existentes
-                                seccionSelect.innerHTML = '<option value="">--Selecciona una SecciÃ³n--</option>';
+                                seccionSelect.innerHTML = '<option value="">--Selecciona una Sección--</option>';
                                 
                                 // Determinar si el cliente tiene secciones disponibles
                                 if (secciones.length > 0) {
@@ -626,70 +707,92 @@ if (isset($_GET['cod_zona'])) {
                 }
 
                 // Agregar evento de cambio al select de clientes
-                document.getElementById('cod_cliente').addEventListener('change', function() {
-                    var cod_cliente = this.value;
-                    
-                    if (cod_cliente) {
-                        verificarSecciones(cod_cliente);
-                    } else {
-                        // Si no hay cliente seleccionado, ocultar el campo de secciones
-                        document.getElementById('seccion-container').classList.add('d-none');
-                        document.getElementById('cod_seccion').required = false;
-                        document.getElementById('cod_seccion').value = '';
-                    }
-                });
+                var clienteSelect = document.getElementById('cod_cliente');
+                if (clienteSelect) {
+                    clienteSelect.addEventListener('change', function() {
+                        var cod_cliente = this.value;
+                        
+                        if (cod_cliente) {
+                            verificarSecciones(cod_cliente);
+                        } else {
+                            // Si no hay cliente seleccionado, ocultar el campo de secciones
+                            document.getElementById('seccion-container').classList.add('d-none');
+                            document.getElementById('cod_seccion').required = false;
+                            document.getElementById('cod_seccion').value = '';
+                        }
+                    });
+                }
 
-                // ValidaciÃ³n del formulario antes de enviarlo
-                document.getElementById('assign-form').addEventListener('submit', function(event) {
-                    var errorMessage = document.getElementById('error-message');
-                    var cod_cliente = document.getElementById('cod_cliente').value;
-                    var seccionContainer = document.getElementById('seccion-container');
-                    var cod_seccion = document.getElementById('cod_seccion').value;
-                    var tiempo_promedio_visita = document.getElementById('tiempo_promedio_visita').value;
-                    var preferencia_horaria = document.getElementById('preferencia_horaria').value;
-                    var frecuencia_visita = document.getElementById('frecuencia_visita').value;
-                    
-                    // Resetear mensaje de error
-                    errorMessage.classList.add('d-none');
-                    errorMessage.textContent = 'Por favor, completa todos los campos obligatorios.';
-                    
-                    // Verificar campos obligatorios
-                    if (cod_cliente === '') {
-                        errorMessage.classList.remove('d-none');
-                        errorMessage.textContent = 'Debes seleccionar un cliente.';
-                        event.preventDefault();
-                        return;
-                    }
-                    
-                    if (!seccionContainer.classList.contains('d-none') && cod_seccion === '') {
-                        errorMessage.classList.remove('d-none');
-                        errorMessage.textContent = 'Debes seleccionar una secciÃ³n.';
-                        event.preventDefault();
-                        return;
-                    }
-                    
-                    /* if (tiempo_promedio_visita === '' || tiempo_promedio_visita <= 0) {
-                        errorMessage.classList.remove('d-none');
-                        errorMessage.textContent = 'Debes ingresar un tiempo promedio de visita vlido.';
-                        event.preventDefault();
-                        return;
-                    } */
-                    
-                    /* if (preferencia_horaria === '') {
-                        errorMessage.style.display = 'block';
-                        errorMessage.textContent = 'Debes seleccionar una preferencia horaria.';
-                        event.preventDefault();
-                        return;
-                    } */
-                    
-                    if (frecuencia_visita === '') {
-                        errorMessage.style.display = 'block';
-                        errorMessage.textContent = 'Debes seleccionar una frecuencia de visita.';
-                        event.preventDefault();
-                        return;
-                    }
-                    
-                    // Si todas las validaciones pasan, el formulario se enviarÃ¡
+                // Validación del formulario antes de enviarlo
+                var assignForm = document.getElementById('assign-form');
+                if (assignForm) {
+                    assignForm.addEventListener('submit', function(event) {
+                        var errorMessage = document.getElementById('error-message');
+                        var cod_cliente = document.getElementById('cod_cliente').value;
+                        var seccionContainer = document.getElementById('seccion-container');
+                        var cod_seccion = document.getElementById('cod_seccion').value;
+                        var tiempo_promedio_visita = document.getElementById('tiempo_promedio_visita').value;
+                        var preferencia_horaria = document.getElementById('preferencia_horaria').value;
+                        var frecuencia_visita = document.getElementById('frecuencia_visita').value;
+                        
+                        // Resetear mensaje de error
+                        errorMessage.classList.add('d-none');
+                        errorMessage.textContent = 'Por favor, completa todos los campos obligatorios.';
+                        
+                        // Verificar campos obligatorios
+                        if (cod_cliente === '') {
+                            errorMessage.classList.remove('d-none');
+                            errorMessage.textContent = 'Debes seleccionar un cliente.';
+                            event.preventDefault();
+                            return;
+                        }
+                        
+                        if (!seccionContainer.classList.contains('d-none') && cod_seccion === '') {
+                            errorMessage.classList.remove('d-none');
+                            errorMessage.textContent = 'Debes seleccionar una sección.';
+                            event.preventDefault();
+                            return;
+                        }
+                        
+                        /* if (tiempo_promedio_visita === '' || tiempo_promedio_visita <= 0) {
+                            errorMessage.classList.remove('d-none');
+                            errorMessage.textContent = 'Debes ingresar un tiempo promedio de visita vlido.';
+                            event.preventDefault();
+                            return;
+                        } */
+                        
+                        /* if (preferencia_horaria === '') {
+                            errorMessage.style.display = 'block';
+                            errorMessage.textContent = 'Debes seleccionar una preferencia horaria.';
+                            event.preventDefault();
+                            return;
+                        } */
+                        
+                        if (frecuencia_visita === '') {
+                            errorMessage.style.display = 'block';
+                            errorMessage.textContent = 'Debes seleccionar una frecuencia de visita.';
+                            event.preventDefault();
+                            return;
+                        }
+                        
+                        // Si todas las validaciones pasan, el formulario se enviará
+                    });
+                }
+
+                document.querySelectorAll('.js-edit-asignacion').forEach(function(button) {
+                    button.addEventListener('click', function() {
+                        document.getElementById('modal-cod-cliente').value = this.dataset.codCliente || '';
+                        document.getElementById('modal-cod-zona').value = this.dataset.codZona || '';
+                        document.getElementById('modal-cod-seccion').value = this.dataset.codSeccion || 'NULL';
+                        document.getElementById('modal-nombre-cliente').value = this.dataset.nombreCliente || '';
+                        document.getElementById('modal-nombre-seccion').value = this.dataset.nombreSeccion || 'Sin Sección';
+                        document.getElementById('modal-nombre-zona').value = this.dataset.nombreZona || '';
+                        document.getElementById('modal-zona-secundaria').value = this.dataset.zonaSecundaria || '';
+                        document.getElementById('modal-tiempo-promedio-visita').value = this.dataset.tiempoPromedioVisita || '';
+                        document.getElementById('modal-preferencia-horaria').value = this.dataset.preferenciaHoraria || '';
+                        document.getElementById('modal-frecuencia-visita').value = this.dataset.frecuenciaVisita || '';
+                        document.getElementById('modal-observaciones').value = this.dataset.observaciones || '';
+                    });
                 });
             </script>
 <?php endif; ?>

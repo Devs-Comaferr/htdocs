@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($resultado) {
         // Redirigir de vuelta a la pÃ¡gina de asignaciÃ³n con un mensaje de Ã©xito
-        header("Location: asignacion_clientes_zonas.php?cod_zona=$cod_zona&mensaje=asignado");
+        header("Location: zonas_clientes.php?cod_zona=$cod_zona&mensaje=asignado");
         exit();
     } else {
         error_log('Error al asignar el cliente a la zona.');

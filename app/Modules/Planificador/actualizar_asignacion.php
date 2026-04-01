@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (!defined('BASE_PATH')) {
     header('Location: /public/');
     exit;
@@ -16,6 +16,8 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 
 require_once BASE_PATH . '/app/Modules/Planificador/planificador_service.php';
+
+$conn = db();
 
 if (!isset($_POST['cod_cliente'], $_POST['cod_zona'], $_POST['cod_seccion'], $_POST['frecuencia_visita'], $_POST['tiempo_promedio_visita'], $_POST['preferencia_horaria'])) {
     appExitTextError('Error: Datos insuficientes para actualizar la asignacion.', 400);
@@ -58,6 +60,5 @@ if (!$resultado) {
     appExitTextError('No se pudo actualizar la asignacion.', 500, 'actualizar_asignacion', odbc_errormsg($conn));
 }
 
-header("Location: asignacion_clientes_zonas.php?cod_zona=$cod_zona");
+header("Location: zonas_clientes.php?cod_zona=$cod_zona");
 exit;
-
