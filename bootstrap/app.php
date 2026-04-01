@@ -29,4 +29,8 @@ if (is_file($securityPath)) {
     require_once $securityPath;
 }
 
+if (function_exists('csrfToken')) {
+    csrfToken();
+}
+
 require_once __DIR__ . '/../app/Support/functions.php';
