@@ -1,8 +1,5 @@
 <?php
-// ARCHIVO LEGACY
-// Este archivo ya no debe usarse directamente.
-// Se mantiene por compatibilidad.
-// Usar /visitas.php?action=crear|editar|eliminar
+// Pantalla unificada para registro manual de visitas (flujo completo en un solo archivo)
 
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
@@ -46,7 +43,6 @@ $observaciones = isset($_POST['observaciones']) ? trim((string)$_POST['observaci
 $error = '';
 $resultadosBusqueda = [];
 $mostrarResultados = ($accion === 'buscar');
-$mostrarFormulario = ($cod_cliente > 0);
 $assignment = null;
 $nombreCliente = '';
 $nombreSeccion = '';
@@ -84,7 +80,7 @@ if ($accion === 'buscar') {
     }
 }
 
-if ($mostrarFormulario) {
+if ($cod_cliente > 0) {
     $sql_assignment = "SELECT * FROM [integral].[dbo].[cmf_asignacion_zonas_clientes] WHERE cod_cliente = ? AND activo = 1";
     $assignmentParams = [$cod_cliente];
     if ($cod_seccion !== null) {
@@ -93,20 +89,18 @@ if ($mostrarFormulario) {
     } else {
         $sql_assignment .= " AND cod_seccion IS NULL";
     }
-    $result_assignment = registrarVisitaManualPrepareExecute($conn, $sql_assignment, $assignmentParams);
+        $result_assignment = registrarVisitaManualPrepareExecute($conn, $sql_assignment, $assignmentParams);
     if (!$result_assignment) {
         $error = 'Error interno';
-        $mostrarFormulario = false;
     } else {
         $assignment = odbc_fetch_array($result_assignment);
         if (!$assignment) {
             $error = 'Error interno';
-            $mostrarFormulario = false;
         }
     }
 }
 
-if ($mostrarFormulario && $assignment) {
+if ($cod_cliente > 0 && $assignment) {
     $sql_cliente = "SELECT nombre_comercial FROM [integral].[dbo].[clientes] WHERE cod_cliente = ?";
     $result_cliente = registrarVisitaManualPrepareExecute($conn, $sql_cliente, [$cod_cliente]);
     $clienteData = $result_cliente ? odbc_fetch_array($result_cliente) : false;
@@ -274,15 +268,15 @@ if ($mostrarFormulario && $assignment) {
                     <label for="buscar">Nombre del Cliente:</label>
                     <input type="text" name="buscar" id="buscar" class="form-control" value="<?php echo htmlspecialchars($busqueda); ?>" placeholder="Ingrese el nombre del cliente">
                     <button type="submit" name="accion" value="buscar" class="btn btn-primary w-100 btn-submit">Buscar</button>
-                    <p class="text-center" style="margin-top:20px;">Solo se mostraran clientes asignados a tu usuario.</p>
+                    <p class="text-center" style="margin-top:20px;">Solo se mostrarán clientes asignados a tu usuario.</p>
                 </div>
             <?php endif; ?>
 
             <?php if ($mostrarResultados && $cod_cliente == 0): ?>
                 <hr>
-                <h3>Resultados de la busqueda</h3>
+                <h3>Resultados de la búsqueda</h3>
                 <?php if (empty($resultadosBusqueda)): ?>
-                    <p class="text-center">No se encontraron clientes que cumplan con la busqueda.</p>
+                    <p class="text-center">No se encontraron clientes que cumplan con la búsqueda.</p>
                 <?php else: ?>
                     <?php foreach ($resultadosBusqueda as $cliente): ?>
                         <?php
@@ -308,6 +302,14 @@ if ($mostrarFormulario && $assignment) {
 
             <?php if ($cod_cliente > 0 && $assignment): ?>
                 <hr>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div class="alert alert-primary mb-0 py-2 px-3">
+                        <strong>Cliente seleccionado:</strong>
+                        <?php echo htmlspecialchars($nombreCliente); ?>
+                        <span class="badge bg-light text-dark ms-2">#<?php echo htmlspecialchars((string)$cod_cliente); ?></span>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="window.location='<?= BASE_URL ?>/registrar_visita_manual.php'">Cambiar cliente</button>
+                </div>
 
                 <?php if (count($citas) > 0): ?>
                     <?php foreach ($citas as $cita): ?>
@@ -325,13 +327,12 @@ if ($mostrarFormulario && $assignment) {
                 <?php endif; ?>
 
                 <?php if (!empty($assignment['frecuencia_visita']) && strtolower((string)$assignment['frecuencia_visita']) === 'nunca'): ?>
-                    <div class="alert alert-danger">Atencion: Este cliente no se visita habitualmente.</div>
+                    <div class="alert alert-danger">Atención: Este cliente no se visita habitualmente.</div>
                 <?php endif; ?>
 
                 <h3>Datos del Cliente y Disponibilidad</h3>
-                <p><strong>Cliente:</strong> <?php echo htmlspecialchars($nombreCliente); ?></p>
                 <?php if ($nombreSeccion !== ''): ?>
-                    <p><strong>Seccion:</strong> <?php echo htmlspecialchars($nombreSeccion); ?></p>
+                    <p><strong>Sección:</strong> <?php echo htmlspecialchars($nombreSeccion); ?></p>
                 <?php endif; ?>
                 <p><strong>Tiempo Promedio de Visita:</strong>
                     <?php
@@ -347,35 +348,35 @@ if ($mostrarFormulario && $assignment) {
                     }
                     ?>
                 </p>
-                <p><strong>Disponibilidad Manana:</strong> <?php echo $hora_inicio_manana !== '' ? htmlspecialchars($hora_inicio_manana) : 'No definido'; ?> a <?php echo $hora_fin_manana !== '' ? htmlspecialchars($hora_fin_manana) : 'No definido'; ?></p>
+                <p><strong>Disponibilidad Mañana:</strong> <?php echo $hora_inicio_manana !== '' ? htmlspecialchars($hora_inicio_manana) : 'No definido'; ?> a <?php echo $hora_fin_manana !== '' ? htmlspecialchars($hora_fin_manana) : 'No definido'; ?></p>
                 <p><strong>Disponibilidad Tarde:</strong> <?php echo $hora_inicio_tarde !== '' ? htmlspecialchars($hora_inicio_tarde) : 'No definido'; ?> a <?php echo $hora_fin_tarde !== '' ? htmlspecialchars($hora_fin_tarde) : 'No definido'; ?></p>
                 <p><strong>Preferencia Horaria:</strong> <?php echo !empty($assignment['preferencia_horaria']) ? htmlspecialchars((string)$assignment['preferencia_horaria']) : 'No definida'; ?></p>
 
-                <button id="btnDefinirHorario" type="button" class="btn btn-info" style="margin-bottom:15px;">Definir Horario</button>
+                <button id="horario_btnDefinirHorario" type="button" class="btn btn-info" style="margin-bottom:15px;">Definir Horario</button>
 
-                <div id="modalDefinirHorario">
+                <div id="horario_modalDefinirHorario">
                     <div class="modal-content">
                         <span class="close">&times;</span>
                         <h3>Definir Horario de Disponibilidad</h3>
-                        <input type="hidden" id="modal_cod_cliente" value="<?php echo htmlspecialchars((string)$cod_cliente); ?>">
-                        <input type="hidden" id="modal_cod_seccion" value="<?php echo $cod_seccion !== null ? htmlspecialchars((string)$cod_seccion) : ''; ?>">
+                        <input type="hidden" id="horario_modal_cod_cliente" value="<?php echo htmlspecialchars((string)$cod_cliente); ?>">
+                        <input type="hidden" id="horario_modal_cod_seccion" value="<?php echo $cod_seccion !== null ? htmlspecialchars((string)$cod_seccion) : ''; ?>">
                         <div class="mb-3">
-                            <label for="hora_inicio_manana">Hora Inicio Manana:</label>
-                            <input type="time" class="form-control" id="hora_inicio_manana" value="<?php echo htmlspecialchars($hora_inicio_manana); ?>" required>
+                            <label for="horario_inicio_manana">Hora Inicio Mañana:</label>
+                            <input type="time" class="form-control" id="horario_inicio_manana" value="<?php echo htmlspecialchars($hora_inicio_manana); ?>" required>
                         </div>
                         <div class="mb-3">
-                            <label for="hora_fin_manana">Hora Fin Manana:</label>
-                            <input type="time" class="form-control" id="hora_fin_manana" value="<?php echo htmlspecialchars($hora_fin_manana); ?>" required>
+                            <label for="horario_fin_manana">Hora Fin Mañana:</label>
+                            <input type="time" class="form-control" id="horario_fin_manana" value="<?php echo htmlspecialchars($hora_fin_manana); ?>" required>
                         </div>
                         <div class="mb-3">
-                            <label for="hora_inicio_tarde">Hora Inicio Tarde:</label>
-                            <input type="time" class="form-control" id="hora_inicio_tarde" value="<?php echo htmlspecialchars($hora_inicio_tarde); ?>" required>
+                            <label for="horario_inicio_tarde">Hora Inicio Tarde:</label>
+                            <input type="time" class="form-control" id="horario_inicio_tarde" value="<?php echo htmlspecialchars($hora_inicio_tarde); ?>" required>
                         </div>
                         <div class="mb-3">
-                            <label for="hora_fin_tarde">Hora Fin Tarde:</label>
-                            <input type="time" class="form-control" id="hora_fin_tarde" value="<?php echo htmlspecialchars($hora_fin_tarde); ?>" required>
+                            <label for="horario_fin_tarde">Hora Fin Tarde:</label>
+                            <input type="time" class="form-control" id="horario_fin_tarde" value="<?php echo htmlspecialchars($hora_fin_tarde); ?>" required>
                         </div>
-                        <button type="button" id="guardarHorarioBtn" class="btn btn-success w-100 btn-submit">Guardar Horario</button>
+                        <button type="button" id="horario_guardarHorarioBtn" class="btn btn-success w-100 btn-submit">Guardar Horario</button>
                     </div>
                 </div>
 
@@ -430,10 +431,10 @@ if ($mostrarFormulario && $assignment) {
             var horaInicioInput = document.querySelector('#hora_inicio_visita');
             var horaFinInput = document.querySelector('#hora_fin_visita');
             var visitasDelDia = document.querySelector('#visitas_del_dia');
-            var btnDefinirHorario = document.querySelector('#btnDefinirHorario');
-            var modalDefinirHorario = document.querySelector('#modalDefinirHorario');
+            var btnDefinirHorario = document.querySelector('#horario_btnDefinirHorario');
+            var modalDefinirHorario = document.querySelector('#horario_modalDefinirHorario');
             var modalClose = modalDefinirHorario ? modalDefinirHorario.querySelector('.close') : null;
-            var guardarHorarioBtn = document.querySelector('#guardarHorarioBtn');
+            var guardarHorarioBtn = document.querySelector('#horario_guardarHorarioBtn');
             var promedio = <?php echo json_encode($tiempo_promedio_minutes); ?>;
             var emptyStateHtml = "<div class='alert alert-info'>Seleccione una fecha para ver las visitas programadas.</div>";
             var errorStateHtml = "<div class='alert alert-danger'>Error al cargar las visitas.</div>";
@@ -536,12 +537,12 @@ if ($mostrarFormulario && $assignment) {
             if (guardarHorarioBtn) {
                 guardarHorarioBtn.addEventListener('click', function() {
                     var payload = new URLSearchParams();
-                    payload.append('cod_cliente', document.querySelector('#modal_cod_cliente').value);
-                    payload.append('cod_seccion', document.querySelector('#modal_cod_seccion').value);
-                    payload.append('hora_inicio_manana', document.querySelector('#hora_inicio_manana').value);
-                    payload.append('hora_fin_manana', document.querySelector('#hora_fin_manana').value);
-                    payload.append('hora_inicio_tarde', document.querySelector('#hora_inicio_tarde').value);
-                    payload.append('hora_fin_tarde', document.querySelector('#hora_fin_tarde').value);
+                    payload.append('cod_cliente', document.querySelector('#horario_modal_cod_cliente').value);
+                    payload.append('cod_seccion', document.querySelector('#horario_modal_cod_seccion').value);
+                    payload.append('hora_inicio_manana', document.querySelector('#horario_inicio_manana').value);
+                    payload.append('hora_fin_manana', document.querySelector('#horario_fin_manana').value);
+                    payload.append('hora_inicio_tarde', document.querySelector('#horario_inicio_tarde').value);
+                    payload.append('hora_fin_tarde', document.querySelector('#horario_fin_tarde').value);
 
                     fetch("<?= BASE_URL ?>/definir_horario.php", {
                         method: 'POST',
@@ -567,7 +568,7 @@ if ($mostrarFormulario && $assignment) {
                         })
                         .catch(function(error) {
                             console.error('Error guardando horario:', error);
-                            alert('Error en la peticion.');
+                            alert('Error en la petición.');
                         });
                 });
             }
