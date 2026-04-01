@@ -294,10 +294,43 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0) {
     $codZona = intval($zonaActivaId);
     $codVendedor = obtenerCodVendedorPlanificacionService();
     $conn = db();
+    $iteracionZona = 0;
 
     if ($codVendedor <= 0) {
         return [];
     }
+
+    if ($codZona > 0) {
+        $queryZonaActiva = "
+            SELECT fecha_inicio_ciclo, duracion_semanas, orden
+            FROM cmf_zonas_visita
+            WHERE cod_zona = '$codZona'
+        ";
+        $resultadoZonaActiva = odbc_exec($conn, $queryZonaActiva);
+        $filaZonaActiva = $resultadoZonaActiva ? odbc_fetch_array($resultadoZonaActiva) : false;
+
+        $fechaInicioCiclo = trim((string)($filaZonaActiva['fecha_inicio_ciclo'] ?? ''));
+        if ($fechaInicioCiclo !== '') {
+            $hoy = date('Y-m-d');
+            $dias = (strtotime($hoy) - strtotime(substr($fechaInicioCiclo, 0, 10))) / 86400;
+            $semanasTranscurridas = (int)floor($dias / 7);
+
+            $queryDuracionTotal = "
+                SELECT SUM(duracion_semanas) AS duracion_total_semanas
+                FROM cmf_zonas_visita
+            ";
+            $resultadoDuracionTotal = odbc_exec($conn, $queryDuracionTotal);
+            $filaDuracionTotal = $resultadoDuracionTotal ? odbc_fetch_array($resultadoDuracionTotal) : false;
+            $duracionTotalSemanas = (int)($filaDuracionTotal['duracion_total_semanas'] ?? 0);
+
+            if ($duracionTotalSemanas > 0) {
+                $iteracionZona = (int)floor($semanasTranscurridas / $duracionTotalSemanas);
+            }
+        }
+    }
+
+    error_log('ZONA ACTIVA ID: ' . $codZona);
+    error_log('ITERACION ZONA: ' . $iteracionZona);
 
     $selectZonaBase = "
         SELECT
