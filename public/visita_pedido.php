@@ -1,4 +1,4 @@
 <?php
 require_once dirname(__DIR__) . '/bootstrap/init.php';
-require_once BASE_PATH . '/app/Modules/Visitas/views/visita_pedido.php';
+require_once BASE_PATH . '/app/Modules/Visitas/controllers/visita_pedido.php';
 
