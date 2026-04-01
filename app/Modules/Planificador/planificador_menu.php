@@ -85,6 +85,12 @@ $motivoClienteRecomendado = trim((string)($clienteRecomendado['motivo'] ?? ''));
 $pedidosSinAsignarCriticos = ($totalPedidosSinAsignar ?? 0) > 0;
 $pendientesHoy = $totalPendientesHoy ?? 0;
 $visitasHoy = $totalVisitasHoy ?? 0;
+$fechaHoy = $fechaHoyMenu;
+$codigoVendedorSesion = trim((string)($_SESSION['codigo'] ?? ''));
+$urlCalendarioHoy = 'calendario.php?fecha=' . rawurlencode($fechaHoy);
+if ($codigoVendedorSesion !== '') {
+    $urlCalendarioHoy .= '&cod_vendedor=' . rawurlencode($codigoVendedorSesion);
+}
 
 $cards = [
     [
@@ -391,6 +397,12 @@ unset($card);
             box-shadow: 0 18px 40px rgba(0,0,0,0.12);
         }
 
+        .hover-shadow:hover {
+            transform: translateY(-2px);
+            transition: 0.2s ease;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15) !important;
+        }
+
         .card-critical {
             border: 1px solid rgba(220,38,38,0.2);
             box-shadow: 0 20px 50px rgba(220,38,38,0.15);
@@ -648,30 +660,32 @@ unset($card);
         <div class="container-fluid mb-4 px-0">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
-                    <div class="card shadow-sm h-100 border-0">
-                        <div class="card-body">
-                            <div class="text-muted small mb-1">HOY</div>
-                            <h5 class="fw-bold mb-3">
-                                <?= htmlspecialchars($nombreZonaActiva ?? 'Sin zona', ENT_QUOTES, 'UTF-8') ?>
-                            </h5>
+                    <a href="<?= htmlspecialchars($urlCalendarioHoy, ENT_QUOTES, 'UTF-8') ?>" class="text-decoration-none text-dark d-block h-100">
+                        <div class="card shadow-sm h-100 border-0 hover-shadow">
+                            <div class="card-body">
+                                <div class="text-muted small mb-1">HOY</div>
+                                <h5 class="fw-bold mb-3">
+                                    <?= htmlspecialchars($nombreZonaActiva ?? 'Sin zona', ENT_QUOTES, 'UTF-8') ?>
+                                </h5>
 
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <div class="text-muted small">Visitas</div>
-                                    <div class="fw-semibold fs-5">
-                                        <?= (int)($totalVisitasHoy ?? $visitasHoy ?? 0) ?>
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <div class="text-muted small">Visitas</div>
+                                        <div class="fw-semibold fs-5">
+                                            <?= (int)($totalVisitasHoy ?? $visitasHoy ?? 0) ?>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div>
-                                    <div class="text-muted small">Pendientes</div>
-                                    <div class="fw-semibold fs-5 text-warning">
-                                        <?= (int)($totalPendientesHoy ?? $pendientesHoy ?? 0) ?>
+                                    <div>
+                                        <div class="text-muted small">Pendientes</div>
+                                        <div class="fw-semibold fs-5 text-warning">
+                                            <?= (int)($totalPendientesHoy ?? $pendientesHoy ?? 0) ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
 
                 <div class="col-12 col-md-6">
