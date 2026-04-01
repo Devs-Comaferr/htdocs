@@ -68,19 +68,43 @@
         .login-container p a:hover {
             text-decoration: underline;
         }
+        .login-alert {
+            margin-bottom: 16px;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: left;
+        }
+        .login-alert.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f1aeb5;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h1>Iniciar Sesión</h1>
+        <h1>Iniciar sesion</h1>
+        <?php
+        $errorCode = trim((string)($_GET['error'] ?? ''));
+        $errorMessage = '';
+        if ($errorCode === 'invalid_credentials') {
+            $errorMessage = 'Credenciales no validas.';
+        } elseif ($errorCode === 'login_unavailable') {
+            $errorMessage = 'No se pudo iniciar sesion. Intentalo de nuevo.';
+        }
+        ?>
+        <?php if ($errorMessage !== ''): ?>
+            <div class="login-alert error"><?= htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') ?></div>
+        <?php endif; ?>
         <form action="procesar_login.php" method="POST">
-            <label for="email">Correo Electrónico:</label>
+            <label for="email">Correo electronico:</label>
             <input type="email" name="email" id="email" placeholder="ejemplo@correo.com" required>
-            
-            <label for="password">Contraseña:</label>
-            <input type="password" name="password" id="password" placeholder="Ingresa tu contraseña" required>
-            
-            <button type="submit">Iniciar Sesión</button>
+
+            <label for="password">Contrasena:</label>
+            <input type="password" name="password" id="password" placeholder="Ingresa tu contrasena" required>
+
+            <button type="submit">Iniciar sesion</button>
         </form>
     </div>
 </body>

@@ -462,6 +462,9 @@ if ($numero_pedido) {
     font-size: 25px;
     margin-bottom: 5px;
   }
+  .button-group form {
+    margin: 0;
+  }
   .btn:hover {
     transform: translateY(-2px);
   }
@@ -590,6 +593,50 @@ if ($numero_pedido) {
       <?php endif; ?>
     </div>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var botonHistorico = document.querySelector('a.btn-pasar[href*="pasar_historico.php"]');
+      if (!botonHistorico) {
+        return;
+      }
+
+      botonHistorico.addEventListener('click', function (event) {
+        event.preventDefault();
+
+        if (!window.confirm('Seguro que deseas solicitar pasar este pedido a historico?')) {
+          return;
+        }
+
+        var url = new URL(botonHistorico.href, window.location.origin);
+        var form = document.createElement('form');
+        form.method = 'post';
+        form.action = 'pasar_historico.php';
+        form.style.display = 'none';
+
+        var params = url.searchParams;
+        ['pedido', 'cod_cliente', 'cod_seccion'].forEach(function (name) {
+          if (!params.has(name)) {
+            return;
+          }
+
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = name;
+          input.value = params.get(name) || '';
+          form.appendChild(input);
+        });
+
+        var csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_csrf_token';
+        csrf.value = <?php echo json_encode(csrfToken(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+        form.appendChild(csrf);
+
+        document.body.appendChild(form);
+        form.submit();
+      });
+    });
+  </script>
 </body>
 </html>
 <?php
