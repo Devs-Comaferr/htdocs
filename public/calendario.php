@@ -1,3 +1,6 @@
 <?php
 require_once dirname(__DIR__) . '/bootstrap/init.php';
-require_once BASE_PATH . '/app/Modules/Calendario/calendario.php';
+$query = $_SERVER['QUERY_STRING'] ?? '';
+$target = BASE_URL . '/mostrar_calendario.php' . ($query !== '' ? '?' . $query : '');
+header('Location: ' . $target, true, 302);
+exit;

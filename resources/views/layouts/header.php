@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once BASE_PATH . '/app/Support/header.php';
+$renderGlobalHeader = isset($renderGlobalHeader) ? (bool)$renderGlobalHeader : true;
 ?>
 <!-- Frontend policy: el stack UI global es Bootstrap 5. Las vistas activas deben apoyarse en este header y usar assets locales de /public/assets/vendor/. -->
 <!-- Font Awesome local (instalado vÃ­a Composer/npm-asset) -->
@@ -210,6 +211,7 @@ require_once BASE_PATH . '/app/Support/header.php';
   }
 </style>
 
+<?php if ($renderGlobalHeader): ?>
 <div id="globalHeader" class="<?= $headerClass ?>">
   <div class="header-left">
     <a href="<?= BASE_URL ?>/index.php" class="header-home-link">
@@ -265,6 +267,7 @@ require_once BASE_PATH . '/app/Support/header.php';
     <i class="fa fa-user-plus"></i>
   </a>
 </div>
+<?php endif; ?>
 
 <script>
 function cambiarFecha() {

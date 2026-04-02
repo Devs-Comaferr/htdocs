@@ -19,6 +19,7 @@ requierePermiso('perm_planificador');
 
 $ui_version = 'bs5';
 $ui_requires_jquery = false;
+$isEmbedded = (string)($_POST['origen'] ?? $_GET['origen'] ?? '') === 'visita_pedido';
 
 $conn = db();
 
@@ -41,7 +42,23 @@ if (!puedeEliminarVisita($idVisita, $codVendedorSesion)) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar']) && $_POST['confirmar'] === '1') {
+    csrfValidateRequest('visitas.eliminar');
     if (eliminarVisita($idVisita, $codVendedorSesion)) {
+        if ($isEmbedded) {
+            $redirect = json_encode(BASE_URL . '/visita_pedido.php?msg=visita_eliminada', JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            echo '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Eliminada</title></head><body>';
+            echo '<script>';
+            echo 'if (window.parent && typeof window.parent.onEmbeddedVisitaDeleted === "function") {';
+            echo 'window.parent.onEmbeddedVisitaDeleted(' . $redirect . ');';
+            echo '} else if (window.parent && window.parent !== window) {';
+            echo 'window.parent.location.href = ' . $redirect . ';';
+            echo '} else {';
+            echo 'window.location.href = ' . $redirect . ';';
+            echo '}';
+            echo '</script>';
+            echo '</body></html>';
+            exit;
+        }
         header('Location: index.php?msg=visita_eliminada');
         exit;
     }
@@ -70,11 +87,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar']) && $_POS
         </div>
         <div class="card-body">
             <p>Seguro que quieres eliminar esta visita? Se eliminaran tambien los pedidos asociados.</p>
-            <form action="eliminar_visita.php" method="POST" class="confirm-actions">
+            <form action="<?= BASE_URL ?>/eliminar_visita.php" method="POST" class="confirm-actions">
+                <?= csrfInput() ?>
                 <input type="hidden" name="id_visita" value="<?php echo htmlspecialchars((string)$idVisita, ENT_QUOTES, 'UTF-8'); ?>">
+                <input type="hidden" name="origen" value="<?php echo htmlspecialchars((string)($_GET['origen'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="confirmar" value="1">
                 <button type="submit" class="btn btn-danger">Confirmar</button>
-                <a href="index.php" class="btn btn-secondary">Cancelar</a>
+                <a href="<?php echo $isEmbedded ? 'javascript:history.back()' : (BASE_URL . '/index.php'); ?>" class="btn btn-secondary">Cancelar</a>
             </form>
         </div>
     </div>

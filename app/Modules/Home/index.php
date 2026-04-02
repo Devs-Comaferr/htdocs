@@ -1883,30 +1883,18 @@ $ui_requires_jquery = false;
 <script>
 // ================ Pedidos ================
 function abrirModalPedido(codVenta, codCliente) {
-  var modal = document.getElementById('modal-pedido');
-  modal.classList.add('show');
-  modal.style.display = 'block';
-  document.getElementById('pedido-client-btn').innerHTML =
-    '<a href="faltas.php?cod_cliente=' + codCliente + '" class="btn-client"><i class="fa fa-book"></i>Faltas</a>';
-  document.getElementById('pedido-detalle').innerHTML = 'Cargando...';
-
-  $.get('<?= BASE_URL ?>/ajax/detalle_pedido.php', { cod_venta: codVenta }, function(resp){
-    document.getElementById('pedido-detalle').innerHTML = resp;
-  });
+  abrirDocumento(1, 2, 1, codVenta);
 }
 
 // ================ Albaranes ================
 function abrirModalAlbaran(codVentaTipo, codCliente) {
-  var modal = document.getElementById('modal-albaran');
-  modal.classList.add('show');
-  modal.style.display = 'block';
-  document.getElementById('albaran-client-btn').innerHTML =
-    '<a href="faltas.php?cod_cliente=' + codCliente + '" class="btn-client"><i class="fa fa-book"></i>Faltas</a>';
-  document.getElementById('albaran-detalle').innerHTML = 'Cargando...';
-
-  $.get('<?= BASE_URL ?>/ajax/detalle_albaran.php', { cod_venta_tipo: codVentaTipo }, function(resp){
-    document.getElementById('albaran-detalle').innerHTML = resp;
-  });
+  var parts = String(codVentaTipo || '').split('_');
+  var codVenta = parts[0] || '';
+  var tipoVenta = parts[1] || '2';
+  if (!codVenta) {
+    return;
+  }
+  abrirDocumento(tipoVenta, 2, 1, codVenta);
 }
 
 // ================ Visitas ================

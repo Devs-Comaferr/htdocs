@@ -434,12 +434,15 @@ function procesarEdicionVisita(int $id_visita, array $input, int $codigo_vendedo
     $hora_fin_visita = trim((string)$input['hora_fin_visita']);
     $observaciones = trim((string)$input['observaciones']);
     $estado_visita = normalizarEstadoVisita(trim((string)$input['estado_visita']));
+    $estadoActual = normalizarEstadoVisita((string) ($data['estado_visita'] ?? ''));
 
     $error = '';
     if (empty($fecha_visita) || empty($hora_inicio_visita) || empty($hora_fin_visita)) {
         $error = 'Por favor, complete la fecha y las horas de la visita.';
     } elseif (strtotime($hora_inicio_visita) >= strtotime($hora_fin_visita)) {
         $error = 'La hora de inicio debe ser anterior a la de fin.';
+    } elseif (!empty($data['bloquear_cambio_estado']) && $estadoActual === 'Realizada' && $estado_visita !== 'Realizada') {
+        $error = 'Una visita realizada con pedidos asociados no puede cambiar de estado.';
     } else {
         if (estadoVisitaRequiereFranja($estado_visita)) {
             $slot = '';
@@ -564,10 +567,10 @@ function procesarEdicionVisita(int $id_visita, array $input, int $codigo_vendedo
     }
 
     if ($origen === 'visita_pedido') {
-        return ['ok' => true, 'redirect' => 'calendario.php?view=timeGridDay&msg=visita_actualizada'];
+        return ['ok' => true, 'redirect' => 'visita_pedido.php?msg=visita_actualizada'];
     }
 
-    return ['ok' => true, 'redirect' => 'calendario.php?msg=visita_actualizada'];
+    return ['ok' => true, 'redirect' => 'mostrar_calendario.php?msg=visita_actualizada'];
 }
 
 function actualizarHorarioVisitaService(int $cod_cliente, $cod_seccion, string $hora_inicio_manana, string $hora_fin_manana, string $hora_inicio_tarde, string $hora_fin_tarde): bool

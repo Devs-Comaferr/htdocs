@@ -1,7 +1,8 @@
 function formatTime(totalMinutes) {
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return hours + ":" + minutes.toString().padStart(2, "0");
+    const normalized = ((totalMinutes % (24 * 60)) + (24 * 60)) % (24 * 60);
+    const hours = Math.floor(normalized / 60);
+    const minutes = normalized % 60;
+    return hours.toString().padStart(2, "0") + ":" + minutes.toString().padStart(2, "0");
 }
 
 function parseTime(timeStr) {

@@ -21,7 +21,7 @@ require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasCalendarioService
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasService.php';
 
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-    echo "error:Solicitud invÃ¡lida.";
+    echo "error:Solicitud invalida.";
     exit();
 }
 
@@ -39,7 +39,7 @@ if ($cod_cliente <= 0 || empty($fecha_visita)) {
 }
 
 if (!is_valid_date($fecha_visita)) {
-    echo "error:Formato de fecha invÃ¡lido.";
+    echo "error:Formato de fecha invalido.";
     exit();
 }
 

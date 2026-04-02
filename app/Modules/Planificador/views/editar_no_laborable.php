@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $error = "Error al actualizar el registro.";
             } else {
                 // Redirigir a calendario
-                header("Location: calendario.php");
+                header("Location: mostrar_calendario.php");
                 exit();
             }
         }
@@ -168,7 +168,7 @@ $descripcion_db = trim($row['descripcion']);
             ?></textarea>
         </div>
         <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
-        <a href="calendario.php" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+        <a href="mostrar_calendario.php" class="btn btn-secondary w-100 mt-2">Cancelar</a>
     </form>
 </div>
 </body>

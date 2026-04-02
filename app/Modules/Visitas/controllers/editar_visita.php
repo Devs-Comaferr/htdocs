@@ -24,6 +24,7 @@ require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasService.php';
 
 $ui_version = 'bs5';
 $ui_requires_jquery = false;
+$isEmbedded = (string)($_GET['origen'] ?? '') === 'visita_pedido';
 
 $id_visita = isset($_GET['id_visita']) ? intval($_GET['id_visita']) : 0;
 if ($id_visita <= 0) {
@@ -43,8 +44,24 @@ if ($viewData === null) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    csrfValidateRequest('visitas.editar');
     $resultadoEdicion = procesarEdicionVisita($id_visita, $_POST, intval($_SESSION['codigo']), (string)($_GET['origen'] ?? ''));
     if ($resultadoEdicion['ok']) {
+        if ($isEmbedded) {
+            $redirect = json_encode($resultadoEdicion['redirect'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            echo '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Guardado</title></head><body>';
+            echo '<script>';
+            echo 'if (window.parent && typeof window.parent.onEmbeddedVisitaSaved === "function") {';
+            echo 'window.parent.onEmbeddedVisitaSaved(' . $redirect . ');';
+            echo '} else if (window.parent && window.parent !== window) {';
+            echo 'window.parent.location.href = ' . $redirect . ';';
+            echo '} else {';
+            echo 'window.location.href = ' . $redirect . ';';
+            echo '}';
+            echo '</script>';
+            echo '</body></html>';
+            exit();
+        }
         header('Location: ' . $resultadoEdicion['redirect']);
         exit();
     }

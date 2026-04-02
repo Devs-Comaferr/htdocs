@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <title>Editar Visita</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php $renderGlobalHeader = empty($isEmbedded); ?>
     <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
     <style>
-      body { padding-top: 80px; }
+      body { padding-top: <?php echo empty($isEmbedded) ? '80px' : '16px'; ?>; }
       .boton-derecha { float: right; margin-left: 10px; }
+      .container { max-width: <?php echo empty($isEmbedded) ? '960px' : '100%'; ?>; }
     </style>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -43,6 +45,7 @@
         <div class="alert alert-danger"><?php echo $error; ?></div>
     <?php endif; ?>
     <form action="<?= BASE_URL ?>/editar_visita.php?id_visita=<?php echo $id_visita; ?><?php echo isset($_GET['origen']) ? '&amp;origen=' . $_GET['origen'] : ''; ?>" method="POST">
+        <?= csrfInput() ?>
         <input type="hidden" name="id_visita" value="<?php echo $id_visita; ?>">
 
         <div class="mb-3">
@@ -91,14 +94,14 @@
         <button type="submit" class="btn btn-primary">Guardar Cambios</button>
         <?php
             if (isset($_GET['origen']) && $_GET['origen'] === 'visita_pedido') {
-                $cancelUrl = 'calendario.php?view=timeGridDay';
+                $cancelUrl = 'visita_pedido.php';
             } else {
-                $cancelUrl = 'calendario.php';
+                $cancelUrl = 'mostrar_calendario.php';
             }
         ?>
         <a href="<?php echo $cancelUrl; ?>" class="btn btn-secondary">Cancelar</a>
 
-        <a href="<?= BASE_URL ?>/eliminar_visita.php?id_visita=<?php echo $id_visita; ?>" class="btn btn-danger boton-derecha">
+        <a href="<?= BASE_URL ?>/eliminar_visita.php?id_visita=<?php echo $id_visita; ?><?php echo isset($_GET['origen']) ? '&amp;origen=' . $_GET['origen'] : ''; ?>" class="btn btn-danger boton-derecha">
             Eliminar Visita
         </a>
 

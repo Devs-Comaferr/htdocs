@@ -191,7 +191,20 @@ function obtenerDatosEditarVisita(int $id_visita): ?array
     $result_assignment = visitasServicePrepareExecute($conn, $sql_assignment, $assignmentParams);
     $assignment = $result_assignment ? odbc_fetch_array($result_assignment) : false;
 
+    $sqlPedidosAsociados = "
+        SELECT COUNT(*) AS total
+        FROM [integral].[dbo].[cmf_visita_pedidos]
+        WHERE id_visita = ?
+    ";
+    $resultPedidosAsociados = visitasServicePrepareExecute($conn, $sqlPedidosAsociados, [$id_visita]);
+    $tienePedidosAsociados = false;
+    if ($resultPedidosAsociados && odbc_fetch_row($resultPedidosAsociados)) {
+        $tienePedidosAsociados = ((int) odbc_result($resultPedidosAsociados, 'total')) > 0;
+    }
+
     $tiempo_promedio = $assignment ? floatval($assignment['tiempo_promedio_visita']) : 0.0;
+    $estadoActual = odbc_result($result, 'estado_visita');
+    $bloquearCambioEstado = normalizarEstadoVisitaClave((string) $estadoActual) === 'realizada' && $tienePedidosAsociados;
 
     return [
         'id_visita' => $id_visita,
@@ -202,12 +215,14 @@ function obtenerDatosEditarVisita(int $id_visita): ?array
         'hora_inicio_visita' => (($value = odbc_result($result, 'hora_inicio_visita')) ? substr($value, 0, 5) : ''),
         'hora_fin_visita' => (($value = odbc_result($result, 'hora_fin_visita')) ? substr($value, 0, 5) : ''),
         'observaciones' => odbc_result($result, 'observaciones'),
-        'estado_visita' => odbc_result($result, 'estado_visita'),
+        'estado_visita' => $estadoActual,
         'hora_inicio_manana' => ($assignment && !empty($assignment['hora_inicio_manana'])) ? substr($assignment['hora_inicio_manana'], 0, 5) : '',
         'hora_fin_manana' => ($assignment && !empty($assignment['hora_fin_manana'])) ? substr($assignment['hora_fin_manana'], 0, 5) : '',
         'hora_inicio_tarde' => ($assignment && !empty($assignment['hora_inicio_tarde'])) ? substr($assignment['hora_inicio_tarde'], 0, 5) : '',
         'hora_fin_tarde' => ($assignment && !empty($assignment['hora_fin_tarde'])) ? substr($assignment['hora_fin_tarde'], 0, 5) : '',
         'tiempo_promedio_minutes' => $tiempo_promedio * 60,
+        'tiene_pedidos_asociados' => $tienePedidosAsociados,
+        'bloquear_cambio_estado' => $bloquearCambioEstado,
     ];
 }
 

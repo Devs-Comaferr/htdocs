@@ -152,7 +152,7 @@ if (!function_exists('crearVisitaRealizada')) {
 
         $fechaVisitaNorm = $normalizarFecha($fecha_visita);
         $horaInicioNorm = $normalizarHora($hora_inicio_visita) ?? '00:00';
-        $horaFinNorm = $normalizarHora($hora_fin_visita ?: $hora_inicio_visita) ?? $horaInicioNorm;
+        $horaFinNorm = $normalizarHora($hora_fin_visita);
 
         $sqlInsVisita = "
             INSERT INTO [integral].[dbo].[cmf_visitas_comerciales]
@@ -307,7 +307,9 @@ if (!function_exists('asegurarRelacionVisitaPedido')) {
                 $codVendedor = (int)($opciones['cod_vendedor'] ?? ($cab['cod_comisionista'] ?? $cab['COD_COMISIONISTA'] ?? 0));
                 $fechaVisita = (string)($opciones['fecha_visita'] ?? ($cab['fecha_venta'] ?? $cab['FECHA_VENTA'] ?? date('Y-m-d')));
                 $horaInicio = (string)($opciones['hora_inicio_visita'] ?? ($cab['hora_venta'] ?? $cab['HORA_VENTA'] ?? date('H:i:s')));
-                $horaFin = (string)($opciones['hora_fin_visita'] ?? $horaInicio);
+                $horaFin = array_key_exists('hora_fin_visita', $opciones)
+                    ? (($opciones['hora_fin_visita'] === null || $opciones['hora_fin_visita'] === '') ? null : (string)$opciones['hora_fin_visita'])
+                    : $horaInicio;
                 $observaciones = array_key_exists('observaciones', $opciones)
                     ? (string)$opciones['observaciones']
                     : null;
