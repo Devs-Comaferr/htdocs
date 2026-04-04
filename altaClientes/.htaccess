@@ -1,6 +1,0 @@
-Options -Indexes
-
-# Evita exposicion accidental de logs residuales dentro del modulo.
-<FilesMatch "^(mailchimp_log\.txt|error_log\.txt)$">
-  Require all denied
-</FilesMatch>
