@@ -826,10 +826,10 @@
                     var payload = new URLSearchParams();
                     payload.append('cod_cliente', document.querySelector('#horario_modal_cod_cliente').value);
                     payload.append('cod_seccion', document.querySelector('#horario_modal_cod_seccion').value);
-                    payload.append('horario_inicio_manana', document.querySelector('#horario_inicio_manana').value);
-                    payload.append('horario_fin_manana', document.querySelector('#horario_fin_manana').value);
-                    payload.append('horario_inicio_tarde', document.querySelector('#horario_inicio_tarde').value);
-                    payload.append('horario_fin_tarde', document.querySelector('#horario_fin_tarde').value);
+                    payload.append('hora_inicio_manana', document.querySelector('#horario_inicio_manana').value);
+                    payload.append('hora_fin_manana', document.querySelector('#horario_fin_manana').value);
+                    payload.append('hora_inicio_tarde', document.querySelector('#horario_inicio_tarde').value);
+                    payload.append('hora_fin_tarde', document.querySelector('#horario_fin_tarde').value);
                     payload.append('_csrf_token', csrfTokenVisitas);
 
                     fetch("<?= BASE_URL ?>/definir_horario.php", {
