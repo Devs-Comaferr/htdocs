@@ -4,11 +4,18 @@ declare(strict_types=1);
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/functions.php';
+require_once BASE_PATH . '/app/Support/security.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasValidationService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasAjaxService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasQueryService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasCalendarioService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasService.php';
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+    appExitTextError('Metodo no permitido.', 405, 'visitas.quitar_pedido.metodo');
+}
+
+csrfValidateRequest('visitas.quitar_pedido');
 
 if (!isset($_POST['cod_pedido'])) {
     echo "ERROR: Falta el parametro 'cod_pedido'.";

@@ -16,6 +16,7 @@ error_reporting(0);
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/functions.php';
+require_once BASE_PATH . '/app/Support/security.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasValidationService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasAjaxService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasQueryService.php';
@@ -26,6 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: visita_pedido.php?msg=error');
     exit();
 }
+
+csrfValidateRequest('visitas.registrar_visita');
 
 $resultado = procesarRegistroVisita([
     'cod_venta' => isset($_POST['cod_venta']) ? (int)$_POST['cod_venta'] : 0,

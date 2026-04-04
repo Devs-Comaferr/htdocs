@@ -14,6 +14,7 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 }
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
+require_once BASE_PATH . '/app/Support/security.php';
 requierePermiso('perm_planificador');
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasValidationService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasAjaxService.php';
@@ -28,6 +29,8 @@ $codigo_vendedor = isset($_SESSION['codigo']) ? intval($_SESSION['codigo']) : 0;
 
 $errors = array();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrfValidateRequest('visitas.visita_sin_venta');
+
     $resultado = procesarVisitaSimple([
         'cod_vendedor' => $codigo_vendedor,
         'cod_cliente' => isset($_POST['cod_cliente']) ? intval($_POST['cod_cliente']) : 0,

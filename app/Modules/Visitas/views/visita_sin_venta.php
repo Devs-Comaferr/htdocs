@@ -56,6 +56,7 @@
   ?>
 
   <form action="<?= BASE_URL ?>/visita_sin_venta.php" method="POST">
+    <?= csrfInput() ?>
     <input type="hidden" name="cod_vendedor" value="<?php echo $codigo_vendedor; ?>">
 
     <div class="mb-3 cliente-autocomplete">

@@ -423,6 +423,7 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <form action="<?= BASE_URL ?>/registrar_visita.php" method="POST">
+          <?= csrfInput() ?>
           <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             <h5 class="modal-title" id="visitaModalLabel">Registrar Visita</h5>
@@ -475,6 +476,7 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <form action="<?= BASE_URL ?>/registrar_whatsapp.php" method="POST">
+          <?= csrfInput() ?>
           <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             <h5 class="modal-title" id="whatsappModalLabel">Registrar Pedido WhatsApp</h5>
@@ -522,6 +524,7 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <form action="<?= BASE_URL ?>/registrar_telefono.php" method="POST">
+          <?= csrfInput() ?>
           <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             <h5 class="modal-title" id="telefonoModalLabel">Registrar Llamada Telefonica</h5>
@@ -573,6 +576,7 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <form action="<?= BASE_URL ?>/registrar_email.php" method="POST">
+          <?= csrfInput() ?>
           <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             <h5 class="modal-title" id="emailModalLabel">Registrar Pedido Email</h5>
@@ -621,6 +625,7 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <form action="<?= BASE_URL ?>/registrar_web.php" method="POST">
+          <?= csrfInput() ?>
           <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             <h5 class="modal-title" id="webModalLabel">Registrar Pedido Web</h5>
@@ -812,11 +817,14 @@
       enforceTimeDifference('#t_hora_inicio_visita', '#t_hora_fin_visita', 15, 300);
       enforceTimeDifference('#e_hora_inicio_visita', '#e_hora_fin_visita', 15, 300);
 
+      var csrfTokenVisitas = <?= json_encode(csrfToken(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+
       function checkVisitaPreviaGeneral(modal, cod_cliente, cod_seccion, fecha, checkboxSelector, previousIdSelector) {
         var payload = new URLSearchParams();
         payload.set('cod_cliente', cod_cliente);
         payload.set('fecha_visita', fecha);
         payload.set('cod_seccion', cod_seccion !== '' ? cod_seccion : '');
+        payload.set('_csrf_token', csrfTokenVisitas);
 
         fetch('<?= BASE_URL ?>/check_visita_previa.php', {
           method: 'POST',

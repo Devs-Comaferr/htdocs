@@ -2197,6 +2197,8 @@ function calcularPromedioVisita(cod_cliente, cod_seccion) {
 }
 
 // AÃ±adimos las funciones para quitarPedido y actualizarOrigen (AJAX)
+var csrfTokenVisitas = <?= json_encode(csrfToken(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+
 function quitarPedido(cod_pedido, event) {
     event.stopPropagation();
     if (!confirm("Â¿EstÃ¡s seguro de quitar este pedido de la visita?")) {
@@ -2205,7 +2207,7 @@ function quitarPedido(cod_pedido, event) {
     $.ajax({
         url: '<?= BASE_URL ?>/ajax/quitar_pedido.php',
         type: 'POST',
-        data: { cod_pedido: cod_pedido },
+        data: { cod_pedido: cod_pedido, _csrf_token: csrfTokenVisitas },
         success: function(response) {
             if (response.indexOf("OK") === 0) {
                 location.reload();
@@ -2224,7 +2226,7 @@ function actualizarOrigen(cod_pedido, nuevo_origen, event) {
     $.ajax({
         url: '<?= BASE_URL ?>/ajax/actualizar_origen.php',
         type: 'POST',
-        data: { cod_pedido: cod_pedido, origen: nuevo_origen },
+        data: { cod_pedido: cod_pedido, origen: nuevo_origen, _csrf_token: csrfTokenVisitas },
         success: function(response) {
             if (response.indexOf("OK") === 0) {
                 location.reload();

@@ -263,7 +263,7 @@ $renderGlobalHeader = isset($renderGlobalHeader) ? (bool)$renderGlobalHeader : t
       <i class="fa fa-bar-chart"></i>
     </a>
   <?php endif; ?>
-  <a href="<?= BASE_URL ?>/altaClientes/alta_cliente.php" class="app-btn app-nuevo" title="AÃ±adir cliente">
+  <a href="<?= BASE_URL ?>/alta_cliente.php" class="app-btn app-nuevo" title="A&ntilde;adir cliente">
     <i class="fa fa-user-plus"></i>
   </a>
 </div>

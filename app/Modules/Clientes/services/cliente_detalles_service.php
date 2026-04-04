@@ -34,6 +34,7 @@ function clienteDetallesObtenerClienteBase($conn, string $codCliente): array
             c.poblacion,
             c.provincia,
             c.telefono,
+            c.telefono1_comentario,
             c.e_mail,
             c.cod_forma_liquidacion,
             c.advertencia,
@@ -42,7 +43,9 @@ function clienteDetallesObtenerClienteBase($conn, string $codCliente): array
             c.cod_tarifa,
             c.cod_ruta,
             c.telefono2,
+            c.telefono2_comentario,
             c.telefono3,
+            c.telefono3_comentario,
             fl.descripcion AS forma_pago_descripcion
         FROM [integral].[dbo].[clientes] c
         LEFT JOIN [integral].[dbo].[formas_liquidacion] fl
@@ -90,6 +93,36 @@ function clienteDetallesObtenerFormaPago($conn, array $cliente): string
     }
 
     return (string) ($row['descripcion'] ?? $row['DESCRIPCION'] ?? 'Desconocida');
+}
+
+function clienteDetallesObtenerTarifa($conn, array $cliente): string
+{
+    $codTarifa = trim((string)($cliente['cod_tarifa'] ?? $cliente['COD_TARIFA'] ?? ''));
+    if ($codTarifa === '') {
+        return 'Sin tarifa';
+    }
+
+    $sql = "
+        SELECT descripcion
+        FROM [integral].[dbo].[tarifas_venta_cabecera]
+        WHERE cod_tarifa = ?
+    ";
+    $result = clienteDetallesExecPrepared($conn, $sql, [$codTarifa]);
+    if (!$result) {
+        return $codTarifa;
+    }
+
+    $row = odbc_fetch_array($result);
+    if (!$row) {
+        return $codTarifa;
+    }
+
+    $descripcion = trim((string)($row['descripcion'] ?? $row['DESCRIPCION'] ?? ''));
+    if ($descripcion === '') {
+        return $codTarifa;
+    }
+
+    return function_exists('toUTF8') ? toUTF8($descripcion) : $descripcion;
 }
 
 function clienteDetallesObtenerSecciones($conn, string $codCliente): array

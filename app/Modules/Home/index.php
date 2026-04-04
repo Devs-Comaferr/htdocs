@@ -178,7 +178,10 @@ if ($result_pedidos_sin_visita && odbc_fetch_row($result_pedidos_sin_visita)) {
 
 
 // Establecer la fecha de consulta (ejemplo: ?fecha=2025-02-22)
-$fechaConsulta = $_GET['fecha'] ?? date('Y-m-d');
+$fechaConsulta = isset($_GET['fecha']) ? trim((string)$_GET['fecha']) : date('Y-m-d');
+if (!validarFechaSQL($fechaConsulta)) {
+    $fechaConsulta = date('Y-m-d');
+}
 
 // Variables de control
 $isJcasado = (
@@ -1334,7 +1337,7 @@ $ui_requires_jquery = false;
           <i class="fa fa-chart-line"></i> Estad&iacute;sticas
         </a>
       <?php } ?>
-      <a href="altaClientes/alta_cliente.php" class="btn btn-nuevocliente" >
+      <a href="alta_cliente.php" class="btn btn-nuevocliente" >
         <i class="fa fa-user-plus"></i> A&ntilde;adir Cliente
       </a>
     </div>
@@ -1837,7 +1840,7 @@ $ui_requires_jquery = false;
       <i class="fa fa-chart-line"></i><span>Estad&iacute;sticas</span>
     </a>
   <?php } ?>
-  <a href="altaClientes/alta_cliente.php" class="app-btn app-nuevo">
+  <a href="alta_cliente.php" class="app-btn app-nuevo">
     <i class="fa fa-user-plus"></i><span>A&ntilde;adir</span>
   </a>
 </div>
@@ -1898,6 +1901,8 @@ function abrirModalAlbaran(codVentaTipo, codCliente) {
 }
 
 // ================ Visitas ================
+var csrfTokenHome = <?= json_encode(csrfToken(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+
 function abrirModalVisita(idVisita) {
   // Redirige a la pÃ¡gina de ediciÃ³n de visita
   window.location.href = "editar_visita.php?id_visita=" + idVisita + "&origen=index";
@@ -1910,7 +1915,7 @@ function actualizarOrigenDesdeIndex(codPedido, nuevoOrigen, event) {
   $.ajax({
     url: '<?= BASE_URL ?>/ajax/actualizar_origen.php',
     type: 'POST',
-    data: { cod_pedido: codPedido, origen: nuevoOrigen },
+    data: { cod_pedido: codPedido, origen: nuevoOrigen, _csrf_token: csrfTokenHome },
     success: function(response) {
       if (response.indexOf('OK') === 0) {
         location.reload();

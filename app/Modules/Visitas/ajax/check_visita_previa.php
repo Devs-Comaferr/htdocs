@@ -14,6 +14,7 @@ header('Content-Type: text/plain');
 
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
+require_once BASE_PATH . '/app/Support/security.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasValidationService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasAjaxService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasQueryService.php';
@@ -25,12 +26,19 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     exit();
 }
 
+csrfValidateRequest('visitas.check_visita_previa');
+
 $cod_cliente = isset($_POST['cod_cliente']) ? intval($_POST['cod_cliente']) : 0;
 $fecha_visita = isset($_POST['fecha_visita']) ? $_POST['fecha_visita'] : '';
-$cod_seccion = isset($_POST['cod_seccion']) ? $_POST['cod_seccion'] : null;
+$cod_seccion = isset($_POST['cod_seccion']) ? trim((string)$_POST['cod_seccion']) : null;
 
 if ($cod_seccion === '' || strtoupper((string)$cod_seccion) === 'NULL') {
     $cod_seccion = null;
+}
+
+if ($cod_seccion !== null && !ctype_digit((string)$cod_seccion)) {
+    echo "error:Seccion invalida.";
+    exit();
 }
 
 if ($cod_cliente <= 0 || empty($fecha_visita)) {

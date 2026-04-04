@@ -9,12 +9,17 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 }
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
+require_once BASE_PATH . '/app/Support/security.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasValidationService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasAjaxService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasQueryService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasCalendarioService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasService.php';
 require_once BASE_PATH . '/app/Modules/Planificador/services/planificador_service.php';
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    csrfValidateRequest('visitas.obtener_secciones_pedidos');
+}
 
 $cod_cliente = 0;
 if (isset($_GET['cod_cliente'])) {

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
+require_once BASE_PATH . '/app/Support/security.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasValidationService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasAjaxService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasQueryService.php';
@@ -12,6 +13,10 @@ require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasService.php';
 requierePermiso('perm_planificador');
 
 header('Content-Type: application/json; charset=UTF-8');
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    csrfValidateRequest('visitas.check_visitas_existentes');
+}
 
 $source = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
 

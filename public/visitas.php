@@ -1,4 +1,6 @@
 <?php
+// Dispatcher legacy mantenido por compatibilidad.
+// Las rutas canónicas viven ya en endpoints explícitos y AJAX dedicados.
 require_once dirname(__DIR__) . '/bootstrap/init.php';
 
 $action = $_POST['action'] ?? $_GET['action'] ?? null;

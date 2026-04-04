@@ -20,6 +20,7 @@ error_reporting(0);
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/functions.php';
+require_once BASE_PATH . '/app/Support/security.php';
 
 $conn = db();
 
@@ -27,6 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: visita_pedido.php?msg=error');
     exit();
 }
+
+csrfValidateRequest('clientes.registrar_web');
 
 function escape_string_web(string $str): string
 {

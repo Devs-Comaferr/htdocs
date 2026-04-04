@@ -4,11 +4,18 @@ declare(strict_types=1);
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Support/functions.php';
+require_once BASE_PATH . '/app/Support/security.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasValidationService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasAjaxService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasQueryService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasCalendarioService.php';
 require_once BASE_PATH . '/app/Modules/Visitas/services/VisitasService.php';
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+    appExitTextError('Metodo no permitido.', 405, 'visitas.actualizar_origen.metodo');
+}
+
+csrfValidateRequest('visitas.actualizar_origen');
 
 if (!isset($_POST['cod_pedido']) || !isset($_POST['origen'])) {
     echo 'ERROR: Faltan parametros (cod_pedido y origen).';
@@ -24,6 +31,12 @@ if ($cod_pedido <= 0) {
 }
 if ($nuevo_origen === '') {
     echo 'ERROR: Origen invalido.';
+    exit;
+}
+
+$origenPermitido = in_array($nuevo_origen, ['visita', 'telefono', 'whatsapp', 'email', 'pedido web'], true);
+if (!$origenPermitido) {
+    echo 'ERROR: Origen no permitido.';
     exit;
 }
 

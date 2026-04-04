@@ -111,6 +111,7 @@
         </div>
 
         <form method="POST" action="<?= BASE_URL ?>/registrar_visita.php" class="form" id="flujoVisitaManual">
+            <?= csrfInput() ?>
             <input type="hidden" name="origen" value="manual">
             <input type="hidden" name="cod_cliente" id="cod_cliente" value="<?php echo $cod_cliente > 0 ? htmlspecialchars((string)$cod_cliente) : ''; ?>">
             <input type="hidden" name="cod_seccion" id="cod_seccion" value="<?php echo $cod_seccion !== null ? htmlspecialchars((string)$cod_seccion) : ''; ?>">
@@ -284,6 +285,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            var csrfTokenVisitas = <?= json_encode(csrfToken(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
             var fechaInput = document.querySelector('#fecha_visita');
             var horaInicioInput = document.querySelector('#hora_inicio_visita');
             var horaFinInput = document.querySelector('#hora_fin_visita');
@@ -828,6 +830,7 @@
                     payload.append('horario_fin_manana', document.querySelector('#horario_fin_manana').value);
                     payload.append('horario_inicio_tarde', document.querySelector('#horario_inicio_tarde').value);
                     payload.append('horario_fin_tarde', document.querySelector('#horario_fin_tarde').value);
+                    payload.append('_csrf_token', csrfTokenVisitas);
 
                     fetch("<?= BASE_URL ?>/definir_horario.php", {
                         method: 'POST',
