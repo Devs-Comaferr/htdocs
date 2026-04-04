@@ -212,7 +212,7 @@
                     <div class="modal-content">
                         <span class="close">&times;</span>
                         <h3>Definir Horario de Disponibilidad</h3>
-                        <form id="formDefinirHorario">
+                        <div id="formDefinirHorario">
                             <input type="hidden" id="horario_modal_cod_cliente" value="<?php echo htmlspecialchars((string)$cod_cliente); ?>">
                             <input type="hidden" id="horario_modal_cod_seccion" value="<?php echo $cod_seccion !== null ? htmlspecialchars((string)$cod_seccion) : ''; ?>">
                             <div class="mb-3">
@@ -232,7 +232,7 @@
                                 <input type="time" class="form-control" id="horario_fin_tarde" value="<?php echo htmlspecialchars($hora_fin_tarde); ?>" required>
                             </div>
                             <button type="button" id="horario_guardarHorarioBtn" class="btn btn-success w-100 btn-submit">Guardar Horario</button>
-                        </form>
+                        </div>
                     </div>
                 </div>
 
