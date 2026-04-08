@@ -514,7 +514,18 @@ function obtenerUniversoCandidatosPlanificador($conn, string $query, ?int $itera
     return $clientes;
 }
 
-function filtrarClientesElegiblesPlanificador($clientes, ?int $iteracionZona = null) {
+function planificadorClienteEsLaborable(array $cliente, int $codVendedor, ?string $fecha = null): bool {
+    $fecha = $fecha !== null && validarFechaSQL($fecha) ? $fecha : date('Y-m-d');
+    $clienteCalendario = [
+        'poblacion' => trim((string)($cliente['poblacion'] ?? '')),
+        'provincia' => trim((string)($cliente['provincia'] ?? '')),
+        'cod_municipio_ine' => trim((string)($cliente['cod_municipio_ine'] ?? '')),
+    ];
+
+    return esDiaLaborable($fecha, $clienteCalendario, $codVendedor);
+}
+
+function filtrarClientesElegiblesPlanificador($clientes, ?int $iteracionZona = null, ?int $codVendedor = null, ?string $fecha = null) {
     if (!is_array($clientes)) {
         return null;
     }
@@ -531,6 +542,14 @@ function filtrarClientesElegiblesPlanificador($clientes, ?int $iteracionZona = n
         }));
 
         error_log('Clientes candidatos tras filtro de frecuencia: ' . count($clientes));
+    }
+
+    if ($codVendedor !== null && $codVendedor > 0) {
+        $clientes = array_values(array_filter($clientes, function ($cliente) use ($codVendedor, $fecha) {
+            return planificadorClienteEsLaborable((array)$cliente, $codVendedor, $fecha);
+        }));
+
+        error_log('Clientes candidatos tras filtro de calendario: ' . count($clientes));
     }
 
     return $clientes;
@@ -667,8 +686,13 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
     $iteracionZona = 0;
     $iteracionZonaReal = 1;
     $fechaInicioCiclo = '';
+    $fechaHoy = date('Y-m-d');
 
     if ($codVendedor <= 0) {
+        return [];
+    }
+
+    if (!esDiaLaborable($fechaHoy, null, $codVendedor)) {
         return [];
     }
 
@@ -715,12 +739,15 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
     }
 
     error_log('DEBUG fechaInicioCiclo: ' . $fechaInicioCiclo);
-    error_log('DEBUG HOY: ' . date('Y-m-d'));
+    error_log('DEBUG HOY: ' . $fechaHoy);
 
     $selectZonaBase = "
         SELECT
             c.cod_cliente,
             c.nombre_comercial AS nombre,
+            ISNULL(c.provincia, '') AS provincia,
+            ISNULL(c.poblacion, '') AS poblacion,
+            '' AS cod_municipio_ine,
             MAX(v_all.fecha_visita) AS ultima_visita_real,
             MAX(v_ciclo.fecha_visita) AS ultima_visita_ciclo,
             MAX(
@@ -772,6 +799,8 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
             SELECT TOP 50
                 c.cod_cliente,
                 c.nombre_comercial AS nombre,
+                ISNULL(c.provincia, '') AS provincia,
+                ISNULL(c.poblacion, '') AS poblacion,
                 CASE
                     WHEN z.zona_principal = '$codZona'
                       OR z.zona_secundaria = '$codZona'
@@ -815,6 +844,8 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
             GROUP BY
                 c.cod_cliente,
                 c.nombre_comercial,
+                c.provincia,
+                c.poblacion,
                 z.zona_principal,
                 z.zona_secundaria,
                 z.frecuencia_visita
@@ -834,7 +865,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
         ";
 
         $groupByZona = "
-            GROUP BY c.cod_cliente, c.nombre_comercial, z.frecuencia_visita
+            GROUP BY c.cod_cliente, c.nombre_comercial, c.provincia, c.poblacion, z.frecuencia_visita
         ";
 
         $queryZonaNivel1 = $selectZonaBase
@@ -854,7 +885,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
             . $orderByBase;
 
         $universo = obtenerUniversoCandidatosPlanificador($conn, $queryZonaNivel1, $iteracionZona);
-        $elegibles = filtrarClientesElegiblesPlanificador($universo, $iteracionZona);
+        $elegibles = filtrarClientesElegiblesPlanificador($universo, $iteracionZona, $codVendedor, $fechaHoy);
         $scored = calcularScoreClientesPlanificador($elegibles);
         $clienteZona = seleccionarMejorClientePlanificador($scored, 'zona');
         if (!empty($clienteZona)) {
@@ -878,7 +909,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
             . $orderByBase;
 
         $universo = obtenerUniversoCandidatosPlanificador($conn, $queryZonaNivel2, $iteracionZona);
-        $elegibles = filtrarClientesElegiblesPlanificador($universo, $iteracionZona);
+        $elegibles = filtrarClientesElegiblesPlanificador($universo, $iteracionZona, $codVendedor, $fechaHoy);
         $scored = calcularScoreClientesPlanificador($elegibles);
         $clienteZona = seleccionarMejorClientePlanificador($scored, 'zona');
         if (!empty($clienteZona)) {
@@ -890,6 +921,9 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
         SELECT
             c.cod_cliente,
             c.nombre_comercial AS nombre,
+            ISNULL(c.provincia, '') AS provincia,
+            ISNULL(c.poblacion, '') AS poblacion,
+            '' AS cod_municipio_ine,
             MAX(v.fecha_visita) AS ultima_visita,
             NULL AS frecuencia_visita,
             0 AS toca_visita
@@ -899,14 +933,14 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
             AND v.cod_vendedor = c.cod_vendedor
         WHERE c.cod_vendedor = '$codVendedor'
           $filtrosOperativos
-        GROUP BY c.cod_cliente, c.nombre_comercial
+        GROUP BY c.cod_cliente, c.nombre_comercial, c.provincia, c.poblacion
         ORDER BY
             CASE WHEN MAX(v.fecha_visita) IS NULL THEN 0 ELSE 1 END ASC,
             MAX(v.fecha_visita) ASC
     ";
 
     $universo = obtenerUniversoCandidatosPlanificador($conn, $queryGlobal);
-    $elegibles = filtrarClientesElegiblesPlanificador($universo);
+    $elegibles = filtrarClientesElegiblesPlanificador($universo, null, $codVendedor, $fechaHoy);
     $scored = calcularScoreClientesPlanificador($elegibles);
     $clienteGlobal = seleccionarMejorClientePlanificador($scored, 'global');
     if (!empty($clienteGlobal)) {
@@ -917,6 +951,9 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
         SELECT
             c.cod_cliente,
             c.nombre_comercial AS nombre,
+            ISNULL(c.provincia, '') AS provincia,
+            ISNULL(c.poblacion, '') AS poblacion,
+            '' AS cod_municipio_ine,
             NULL AS ultima_visita,
             NULL AS frecuencia_visita,
             0 AS toca_visita
@@ -928,7 +965,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
     ";
 
     $universo = obtenerUniversoCandidatosPlanificador($conn, $queryFallback);
-    $elegibles = filtrarClientesElegiblesPlanificador($universo);
+    $elegibles = filtrarClientesElegiblesPlanificador($universo, null, $codVendedor, $fechaHoy);
     $scored = calcularScoreClientesPlanificador($elegibles);
     $clienteFallback = seleccionarMejorClientePlanificador($scored, 'fallback');
     if (!empty($clienteFallback)) {

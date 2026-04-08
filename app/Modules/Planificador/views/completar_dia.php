@@ -22,6 +22,7 @@ $fecha = isset($_GET['fecha']) ? $_GET['fecha'] : date('Y-m-d');
 $completarDiaData = obtenerDatosCompletarDia($codigo_vendedor, $fecha);
 $visitas = $completarDiaData['visitas'];
 $factor = $completarDiaData['factor'];
+$esLaborable = (bool)($completarDiaData['es_laborable'] ?? true);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -136,6 +137,12 @@ $factor = $completarDiaData['factor'];
             <input type="date" name="fecha" id="fecha" class="form-control" value="<?php echo htmlspecialchars($fecha); ?>" required>
         </div>
     </form>
+
+    <?php if (!$esLaborable): ?>
+        <div class="alert alert-warning text-center" role="alert">
+            El d&iacute;a seleccionado est&aacute; marcado como no laborable para este comercial.
+        </div>
+    <?php endif; ?>
     
     <div class="timeline-container" id="timeline">
         <!-- Escala de tiempo en la izquierda (08:00 a 20:00) -->

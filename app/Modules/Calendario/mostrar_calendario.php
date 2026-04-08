@@ -133,13 +133,6 @@ $ui_requires_jquery = false;
             </div>
           </a>
 
-          <a href="registrar_dia_no_laborable.php" class="calendario-action">
-            <i class="fas fa-ban"></i>
-            <div>
-              <strong>No laborable</strong>
-              <span>Bloquear dias no operativos</span>
-            </div>
-          </a>
         </div>
       </div>
     </aside>

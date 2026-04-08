@@ -389,52 +389,9 @@ if ($isJcasado) {
 /* ===========================================================================
    CONSULTA 4: Comentario saneado
    =========================================================================== */
-$diasNoLaborables = [];
-if ($isJcasado) {
-    $fechaConsultaAyer = date('Y-m-d', strtotime($fechaConsulta . ' -1 day'));
-    $sql_no_laborables = "
-      SELECT 
-        id,
-        cod_vendedor,
-        fecha,
-        hora_inicio,
-        hora_fin,
-        tipo_evento,
-        descripcion,
-        repetir_anualmente
-      FROM [integral].[dbo].[cmf_comerciales_dias_no_laborables]
-      WHERE cod_vendedor = $cod_vendedor_session
-        AND (
-             (repetir_anualmente = 0 AND CONVERT(date, fecha) IN ('$fechaConsulta', '$fechaConsultaAyer'))
-             OR (repetir_anualmente = 1 
-                AND (
-                    (MONTH(fecha) = MONTH('$fechaConsulta') AND DAY(fecha) = DAY('$fechaConsulta'))
-                    OR (MONTH(fecha) = MONTH('$fechaConsultaAyer') AND DAY(fecha) = DAY('$fechaConsultaAyer'))
-                ))
-        )
-      ORDER BY hora_inicio ASC
-    ";
-    $result_no_laborables = odbc_exec($conn, $sql_no_laborables);
-    if ($result_no_laborables) {
-        while ($row = odbc_fetch_array($result_no_laborables)) {
-            if (!noLaborableAplicaEnFecha(
-                trim((string)($row['fecha'] ?? '')),
-                trim((string)($row['tipo_evento'] ?? '')),
-                !empty($row['repetir_anualmente']) && intval($row['repetir_anualmente']) === 1,
-                $fechaConsulta
-            )) {
-                continue;
-            }
-
-            $row['fecha_aplicada'] = obtenerFechaAplicadaNoLaborable(
-                trim((string)($row['fecha'] ?? '')),
-                trim((string)($row['tipo_evento'] ?? '')),
-                !empty($row['repetir_anualmente']) && intval($row['repetir_anualmente']) === 1,
-                $fechaConsulta
-            );
-            $diasNoLaborables[] = $row;
-        }
-    }
+$esDiaLaborableHome = true;
+if ($isJcasado && $cod_vendedor_session !== null) {
+    $esDiaLaborableHome = esDiaLaborable($fechaConsulta, null, $cod_vendedor_session);
 }
 ?>
 <!DOCTYPE html>
@@ -1695,20 +1652,21 @@ $ui_requires_jquery = false;
 
   <!-- COLUMNA 4: VISITAS (solo para jcasado) -->
   <?php if ($isJcasado) { 
-      // Combinamos visitas y d&iacute;as no laborables
       $visitasTransform = [];
       foreach ($visitasHoy as $v) {
           $v['tipo_registro'] = 'visita';
           $v['start'] = $v['hora_inicio_visita'];
           $visitasTransform[] = $v;
       }
-      $noLabTransform = [];
-      foreach ($diasNoLaborables as $nl) {
-          $nl['tipo_registro'] = 'no_laborable';
-          $nl['start'] = $nl['hora_inicio'];
-          $noLabTransform[] = $nl;
+      if (!$esDiaLaborableHome) {
+          $visitasTransform[] = [
+              'tipo_registro' => 'no_laborable',
+              'start' => '00:00:00',
+              'tipo_evento' => 'No laborable',
+              'descripcion' => 'El calendario del comercial bloquea este d&iacute;a completo.',
+          ];
       }
-      $merged = array_merge($visitasTransform, $noLabTransform);
+      $merged = $visitasTransform;
       usort($merged, 'cmpStart');
       ?>
       <div class="column content-column">
@@ -1716,7 +1674,7 @@ $ui_requires_jquery = false;
         <div class="column-scroll">
         <?php
         if (empty($merged)) {
-            echo '<p class="no-data">No hay visitas ni d&iacute;as no laborables para hoy</p>';
+            echo '<p class="no-data">No hay visitas para hoy</p>';
         } else {
             foreach ($merged as $vis) {
                 if ($vis['tipo_registro'] === 'visita') {
@@ -1772,64 +1730,11 @@ $ui_requires_jquery = false;
                     echo '</a>';
 
                 } else {
-                    // Detectar el tipo de evento para elegir el icono actual
-                    $tipoEvento = $vis['tipo_evento'];
-                    $tipoEventoLower = strtolower($tipoEvento);
-                    $borderLeftNL = '6px solid black';
-                    $colorTexto = '#666';
-                    $iconoNL = '<i class="fa fa-ban"></i>';
-                    if (strpos($tipoEventoLower, 'medico') !== false 
-                        || strpos($tipoEventoLower, 'mÃƒÂ©dico') !== false) {
-                        $iconoNL = '<i class="fa fa-user-md"></i>';
-                    } else if (strpos($tipoEventoLower, 'comaferr') !== false) {
-                        $iconoNL = '<i class="fa fa-building"></i>';
-                    } else if ($tipoEventoLower == 'festivo') {
-                        $fechaAplicadaFestivo = trim((string)($vis['fecha_aplicada'] ?? $vis['fecha'] ?? ''));
-                        $fechaBaseFestivo = obtenerFechaAplicadaNoLaborable(
-                            trim((string)($vis['fecha'] ?? '')),
-                            trim((string)($vis['tipo_evento'] ?? '')),
-                            !empty($vis['repetir_anualmente']) && intval($vis['repetir_anualmente']) === 1,
-                            $fechaConsulta
-                        );
-                        $esFestivoDomingoActual = esFestivoDomingo(
-                            trim((string)($vis['fecha'] ?? '')),
-                            trim((string)($vis['tipo_evento'] ?? '')),
-                            !empty($vis['repetir_anualmente']) && intval($vis['repetir_anualmente']) === 1,
-                            $fechaConsulta
-                        );
-                        if ($esFestivoDomingoActual && $fechaAplicadaFestivo === $fechaBaseFestivo) {
-                            $colorTexto = '#ff0000';
-                        }
-                        $iconoNL = '<i class="fa fa-calendar-times-o"></i>';
-                    } else if ($tipoEventoLower == 'vacaciones') {
-                        $colorTexto = '#ff0000';
-                        $iconoNL = '<i class="fa fa-plane"></i>';
-                    }
-                    $todoElDia = false;
-                    $hInicio = isset($vis['hora_inicio']) ? trim($vis['hora_inicio']) : '';
-                    $hFin = isset($vis['hora_fin']) ? trim($vis['hora_fin']) : '';
-                    if ($hInicio == '00:00:00' && $hFin == '00:00:00') {
-                        $todoElDia = true;
-                    }
-                    echo '<div class="item-box" style="border-left:' . $borderLeftNL 
-                         . ';color:' . $colorTexto . ';">';
-                    echo '  <div class="item-title-visita">'
-                         . $iconoNL . " " . htmlspecialchars($vis['tipo_evento']) 
+                    echo '<div class="item-box" style="border-left:6px solid black;color:#666;">';
+                    echo '  <div class="item-title-visita"><i class="fa fa-ban"></i> '
+                         . htmlspecialchars((string)$vis['tipo_evento'])
                          . '</div>';
-                    echo '  <div class="item-subtitle">';
-                    echo htmlspecialchars($vis['descripcion']);
-                    echo ' (' . ($todoElDia ? "Todo el d&iacute;a" 
-                         : (substr($hInicio,0,5) . " - " . substr($hFin,0,5))) . ')';
-                    if ($tipoEventoLower == 'festivo') {
-                        $fechaAplicadaFestivo = trim((string)($vis['fecha_aplicada'] ?? $vis['fecha'] ?? ''));
-                        if ($fechaAplicadaFestivo !== '') {
-                            echo ' - ' . htmlspecialchars(obtenerDiaSemana($fechaAplicadaFestivo));
-                        }
-                    }
-                    if (!empty($vis['repetir_anualmente']) && $vis['repetir_anualmente'] == 1) {
-                        echo " (Anual)";
-                    }
-                    echo '  </div>';
+                    echo '  <div class="item-subtitle">' . (string)$vis['descripcion'] . '</div>';
                     echo '</div>';
                 }
             }

@@ -214,8 +214,10 @@ if (!function_exists('planificadorViewObtenerDatosZonasRutas')) {
 if (!function_exists('planificadorViewObtenerDatosCompletarDia')) {
     function planificadorViewObtenerDatosCompletarDia($codigo_vendedor, $fecha): array
     {
-        $conn = db();
         $codigo_vendedor = intval($codigo_vendedor);
+        $fecha = validarFechaSQL((string)$fecha) ? (string)$fecha : date('Y-m-d');
+        $esLaborable = $codigo_vendedor > 0 ? esDiaLaborable($fecha, null, $codigo_vendedor) : true;
+        $conn = db();
         $sql = "SELECT
                     id_visita,
                     fecha_visita,
@@ -239,6 +241,7 @@ if (!function_exists('planificadorViewObtenerDatosCompletarDia')) {
         return [
             'codigo_vendedor' => $codigo_vendedor,
             'fecha' => $fecha,
+            'es_laborable' => $esLaborable,
             'visitas' => $visitas,
             'factor' => 480 / 720,
         ];
