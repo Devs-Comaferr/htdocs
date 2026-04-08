@@ -192,13 +192,64 @@ if (!function_exists('obtenerDiaSemana')) {
             'Sunday'    => 'Domingo',
             'Monday'    => 'Lunes',
             'Tuesday'   => 'Martes',
-            'Wednesday' => 'Mircoles',
+            'Wednesday' => 'Miercoles',
             'Thursday'  => 'Jueves',
             'Friday'    => 'Viernes',
-            'Saturday'  => 'Sbado'
+            'Saturday'  => 'Sabado'
         ];
         $diaIngles = date('l', strtotime($fecha));
         return isset($dias[$diaIngles]) ? $dias[$diaIngles] : '';
+    }
+}
+
+if (!function_exists('obtenerFechasAplicadasNoLaborable')) {
+    function obtenerFechasAplicadasNoLaborable(string $fechaOriginal, string $tipoEvento, bool $repetirAnualmente, ?string $fechaContexto = null): array
+    {
+        $fechaBase = $fechaOriginal;
+        $tsOriginal = strtotime($fechaOriginal);
+        if ($tsOriginal === false) {
+            return [$fechaOriginal];
+        }
+
+        if ($repetirAnualmente) {
+            $anio = $fechaContexto !== null ? (int)date('Y', strtotime($fechaContexto)) : (int)date('Y');
+            $fechaBase = sprintf('%04d-%02d-%02d', $anio, (int)date('m', $tsOriginal), (int)date('d', $tsOriginal));
+        }
+
+        $fechas = [$fechaBase];
+
+        if (strcasecmp(trim($tipoEvento), 'Festivo') === 0) {
+            $tsBase = strtotime($fechaBase);
+            if ($tsBase !== false && date('w', $tsBase) === '0') {
+                $fechas[] = date('Y-m-d', strtotime('+1 day', $tsBase));
+            }
+        }
+
+        return array_values(array_unique($fechas));
+    }
+}
+
+if (!function_exists('obtenerFechaAplicadaNoLaborable')) {
+    function obtenerFechaAplicadaNoLaborable(string $fechaOriginal, string $tipoEvento, bool $repetirAnualmente, ?string $fechaContexto = null): string
+    {
+        $fechas = obtenerFechasAplicadasNoLaborable($fechaOriginal, $tipoEvento, $repetirAnualmente, $fechaContexto);
+        return (string)($fechas[0] ?? $fechaOriginal);
+    }
+}
+
+if (!function_exists('noLaborableAplicaEnFecha')) {
+    function noLaborableAplicaEnFecha(string $fechaOriginal, string $tipoEvento, bool $repetirAnualmente, string $fechaConsulta): bool
+    {
+        return in_array($fechaConsulta, obtenerFechasAplicadasNoLaborable($fechaOriginal, $tipoEvento, $repetirAnualmente, $fechaConsulta), true);
+    }
+}
+
+if (!function_exists('esFestivoDomingo')) {
+    function esFestivoDomingo(string $fechaOriginal, string $tipoEvento, bool $repetirAnualmente, ?string $fechaContexto = null): bool
+    {
+        $fechaBase = obtenerFechaAplicadaNoLaborable($fechaOriginal, $tipoEvento, $repetirAnualmente, $fechaContexto);
+        $tsBase = strtotime($fechaBase);
+        return strcasecmp(trim($tipoEvento), 'Festivo') === 0 && $tsBase !== false && date('w', $tsBase) === '0';
     }
 }
 require_once __DIR__ . '/HorariosVisitasSupport.php';

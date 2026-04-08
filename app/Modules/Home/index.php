@@ -391,6 +391,7 @@ if ($isJcasado) {
    =========================================================================== */
 $diasNoLaborables = [];
 if ($isJcasado) {
+    $fechaConsultaAyer = date('Y-m-d', strtotime($fechaConsulta . ' -1 day'));
     $sql_no_laborables = "
       SELECT 
         id,
@@ -404,16 +405,33 @@ if ($isJcasado) {
       FROM [integral].[dbo].[cmf_comerciales_dias_no_laborables]
       WHERE cod_vendedor = $cod_vendedor_session
         AND (
-             (repetir_anualmente = 0 AND CONVERT(date, fecha) = '$fechaConsulta')
+             (repetir_anualmente = 0 AND CONVERT(date, fecha) IN ('$fechaConsulta', '$fechaConsultaAyer'))
              OR (repetir_anualmente = 1 
-                AND MONTH(fecha) = MONTH('$fechaConsulta') 
-                AND DAY(fecha) = DAY('$fechaConsulta'))
+                AND (
+                    (MONTH(fecha) = MONTH('$fechaConsulta') AND DAY(fecha) = DAY('$fechaConsulta'))
+                    OR (MONTH(fecha) = MONTH('$fechaConsultaAyer') AND DAY(fecha) = DAY('$fechaConsultaAyer'))
+                ))
         )
       ORDER BY hora_inicio ASC
     ";
     $result_no_laborables = odbc_exec($conn, $sql_no_laborables);
     if ($result_no_laborables) {
         while ($row = odbc_fetch_array($result_no_laborables)) {
+            if (!noLaborableAplicaEnFecha(
+                trim((string)($row['fecha'] ?? '')),
+                trim((string)($row['tipo_evento'] ?? '')),
+                !empty($row['repetir_anualmente']) && intval($row['repetir_anualmente']) === 1,
+                $fechaConsulta
+            )) {
+                continue;
+            }
+
+            $row['fecha_aplicada'] = obtenerFechaAplicadaNoLaborable(
+                trim((string)($row['fecha'] ?? '')),
+                trim((string)($row['tipo_evento'] ?? '')),
+                !empty($row['repetir_anualmente']) && intval($row['repetir_anualmente']) === 1,
+                $fechaConsulta
+            );
             $diasNoLaborables[] = $row;
         }
     }
@@ -1766,7 +1784,22 @@ $ui_requires_jquery = false;
                     } else if (strpos($tipoEventoLower, 'comaferr') !== false) {
                         $iconoNL = '<i class="fa fa-building"></i>';
                     } else if ($tipoEventoLower == 'festivo') {
-                        $colorTexto = '#ff0000';
+                        $fechaAplicadaFestivo = trim((string)($vis['fecha_aplicada'] ?? $vis['fecha'] ?? ''));
+                        $fechaBaseFestivo = obtenerFechaAplicadaNoLaborable(
+                            trim((string)($vis['fecha'] ?? '')),
+                            trim((string)($vis['tipo_evento'] ?? '')),
+                            !empty($vis['repetir_anualmente']) && intval($vis['repetir_anualmente']) === 1,
+                            $fechaConsulta
+                        );
+                        $esFestivoDomingoActual = esFestivoDomingo(
+                            trim((string)($vis['fecha'] ?? '')),
+                            trim((string)($vis['tipo_evento'] ?? '')),
+                            !empty($vis['repetir_anualmente']) && intval($vis['repetir_anualmente']) === 1,
+                            $fechaConsulta
+                        );
+                        if ($esFestivoDomingoActual && $fechaAplicadaFestivo === $fechaBaseFestivo) {
+                            $colorTexto = '#ff0000';
+                        }
                         $iconoNL = '<i class="fa fa-calendar-times-o"></i>';
                     } else if ($tipoEventoLower == 'vacaciones') {
                         $colorTexto = '#ff0000';
@@ -1787,6 +1820,12 @@ $ui_requires_jquery = false;
                     echo htmlspecialchars($vis['descripcion']);
                     echo ' (' . ($todoElDia ? "Todo el d&iacute;a" 
                          : (substr($hInicio,0,5) . " - " . substr($hFin,0,5))) . ')';
+                    if ($tipoEventoLower == 'festivo') {
+                        $fechaAplicadaFestivo = trim((string)($vis['fecha_aplicada'] ?? $vis['fecha'] ?? ''));
+                        if ($fechaAplicadaFestivo !== '') {
+                            echo ' - ' . htmlspecialchars(obtenerDiaSemana($fechaAplicadaFestivo));
+                        }
+                    }
                     if (!empty($vis['repetir_anualmente']) && $vis['repetir_anualmente'] == 1) {
                         echo " (Anual)";
                     }
