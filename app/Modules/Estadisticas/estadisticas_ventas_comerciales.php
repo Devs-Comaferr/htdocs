@@ -13,7 +13,6 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_estadisticas');
 require_once BASE_PATH . '/app/Support/statistics.php';
-require_once BASE_PATH . '/app/Support/statistics.php';
 
 header('Content-Type: text/html; charset=UTF-8');
 
@@ -49,7 +48,6 @@ $queryNormalizada['f_hasta'] = $fHasta;
 $queryNormalizada['cod_comisionista'] = trim((string)($queryEntrada['cod_comisionista'] ?? ''));
 
 $contexto = resolverContextoFiltros($conn, $_SESSION, $queryNormalizada);
-error_log('[DEBUG CONTEXTO FILTROS] ' . json_encode($contexto));
 $opcionesMarca = obtenerOpcionesFiltroVentas($conn, $contexto, 'marca');
 $opcionesFamilia = [];
 try {
@@ -2689,13 +2687,3 @@ document.addEventListener('DOMContentLoaded', function () {
 if (isset($conn)) {
 }
 ?>
-
-
-
-
-
-
-
-
-
-

@@ -641,8 +641,16 @@ if (!$agrupar) {
 <script src="<?= BASE_URL ?>/assets/vendor/nouislider/nouislider.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/vendor/wnumb/wNumb.min.js"></script>
 <script>
-$(function(){
+document.addEventListener('DOMContentLoaded', function () {
     var slider = document.getElementById('date-slider');
+    var fechaDesdeInput = document.getElementById('fecha_desde');
+    var fechaHastaInput = document.getElementById('fecha_hasta');
+    var filtrosForm = document.getElementById('filtrosForm');
+
+    if (!slider || !fechaDesdeInput || !fechaHastaInput || !filtrosForm || typeof noUiSlider === 'undefined') {
+        return;
+    }
+
     var minTimestamp = Date.parse("2023-01-01") / 1000;
     var maxTimestamp = Date.now() / 1000;
 
@@ -650,8 +658,8 @@ $(function(){
     var oneYearAgo = new Date();
     oneYearAgo.setFullYear(today.getFullYear() - 1);
 
-    var initialStart = $("#fecha_desde").val() ? Date.parse($("#fecha_desde").val())/1000 : oneYearAgo.getTime()/1000;
-    var initialEnd   = $("#fecha_hasta").val() ? Date.parse($("#fecha_hasta").val())/1000 : today.getTime()/1000;
+    var initialStart = fechaDesdeInput.value ? Date.parse(fechaDesdeInput.value) / 1000 : oneYearAgo.getTime() / 1000;
+    var initialEnd = fechaHastaInput.value ? Date.parse(fechaHastaInput.value) / 1000 : today.getTime() / 1000;
 
     noUiSlider.create(slider, {
         start: [initialStart, initialEnd],
@@ -659,15 +667,15 @@ $(function(){
         range: { 'min': minTimestamp, 'max': maxTimestamp },
         step: 86400,
         tooltips: [
-            wNumb({ decimals: 0, edit: function(value){ return new Date(value*1000).toLocaleDateString(); } }),
-            wNumb({ decimals: 0, edit: function(value){ return new Date(value*1000).toLocaleDateString(); } })
+            wNumb({ decimals: 0, edit: function(value){ return new Date(value * 1000).toLocaleDateString(); } }),
+            wNumb({ decimals: 0, edit: function(value){ return new Date(value * 1000).toLocaleDateString(); } })
         ]
     });
 
-    slider.noUiSlider.on('change', function(values, handle){
-        $("#fecha_desde").val(new Date(parseFloat(values[0])*1000).toISOString().slice(0,10));
-        $("#fecha_hasta").val(new Date(parseFloat(values[1])*1000).toISOString().slice(0,10));
-        $("#filtrosForm").submit();
+    slider.noUiSlider.on('change', function(values) {
+        fechaDesdeInput.value = new Date(parseFloat(values[0]) * 1000).toISOString().slice(0, 10);
+        fechaHastaInput.value = new Date(parseFloat(values[1]) * 1000).toISOString().slice(0, 10);
+        filtrosForm.submit();
     });
 });
 </script>
