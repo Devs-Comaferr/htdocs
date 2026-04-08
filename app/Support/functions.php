@@ -271,6 +271,123 @@ if (!function_exists('validarFechaSQL')) {
     }
 }
 
+if (!function_exists('esDiaLaborable')) {
+    function esDiaLaborable(string $fecha, ?array $cliente = null, ?int $cod_vendedor = null): bool
+    {
+        $fecha = trim($fecha);
+        if (!validarFechaSQL($fecha)) {
+            return false;
+        }
+
+        $conn = db();
+        if (!$conn) {
+            return true;
+        }
+
+        $cliente = is_array($cliente) ? $cliente : [];
+        $provincia = isset($cliente['provincia']) ? trim((string)$cliente['provincia']) : '';
+        $poblacion = isset($cliente['poblacion']) ? trim((string)$cliente['poblacion']) : '';
+        $codMunicipioIne = isset($cliente['cod_municipio_ine']) ? trim((string)$cliente['cod_municipio_ine']) : '';
+
+        $sqlFestivoNacional = "
+            SELECT TOP 1 1 AS existe
+            FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
+            WHERE ambito = ?
+              AND (
+                    fecha = ?
+                    OR (
+                        repetir_anualmente = 1
+                        AND DAY(fecha) = DAY(CAST(? AS DATE))
+                        AND MONTH(fecha) = MONTH(CAST(? AS DATE))
+                    )
+              )
+        ";
+        $stmtFestivoNacional = odbc_prepare($conn, $sqlFestivoNacional);
+        if ($stmtFestivoNacional && odbc_execute($stmtFestivoNacional, ['NACIONAL', $fecha, $fecha, $fecha]) && odbc_fetch_row($stmtFestivoNacional)) {
+            return false;
+        }
+
+        if ($provincia !== '') {
+            $sqlFestivoAutonomico = "
+                SELECT TOP 1 1 AS existe
+                FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
+                WHERE ambito = ?
+                  AND provincia COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
+                  AND (
+                        fecha = ?
+                        OR (
+                            repetir_anualmente = 1
+                            AND DAY(fecha) = DAY(CAST(? AS DATE))
+                            AND MONTH(fecha) = MONTH(CAST(? AS DATE))
+                        )
+                  )
+            ";
+            $stmtFestivoAutonomico = odbc_prepare($conn, $sqlFestivoAutonomico);
+            if ($stmtFestivoAutonomico && odbc_execute($stmtFestivoAutonomico, ['AUTONOMICO', $provincia, $fecha, $fecha, $fecha]) && odbc_fetch_row($stmtFestivoAutonomico)) {
+                return false;
+            }
+        }
+
+        if ($codMunicipioIne !== '') {
+            $sqlFestivoLocalIne = "
+                SELECT TOP 1 1 AS existe
+                FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
+                WHERE ambito = ?
+                  AND cod_municipio_ine = ?
+                  AND (
+                        fecha = ?
+                        OR (
+                            repetir_anualmente = 1
+                            AND DAY(fecha) = DAY(CAST(? AS DATE))
+                            AND MONTH(fecha) = MONTH(CAST(? AS DATE))
+                        )
+                  )
+            ";
+            $stmtFestivoLocalIne = odbc_prepare($conn, $sqlFestivoLocalIne);
+            if ($stmtFestivoLocalIne && odbc_execute($stmtFestivoLocalIne, ['LOCAL', $codMunicipioIne, $fecha, $fecha, $fecha]) && odbc_fetch_row($stmtFestivoLocalIne)) {
+                return false;
+            }
+        } elseif ($provincia !== '' && $poblacion !== '') {
+            $sqlFestivoLocalTexto = "
+                SELECT TOP 1 1 AS existe
+                FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
+                WHERE ambito = ?
+                  AND provincia COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
+                  AND poblacion COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
+                  AND (
+                        fecha = ?
+                        OR (
+                            repetir_anualmente = 1
+                            AND DAY(fecha) = DAY(CAST(? AS DATE))
+                            AND MONTH(fecha) = MONTH(CAST(? AS DATE))
+                        )
+                  )
+            ";
+            $stmtFestivoLocalTexto = odbc_prepare($conn, $sqlFestivoLocalTexto);
+            if ($stmtFestivoLocalTexto && odbc_execute($stmtFestivoLocalTexto, ['LOCAL', $provincia, $poblacion, $fecha, $fecha, $fecha]) && odbc_fetch_row($stmtFestivoLocalTexto)) {
+                return false;
+            }
+        }
+
+        if ($cod_vendedor !== null) {
+            $sqlAgenda = "
+                SELECT TOP 1 1 AS existe
+                FROM [integral].[dbo].[cmf_comerciales_calendario_agenda]
+                WHERE cod_vendedor = ?
+                  AND fecha = ?
+                  AND hora_inicio IS NULL
+                  AND hora_fin IS NULL
+            ";
+            $stmtAgenda = odbc_prepare($conn, $sqlAgenda);
+            if ($stmtAgenda && odbc_execute($stmtAgenda, [$cod_vendedor, $fecha]) && odbc_fetch_row($stmtAgenda)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
 require_once __DIR__ . '/FechasHistoricoSupport.php';
 
 
