@@ -15,8 +15,6 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 
 header('Content-Type: text/html; charset=utf-8');
 
-require_once BASE_PATH . '/app/Support/logs.php';
-
 $conn = db();
 
 function loginRedirectError(string $code = 'invalid_credentials'): void
@@ -46,7 +44,7 @@ $sql = "
         perm_estadisticas,
         perm_comisiones,
         perm_planificador
-    FROM cmf_vendedores_user
+    FROM cmf_comerciales_app_usuarios
     WHERE email = ?
 ";
 
@@ -83,7 +81,7 @@ if (!$passwordOk) {
 if ($rehashPendiente) {
     $nuevoHash = password_hash($password, PASSWORD_DEFAULT);
     if (is_string($nuevoHash) && $nuevoHash !== '') {
-        $sqlUpdateClave = "UPDATE cmf_vendedores_user SET clave = ? WHERE email = ?";
+        $sqlUpdateClave = "UPDATE cmf_comerciales_app_usuarios SET clave = ? WHERE email = ?";
         $stmtUpdateClave = odbc_prepare($conn, $sqlUpdateClave);
         if ($stmtUpdateClave && odbc_execute($stmtUpdateClave, [$nuevoHash, $email])) {
             error_log('Login password rehash aplicado para: ' . $email . ' [needs_rehash]');

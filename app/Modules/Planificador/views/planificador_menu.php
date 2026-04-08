@@ -64,7 +64,7 @@ $totalPedidosSinAsignar = obtenerConteoPlanificadorMenu(
     $conn,
     "SELECT COUNT(*) AS total
      FROM hist_ventas_cabecera h
-     LEFT JOIN cmf_visita_pedidos vp ON h.cod_venta = vp.cod_venta
+     LEFT JOIN cmf_comerciales_visitas_pedidos vp ON h.cod_venta = vp.cod_venta
      WHERE vp.cod_venta IS NULL
        AND h.tipo_venta = 1
        AND h.fecha_venta >= '2025-01-01'

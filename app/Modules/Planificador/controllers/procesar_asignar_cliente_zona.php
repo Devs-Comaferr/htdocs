@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Verificar si el cliente tiene secciones disponibles (si cod_seccion != NULL)
     if ($cod_seccion !== 'NULL') {
         // Verificar si la secciÃ³n estÃ¡ disponible
-        $query_verificar = "SELECT COUNT(*) AS total FROM cmf_asignacion_zonas_clientes 
+        $query_verificar = "SELECT COUNT(*) AS total FROM cmf_comerciales_clientes_zona 
                             WHERE cod_cliente = '$cod_cliente' AND cod_seccion = '$cod_seccion'";
         $resultado_verificar = odbc_exec($conn, $query_verificar);
         if (!$resultado_verificar) {

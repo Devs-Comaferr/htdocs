@@ -13,10 +13,10 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 require_once BASE_PATH . '/app/Modules/Clientes/services/seccion_detalles_service.php';
 
-// Verificar si el usuario ha iniciado sesiÃ³n
+// Verificar si el usuario ha iniciado sesiÃƒÂ³n
 
 
-// Verificar parÃ¡metros GET
+// Verificar parÃƒÂ¡metros GET
 $ajaxAccion = (string)($_GET['ajax'] ?? '');
 $esAjaxLineas = in_array($ajaxAccion, array('lineas_visita', 'lineas_pedido'), true);
 
@@ -47,7 +47,7 @@ $conn = db();
 // Conexion auxiliar para consultas anidadas en el bucle de visitas.
 $conn_aux = openOdbcConnection();
 $conn_aux2 = openOdbcConnection();
-$pageTitle = "Detalles de la SecciÃ³n";
+$pageTitle = "Detalles de la SecciÃƒÂ³n";
 
 // Endpoint AJAX interno: lineas de visita/pedido para carga diferida en modales.
 function cargarResumenPedido($connLocal, string $codPedido, string $origen = ''): array {
@@ -173,7 +173,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'lineas_visita') {
             elv.cantidad AS cantidad_servida,
             hvc_dest.fecha_venta AS fecha_entrega
         FROM [integral].[dbo].[hist_ventas_linea] hl
-        INNER JOIN [integral].[dbo].[cmf_visita_pedidos] vp
+        INNER JOIN [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
            ON hl.cod_venta = vp.cod_venta
         LEFT JOIN [integral].[dbo].[entrega_lineas_venta] elv
            ON hl.cod_venta = elv.cod_venta_origen
@@ -197,7 +197,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'lineas_visita') {
             elv.cantidad AS cantidad_servida,
             hvc_dest.fecha_venta AS fecha_entrega
         FROM [integral].[dbo].[ventas_linea_elim] vle
-        INNER JOIN [integral].[dbo].[cmf_visita_pedidos] vp
+        INNER JOIN [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
            ON vle.cod_venta = vp.cod_venta
         LEFT JOIN [integral].[dbo].[entrega_lineas_venta] elv
            ON vle.cod_venta = elv.cod_venta_origen
@@ -217,7 +217,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'lineas_visita') {
     $lineaIds = array();
     $hay = false;
     echo '<div class="modal-table-container"><table class="modal-table"><thead><tr>';
-    echo '<th>ArtÃ­culo</th><th>DescripciÃ³n</th><th>Cantidad</th><th>Cantidad Servida</th><th>Precio (EUR)</th><th>Dto1 (%)</th><th>Dto2 (%)</th><th>Importe (EUR)</th><th>Fecha de Entrega</th>';
+    echo '<th>ArtÃƒÂ­culo</th><th>DescripciÃƒÂ³n</th><th>Cantidad</th><th>Cantidad Servida</th><th>Precio (EUR)</th><th>Dto1 (%)</th><th>Dto2 (%)</th><th>Importe (EUR)</th><th>Fecha de Entrega</th>';
     echo '</tr></thead><tbody>';
     while ($linea = odbc_fetch_array($result_lineas_visita)) {
         $uniqueId = (string)($linea['cod_articulo'] ?? '') . '-' . (string)($linea['descripcion'] ?? '') . '-' . (string)($linea['cantidad'] ?? '');
@@ -355,7 +355,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'lineas_pedido') {
     $lineaIds = array();
     $hay = false;
     echo '<div class="modal-table-container"><table class="modal-table"><thead><tr>';
-    echo '<th>ArtÃ­culo</th><th>DescripciÃ³n</th><th>Cantidad</th><th>Cantidad Servida</th><th>Precio (EUR)</th><th>Dto1 (%)</th><th>Dto2 (%)</th><th>Importe (EUR)</th><th>Fecha de Entrega</th>';
+    echo '<th>ArtÃƒÂ­culo</th><th>DescripciÃƒÂ³n</th><th>Cantidad</th><th>Cantidad Servida</th><th>Precio (EUR)</th><th>Dto1 (%)</th><th>Dto2 (%)</th><th>Importe (EUR)</th><th>Fecha de Entrega</th>';
     echo '</tr></thead><tbody>';
     foreach ($lineasPedidoRows as $linea) {
         $uniqueId = (string)($linea['cod_articulo'] ?? '') . '-' . (string)($linea['descripcion'] ?? '') . '-' . (string)($linea['cantidad'] ?? '');
@@ -396,7 +396,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'lineas_pedido') {
     exit;
 }
 
-// 1. OBTENER EL NOMBRE DE LA SECCIÃ“N
+// 1. OBTENER EL NOMBRE DE LA SECCIÃƒâ€œN
 $sql_seccion = "
     SELECT nombre
     FROM [integral].[dbo].[secciones_cliente]
@@ -405,14 +405,14 @@ $sql_seccion = "
 ";
 $result_seccion = odbc_exec($conn, $sql_seccion);
 if (!$result_seccion) {
-    error_log("Error al consultar la secciÃ³n: " . odbc_errormsg($conn));
+    error_log("Error al consultar la secciÃƒÂ³n: " . odbc_errormsg($conn));
     echo 'Error interno';
     return;
 }
 $seccion_data = odbc_fetch_array($result_seccion);
-$nombre_seccion = $seccion_data ? $seccion_data['nombre'] : "SecciÃ³n desconocida";
+$nombre_seccion = $seccion_data ? $seccion_data['nombre'] : "SecciÃƒÂ³n desconocida";
 
-// 2. CONSULTA DE DATOS BÃSICOS (CLIENTE + SECCIÃ“N)
+// 2. CONSULTA DE DATOS BÃƒÂSICOS (CLIENTE + SECCIÃƒâ€œN)
 $sql = "
 SELECT 
     c.cod_cliente, 
@@ -435,7 +435,7 @@ WHERE c.cod_cliente = '" . addslashes($cod_cliente) . "'
 ";
 $result = odbc_exec($conn, $sql);
 if (!$result) {
-    error_log("Error al ejecutar la consulta de datos de la secciÃ³n: " . odbc_errormsg($conn));
+    error_log("Error al ejecutar la consulta de datos de la secciÃƒÂ³n: " . odbc_errormsg($conn));
     echo 'Error interno';
     return;
 }
@@ -445,17 +445,17 @@ $data = odbc_fetch_array($result);
 $pageTitle = ($data ? $data['nombre_comercial'] ?? '' : 'Cliente desconocido') . " - " . $nombre_seccion;
 
 // -----------------------------------------------------------------------------
-// FUNCIONES (colores, dÃ­a de la semana, iconos de origen, etc.)
+// FUNCIONES (colores, dÃƒÂ­a de la semana, iconos de origen, etc.)
 // -----------------------------------------------------------------------------
 // Funciones comunes cargadas desde funciones.php:
 // obtenerDiaSemana, determinarColorVisita, determinarColorPedido, iconoDeOrigen
 
 // -----------------------------------------------------------------------------
-// CONSULTA A cmf_asignacion_zonas_clientes PARA MOSTRAR HORARIO Y DEMÃS
+// CONSULTA A cmf_comerciales_clientes_zona PARA MOSTRAR HORARIO Y DEMÃƒÂS
 // -----------------------------------------------------------------------------
 $sql_asignacion = "
 SELECT * 
-FROM [integral].[dbo].[cmf_asignacion_zonas_clientes]
+FROM [integral].[dbo].[cmf_comerciales_clientes_zona]
 WHERE cod_cliente = '" . addslashes($cod_cliente) . "'
   AND cod_seccion = '" . addslashes($cod_seccion) . "'
 ";
@@ -473,7 +473,7 @@ SELECT
     v.fecha_visita,
     v.hora_inicio_visita,
     v.hora_fin_visita
-FROM [integral].[dbo].[cmf_visitas_comerciales] v
+FROM [integral].[dbo].[cmf_comerciales_visitas] v
 WHERE v.cod_cliente = '" . addslashes($cod_cliente) . "'
   AND v.cod_seccion = '" . addslashes($cod_seccion) . "'
 ORDER BY v.fecha_visita DESC
@@ -498,7 +498,7 @@ while ($visita = odbc_fetch_array($result_visitas)) {
     // Origen principal (para color de la visita)
     $sql_pedido_principal = "
         SELECT TOP 1 vp.cod_venta, vp.origen
-        FROM [integral].[dbo].[cmf_visita_pedidos] vp
+        FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
         WHERE vp.id_visita = '" . addslashes($visita['id_visita']) . "'
         ORDER BY vp.id_visita_pedido ASC
     ";
@@ -513,7 +513,7 @@ while ($visita = odbc_fetch_array($result_visitas)) {
         SELECT
             vp.cod_venta AS cod_pedido,
             vp.origen
-        FROM [integral].[dbo].[cmf_visita_pedidos] vp
+        FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
         WHERE vp.id_visita = '" . addslashes($visita['id_visita']) . "'
         ORDER BY vp.id_visita_pedido ASC
     ";
@@ -541,7 +541,7 @@ while ($visita = odbc_fetch_array($result_visitas)) {
                 SELECT DISTINCT
                     vp.cod_venta AS cod_pedido,
                     vp.origen
-                FROM [integral].[dbo].[cmf_visita_pedidos] vp
+                FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
                 INNER JOIN [integral].[dbo].[hist_ventas_linea] hl
                   ON vp.cod_venta = hl.cod_venta
                  AND hl.tipo_venta = 1
@@ -1194,7 +1194,7 @@ include_once BASE_PATH . '/resources/views/layouts/header.php';
         if (!empty($asignacion['zona_principal'])) {
             $sql_zp = "
                 SELECT nombre_zona
-                FROM [integral].[dbo].[cmf_zonas_visita]
+                FROM [integral].[dbo].[cmf_comerciales_zonas]
                 WHERE cod_zona = '" . addslashes($asignacion['zona_principal']) . "'
             ";
             $res_zp = odbc_exec($conn, $sql_zp);
@@ -1207,7 +1207,7 @@ include_once BASE_PATH . '/resources/views/layouts/header.php';
         if (!empty($asignacion['zona_secundaria'])) {
             $sql_zs = "
                 SELECT nombre_zona
-                FROM [integral].[dbo].[cmf_zonas_visita]
+                FROM [integral].[dbo].[cmf_comerciales_zonas]
                 WHERE cod_zona = '" . addslashes($asignacion['zona_secundaria']) . "'
             ";
             $res_zs = odbc_exec($conn, $sql_zs);
@@ -1237,7 +1237,7 @@ include_once BASE_PATH . '/resources/views/layouts/header.php';
 
         // Preferencia Horaria
         $pref = strtolower($asignacion['preferencia_horaria'] ?? '');
-        $estiloManana = ($pref == 'm' || $pref == 'maÃ±ana') ? "background-color: #ffc107; padding:2px 4px;" : "";
+        $estiloManana = ($pref == 'm' || $pref == 'maÃƒÂ±ana') ? "background-color: #ffc107; padding:2px 4px;" : "";
         $estiloTarde  = ($pref == 't' || $pref == 'tarde')   ? "background-color: #007bff; color:#fff; padding:2px 4px;" : "";
 
         // Tiempo Promedio
@@ -1427,7 +1427,7 @@ include_once BASE_PATH . '/resources/views/layouts/header.php';
                         // Reconstruccion defensiva en render: si hay importe en la visita pero no pedidos cargados.
                         $sql_pedidos_render = "
                             SELECT vp.cod_venta AS cod_pedido, vp.origen
-                            FROM [integral].[dbo].[cmf_visita_pedidos] vp
+                            FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
                             WHERE vp.id_visita = '" . addslashes((string)$visita['id_visita']) . "'
                             ORDER BY vp.id_visita_pedido ASC
                         ";
@@ -1645,7 +1645,7 @@ const colorFamilias = {
     '1': '#000000', '99': '#424242', '2': '#B6C002'
 };
 
-// FunciÃ³n para abrir un modal
+// FunciÃƒÂ³n para abrir un modal
 function cargarContenidoAjax(url, containerId) {
     var container = document.getElementById(containerId);
     if (!container) {
@@ -1697,8 +1697,8 @@ function cargarDatosModal(id) {
     }
 }
 
-// FunciÃ³n para cerrar un modal
-// Cerrar modal si se hace clic fuera de Ã©l
+// FunciÃƒÂ³n para cerrar un modal
+// Cerrar modal si se hace clic fuera de ÃƒÂ©l
 window.onclick = function(event) {
     var modals = document.getElementsByClassName('modal');
     for(var i=0; i<modals.length; i++) {
@@ -1830,7 +1830,7 @@ function mostrarDetalleBarra(periodoTxt, items) {
     titulo.textContent = 'Detalle ' + periodoTxt + ' (Pedidos vs Albaranes)';
 
     if (!Array.isArray(items) || items.length === 0) {
-                        contenido.innerHTML = '<p>No hay detalle por artÃ­culos para este periodo.</p>';
+                        contenido.innerHTML = '<p>No hay detalle por artÃƒÂ­culos para este periodo.</p>';
         abrirModal('modal-detalle-barras');
         return;
     }
@@ -1882,7 +1882,7 @@ function mostrarDetalleBarra(periodoTxt, items) {
         '<span class="leyenda-item"><span class="leyenda-color" style="background:#e8f1ff;"></span>Importe: Albaran &gt; Pedido (misma cantidad)</span>' +
         '</div>' +
         '<div class="modal-table-container"><table class="modal-table"><thead><tr>' +
-        '<th>ArtÃ­culo</th><th>DescripciÃ³n</th><th>Cant. Pedido</th><th>Importe Pedido</th><th>Cant. AlbarÃ¡n</th><th>Importe AlbarÃ¡n</th>' +
+        '<th>ArtÃƒÂ­culo</th><th>DescripciÃƒÂ³n</th><th>Cant. Pedido</th><th>Importe Pedido</th><th>Cant. AlbarÃƒÂ¡n</th><th>Importe AlbarÃƒÂ¡n</th>' +
         '</tr></thead><tbody>' + filas +
         '<tr><td colspan="2"><strong>Totales</strong></td>' +
         '<td><strong>' + totalCantPedido.toFixed(2) + '</strong></td>' +
@@ -2131,7 +2131,7 @@ function dibujarGraficoArticulos() {
             responsive: true,
             plugins: {
                 legend: { display: false },
-                        title: { display: true, text: 'ArtÃ­culos (Top 10)' },
+                        title: { display: true, text: 'ArtÃƒÂ­culos (Top 10)' },
                 datalabels: {
                     formatter: function(value, context) {
                         var idx = context.dataIndex;
@@ -2170,7 +2170,7 @@ window.onload = function() {
     dibujarGraficoArticulos();
 }
 
-// FunciÃ³n para recalcular el promedio (igual que en cliente_detalles.php)
+// FunciÃƒÂ³n para recalcular el promedio (igual que en cliente_detalles.php)
 function calcularPromedioVisita(cod_cliente, cod_seccion) {
     var xhr = null;
     if (window.XMLHttpRequest) {
@@ -2196,12 +2196,12 @@ function calcularPromedioVisita(cod_cliente, cod_seccion) {
     xhr.send(null);
 }
 
-// AÃ±adimos las funciones para quitarPedido y actualizarOrigen (AJAX)
+// AÃƒÂ±adimos las funciones para quitarPedido y actualizarOrigen (AJAX)
 var csrfTokenVisitas = <?= json_encode(csrfToken(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
 function quitarPedido(cod_pedido, event) {
     event.stopPropagation();
-    if (!confirm("Â¿EstÃ¡s seguro de quitar este pedido de la visita?")) {
+    if (!confirm("Ã‚Â¿EstÃƒÂ¡s seguro de quitar este pedido de la visita?")) {
         return;
     }
     $.ajax({

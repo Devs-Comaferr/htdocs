@@ -8,7 +8,7 @@ function puedeEliminarVisita(int $id_visita, int $cod_vendedor): bool
 
     $sqlVisita = "
         SELECT id_visita, cod_vendedor
-        FROM [integral].[dbo].[cmf_visitas_comerciales]
+        FROM [integral].[dbo].[cmf_comerciales_visitas]
         WHERE id_visita = ?
     ";
 
@@ -35,13 +35,13 @@ function eliminarVisita(int $id_visita, int $cod_vendedor): bool
         odbc_autocommit($conn, false);
 
         $sqlDeletePedidos = "
-            DELETE FROM [integral].[dbo].[cmf_visita_pedidos]
+            DELETE FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos]
             WHERE id_visita = ?
         ";
         db_execute($conn, $sqlDeletePedidos, [$id_visita]);
 
         $sqlDeleteVisita = "
-            DELETE FROM [integral].[dbo].[cmf_visitas_comerciales]
+            DELETE FROM [integral].[dbo].[cmf_comerciales_visitas]
             WHERE id_visita = ?
         ";
         db_execute($conn, $sqlDeleteVisita, [$id_visita]);

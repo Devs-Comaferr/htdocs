@@ -19,7 +19,7 @@ function visitasServicePrepareExecute($conn, string $sql, array $params = [])
 function obtenerDetalleVisitaPorId(int $id_visita): ?array
 {
     $conn = db();
-    $sql = "SELECT * FROM cmf_visitas_comerciales WHERE id_visita = $id_visita";
+    $sql = "SELECT * FROM cmf_comerciales_visitas WHERE id_visita = $id_visita";
     $result = odbc_exec($conn, $sql);
     if ($result && $row = odbc_fetch_array($result)) {
         return $row;
@@ -44,7 +44,7 @@ function obtenerVisitasDiaData(string $fecha): array
                    c.nombre_comercial,
                    c.cod_cliente,
                    sc.nombre AS nombre_seccion
-            FROM [integral].[dbo].[cmf_visitas_comerciales] v
+            FROM [integral].[dbo].[cmf_comerciales_visitas] v
             LEFT JOIN [integral].[dbo].[clientes] c ON v.cod_cliente = c.cod_cliente
             LEFT JOIN [integral].[dbo].[secciones_cliente] sc ON v.cod_cliente = sc.cod_cliente AND v.cod_seccion = sc.cod_seccion
             WHERE CONVERT(varchar(10), v.fecha_visita, 120) = '$fecha'
@@ -85,7 +85,7 @@ function obtenerVisitasDiaData(string $fecha): array
                 vp.id_visita,
                 vp.origen,
                 ROW_NUMBER() OVER (PARTITION BY vp.id_visita ORDER BY vp.id_visita_pedido ASC) AS rn
-            FROM [integral].[dbo].[cmf_visita_pedidos] vp
+            FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
             WHERE vp.id_visita IN ($idsSql)
         ) t
         WHERE t.rn = 1
@@ -114,7 +114,7 @@ function obtenerVisitasDiaData(string $fecha): array
             hvc.importe,
             avc.observacion_interna,
             ISNULL(hlc.numero_lineas, 0) AS numero_lineas
-        FROM [integral].[dbo].[cmf_visita_pedidos] vp
+        FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
         INNER JOIN [integral].[dbo].[hist_ventas_cabecera] hvc
             ON vp.cod_venta = hvc.cod_venta
         LEFT JOIN [integral].[dbo].[anexo_ventas_cabecera] avc
@@ -168,7 +168,7 @@ function obtenerDatosEditarVisita(int $id_visita): ?array
             cl.cod_cliente,
             cl.nombre_comercial,
             cvc.cod_seccion
-        FROM [integral].[dbo].[cmf_visitas_comerciales] cvc
+        FROM [integral].[dbo].[cmf_comerciales_visitas] cvc
         JOIN [integral].[dbo].[clientes] cl ON cvc.cod_cliente = cl.cod_cliente
         WHERE cvc.id_visita = ?
     ";
@@ -180,7 +180,7 @@ function obtenerDatosEditarVisita(int $id_visita): ?array
     $cod_cliente = odbc_result($result, 'cod_cliente');
     $cod_seccion = odbc_result($result, 'cod_seccion');
 
-    $sql_assignment = "SELECT * FROM [integral].[dbo].[cmf_asignacion_zonas_clientes] WHERE cod_cliente = ? AND activo = 1";
+    $sql_assignment = "SELECT * FROM [integral].[dbo].[cmf_comerciales_clientes_zona] WHERE cod_cliente = ? AND activo = 1";
     $assignmentParams = [$cod_cliente];
     if (!is_null($cod_seccion)) {
         $sql_assignment .= " AND cod_seccion = ?";
@@ -193,7 +193,7 @@ function obtenerDatosEditarVisita(int $id_visita): ?array
 
     $sqlPedidosAsociados = "
         SELECT COUNT(*) AS total
-        FROM [integral].[dbo].[cmf_visita_pedidos]
+        FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos]
         WHERE id_visita = ?
     ";
     $resultPedidosAsociados = visitasServicePrepareExecute($conn, $sqlPedidosAsociados, [$id_visita]);
@@ -277,7 +277,7 @@ function prepararVistaVisitaManual(array $input, int $codigo_vendedor): array
     }
 
     if ($cod_cliente > 0) {
-        $sql_assignment = "SELECT * FROM [integral].[dbo].[cmf_asignacion_zonas_clientes] WHERE cod_cliente = ? AND activo = 1";
+        $sql_assignment = "SELECT * FROM [integral].[dbo].[cmf_comerciales_clientes_zona] WHERE cod_cliente = ? AND activo = 1";
         $assignmentParams = [$cod_cliente];
         if ($cod_seccion !== null) {
             $sql_assignment .= " AND cod_seccion = ?";
@@ -328,7 +328,7 @@ function prepararVistaVisitaManual(array $input, int $codigo_vendedor): array
 
         $currentDate = date('Y-m-d');
         $sql_citas = "SELECT fecha_visita, hora_inicio_visita, hora_fin_visita, estado_visita
-                      FROM [integral].[dbo].[cmf_visitas_comerciales]
+                      FROM [integral].[dbo].[cmf_comerciales_visitas]
                       WHERE cod_cliente = ? ";
         $citasParams = [$cod_cliente];
         if ($cod_seccion !== null) {
@@ -386,7 +386,7 @@ function obtenerSeccionesDisponiblesVisita(int $cod_cliente, bool $limitar = fal
         WHERE sc.cod_cliente = '$cod_cliente' 
           AND sc.cod_seccion NOT IN (
               SELECT azc.cod_seccion 
-              FROM cmf_asignacion_zonas_clientes azc 
+              FROM cmf_comerciales_clientes_zona azc 
               WHERE azc.cod_cliente = sc.cod_cliente
           )
         ORDER BY sc.cod_seccion ASC
@@ -419,7 +419,7 @@ function verificarVisitaPreviaService(int $cod_cliente, string $fecha_visita, $c
 
     $sql = "
     SELECT TOP 1 id_visita
-    FROM [integral].[dbo].[cmf_visitas_comerciales]
+    FROM [integral].[dbo].[cmf_comerciales_visitas]
     WHERE cod_cliente = ?
       AND fecha_visita BETWEEN ? AND ?
       AND (
@@ -463,7 +463,7 @@ function obtenerVisitasExistentesService(int $codCliente, $codSeccion, string $f
     $conn = db();
     $sql = "
         SELECT estado_visita
-        FROM [integral].[dbo].[cmf_visitas_comerciales]
+        FROM [integral].[dbo].[cmf_comerciales_visitas]
         WHERE cod_cliente = ?
     ";
     $params = [$codCliente];

@@ -73,8 +73,8 @@ if (!function_exists('planificadorViewObtenerDatosZonasClientes')) {
                     SELECT
                         z.cod_zona,
                         COUNT(DISTINCT azc.cod_cliente) AS total_desalineados
-                    FROM cmf_zonas_visita z
-                    LEFT JOIN cmf_asignacion_zonas_clientes azc
+                    FROM cmf_comerciales_zonas z
+                    LEFT JOIN cmf_comerciales_clientes_zona azc
                         ON (azc.zona_principal = z.cod_zona OR azc.zona_secundaria = z.cod_zona)
                     LEFT JOIN clientes c
                         ON c.cod_cliente = azc.cod_cliente
@@ -223,8 +223,8 @@ if (!function_exists('planificadorViewObtenerDatosCompletarDia')) {
                     hora_fin_visita,
                     estado_visita,
                     (SELECT nombre_comercial FROM [integral].[dbo].[clientes]
-                     WHERE cod_cliente = cmf_visitas_comerciales.cod_cliente) AS cliente
-                FROM [integral].[dbo].[cmf_visitas_comerciales]
+                     WHERE cod_cliente = cmf_comerciales_visitas.cod_cliente) AS cliente
+                FROM [integral].[dbo].[cmf_comerciales_visitas]
                 WHERE cod_vendedor = $codigo_vendedor
                   AND CONVERT(varchar(10), fecha_visita, 120) = '$fecha'
                 ORDER BY hora_inicio_visita";

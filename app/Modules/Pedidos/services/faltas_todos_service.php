@@ -12,7 +12,7 @@ function faltasTodosResolverCodVendedor($conn): ?string
 
     $sql = "
         SELECT cod_vendedor
-        FROM cmf_vendedores_user
+        FROM cmf_comerciales_app_usuarios
         WHERE email = '" . addslashes((string) ($_SESSION['email'] ?? '')) . "'
     ";
     $result = odbc_exec($conn, $sql);

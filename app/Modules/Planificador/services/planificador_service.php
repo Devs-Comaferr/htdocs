@@ -108,7 +108,7 @@ function obtenerTodasRutas() {
 }
 
 /**
- * Obtener secciones de un cliente específico que no están asignadas a ninguna zona
+ * Obtener secciones de un cliente especÃ­fico que no estÃ¡n asignadas a ninguna zona
  */
 /**
  * Asignar una ruta a una zona.
@@ -155,11 +155,11 @@ function obtenerClientesDisponiblesParaAsignar($cod_zona, $rutas_asignadas, $cod
 }
 
 /**
- * Función de comparación para ordenar clientes por nombre_comercial.
+ * FunciÃ³n de comparaciÃ³n para ordenar clientes por nombre_comercial.
  *
  * @param array $a Primer cliente a comparar.
  * @param array $b Segundo cliente a comparar.
- * @return int Resultado de la comparación.
+ * @return int Resultado de la comparaciÃ³n.
  */
 
 function compararNombreCliente($a, $b) {
@@ -170,7 +170,7 @@ function compararNombreCliente($a, $b) {
 
 
 /**
- * Asignar un cliente y su sección a una zona
+ * Asignar un cliente y su secciÃ³n a una zona
  */
 
 function asignarClienteZona($cod_cliente, $cod_seccion, $zona_principal, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones = '') {
@@ -180,8 +180,8 @@ function asignarClienteZona($cod_cliente, $cod_seccion, $zona_principal, $zona_s
 /**
  * Obtener clientes asignados a una zona especfica, tanto principales como secundarios.
  *
- * @param int $cod_zona Código de la zona.
- * @return array Lista de clientes con detalles de asignación.
+ * @param int $cod_zona CÃ³digo de la zona.
+ * @return array Lista de clientes con detalles de asignaciÃ³n.
  */
 
 function obtenerClientesPorZona($cod_zona) {
@@ -189,11 +189,11 @@ function obtenerClientesPorZona($cod_zona) {
 }
 
 /**
- * Obtener clientes de una ruta concreta que no pertenecen al vendedor en sesión.
+ * Obtener clientes de una ruta concreta que no pertenecen al vendedor en sesiÃ³n.
  *
- * @param int $cod_zona Código de la zona.
- * @param int $cod_ruta Código de la ruta.
- * @return array Lista de clientes de la ruta fuera del vendedor en sesión.
+ * @param int $cod_zona CÃ³digo de la zona.
+ * @param int $cod_ruta CÃ³digo de la ruta.
+ * @return array Lista de clientes de la ruta fuera del vendedor en sesiÃ³n.
  */
 
 function obtenerClientesPorZonaYRuta($cod_zona, $cod_ruta, $cod_vendedor = null) {
@@ -203,7 +203,7 @@ function obtenerClientesPorZonaYRuta($cod_zona, $cod_ruta, $cod_vendedor = null)
 
 
 /**
- * Función para comparar clientes por nombre_comercial y nombre_seccion.
+ * FunciÃ³n para comparar clientes por nombre_comercial y nombre_seccion.
  */
 
 function compararNombreClienteYSeccion($a, $b) {
@@ -213,7 +213,7 @@ function compararNombreClienteYSeccion($a, $b) {
 /**
  * Obtener el nombre comercial de un cliente.
  *
- * @param int $cod_cliente Código del cliente.
+ * @param int $cod_cliente CÃ³digo del cliente.
  * @return array|null Nombre comercial del cliente.
  */
 
@@ -222,10 +222,10 @@ function obtenerNombreCliente($cod_cliente) {
 }
 
 /**
- * Obtener información de una zona por su código.
+ * Obtener informaciÃ³n de una zona por su cÃ³digo.
  *
- * @param int $cod_zona Código de la zona.
- * @return array|null Información de la zona.
+ * @param int $cod_zona CÃ³digo de la zona.
+ * @return array|null InformaciÃ³n de la zona.
  */
 
 function obtenerZonaPorCodigoEditar($cod_zona) {
@@ -233,12 +233,12 @@ function obtenerZonaPorCodigoEditar($cod_zona) {
 }
 
 /**
- * Obtener una asignación específica.
+ * Obtener una asignaciÃ³n especÃ­fica.
  *
- * @param int $cod_cliente Código del cliente.
- * @param int $cod_zona Código de la zona.
- * @param int|null $cod_seccion Código de la sección (puede ser NULL).
- * @return array|null Asignación encontrada.
+ * @param int $cod_cliente CÃ³digo del cliente.
+ * @param int $cod_zona CÃ³digo de la zona.
+ * @param int|null $cod_seccion CÃ³digo de la secciÃ³n (puede ser NULL).
+ * @return array|null AsignaciÃ³n encontrada.
  */
 
 function obtenerAsignacion($cod_cliente, $cod_zona, $cod_seccion = null) {
@@ -249,18 +249,18 @@ function obtenerAsignacion($cod_cliente, $cod_zona, $cod_seccion = null) {
 
 
 /**
- * Actualizar una asignación en la base de datos.
+ * Actualizar una asignaciÃ³n en la base de datos.
  *
- * @param int $cod_cliente Código del cliente.
- * @param int $cod_zona Código de la zona principal.
- * @param int $cod_seccion Código de la sección.
- * @param int|null $zona_secundaria Código de la zona secundaria (puede ser NULL).
+ * @param int $cod_cliente CÃ³digo del cliente.
+ * @param int $cod_zona CÃ³digo de la zona principal.
+ * @param int $cod_seccion CÃ³digo de la secciÃ³n.
+ * @param int|null $zona_secundaria CÃ³digo de la zona secundaria (puede ser NULL).
  * @param float|null $tiempo_promedio_visita Tiempo promedio de visita.
- * @param string|null $preferencia_horaria Preferencia horaria ('M' para mañana, 'T' para tarde).
+ * @param string|null $preferencia_horaria Preferencia horaria ('M' para maÃ±ana, 'T' para tarde).
  * @param string|null $frecuencia_visita Frecuencia de visita ('Todos', 'Cada2', 'Cada3', 'Nunca').
  * @param string|null $observaciones Observaciones.
  *
- * @return bool True si la actualización fue exitosa, false en caso contrario.
+ * @return bool True si la actualizaciÃ³n fue exitosa, false en caso contrario.
  */
 
 function actualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones) {
@@ -284,7 +284,7 @@ function obtenerZonaActivaHoy($cod_vendedor = null) {
     }
 
     $query = "SELECT cod_zona, nombre_zona, duracion_semanas, orden, fecha_inicio_ciclo
-              FROM cmf_zonas_visita
+              FROM cmf_comerciales_zonas
               WHERE cod_vendedor = '$cod_vendedor'
               ORDER BY orden ASC, cod_zona ASC";
 
@@ -675,7 +675,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
     if ($codZona > 0) {
         $queryZonaActiva = "
             SELECT fecha_inicio_ciclo, duracion_semanas, orden
-            FROM cmf_zonas_visita
+            FROM cmf_comerciales_zonas
             WHERE cod_zona = '$codZona'
         ";
         $resultadoZonaActiva = odbc_exec($conn, $queryZonaActiva);
@@ -689,7 +689,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
 
             $queryDuracionTotal = "
                 SELECT SUM(duracion_semanas) AS duracion_total_semanas
-                FROM cmf_zonas_visita
+                FROM cmf_comerciales_zonas
             ";
             $resultadoDuracionTotal = odbc_exec($conn, $queryDuracionTotal);
             $filaDuracionTotal = $resultadoDuracionTotal ? odbc_fetch_array($resultadoDuracionTotal) : false;
@@ -742,18 +742,18 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
                 ELSE 0
             END AS toca_visita
         FROM clientes c
-        LEFT JOIN cmf_asignacion_zonas_clientes z
+        LEFT JOIN cmf_comerciales_clientes_zona z
             ON z.cod_cliente = c.cod_cliente
-        LEFT JOIN cmf_visitas_comerciales v_all
+        LEFT JOIN cmf_comerciales_visitas v_all
             ON v_all.cod_cliente = c.cod_cliente
             AND v_all.cod_vendedor = c.cod_vendedor
             AND v_all.estado_visita = 'Realizada'
-        LEFT JOIN cmf_visitas_comerciales v_ciclo
+        LEFT JOIN cmf_comerciales_visitas v_ciclo
             ON v_ciclo.cod_cliente = c.cod_cliente
             AND v_ciclo.cod_vendedor = c.cod_vendedor
             AND v_ciclo.estado_visita = 'Realizada'
             AND v_ciclo.fecha_visita >= '" . substr($fechaInicioCiclo, 0, 10) . "'
-        LEFT JOIN cmf_visita_pedidos vp
+        LEFT JOIN cmf_comerciales_visitas_pedidos vp
             ON vp.id_visita = v_all.id_visita
     ";
 
@@ -801,14 +801,14 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
                 ) AS visita_real,
                 MAX(v.fecha_visita) AS ultima_visita
             FROM clientes c
-            LEFT JOIN cmf_asignacion_zonas_clientes z
+            LEFT JOIN cmf_comerciales_clientes_zona z
                 ON z.cod_cliente = c.cod_cliente
-            LEFT JOIN cmf_visitas_comerciales v
+            LEFT JOIN cmf_comerciales_visitas v
                 ON v.cod_cliente = c.cod_cliente
                 AND v.cod_vendedor = c.cod_vendedor
                 $filtroVisitasCicloActual
                 AND v.estado_visita = 'Realizada'
-            LEFT JOIN cmf_visita_pedidos vp
+            LEFT JOIN cmf_comerciales_visitas_pedidos vp
                 ON vp.id_visita = v.id_visita
             WHERE c.cod_vendedor = '$codVendedor'
               $filtrosOperativos
@@ -894,7 +894,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
             NULL AS frecuencia_visita,
             0 AS toca_visita
         FROM clientes c
-        LEFT JOIN cmf_visitas_comerciales v
+        LEFT JOIN cmf_comerciales_visitas v
             ON v.cod_cliente = c.cod_cliente
             AND v.cod_vendedor = c.cod_vendedor
         WHERE c.cod_vendedor = '$codVendedor'
@@ -939,7 +939,7 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
 }
 
 /**
- * Obtener información de una zona por su código
+ * Obtener informaciÃ³n de una zona por su cÃ³digo
  */
 
 // ==========================

@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $error = "La hora de inicio debe ser anterior a la hora de fin.";
         } else {
             $sql_update = "
-                UPDATE [integral].[dbo].[cmf_dias_no_laborables]
+                UPDATE [integral].[dbo].[cmf_comerciales_dias_no_laborables]
                 SET 
                     fecha = ?,
                     hora_inicio = ?,
@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Cargar datos actuales del registro
-$sql_select = "SELECT * FROM [integral].[dbo].[cmf_dias_no_laborables] WHERE id = ?";
+$sql_select = "SELECT * FROM [integral].[dbo].[cmf_comerciales_dias_no_laborables] WHERE id = ?";
 $result_select = editarNoLaborablePrepareExecute($conn, $sql_select, [$id]);
 if (!$result_select) {
     error_log("Error al consultar el registro.");

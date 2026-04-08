@@ -1,4 +1,4 @@
-# Preparación SaaS del proyecto APP Comerciales
+# PreparaciÃ³n SaaS del proyecto APP Comerciales
 
 Analisis arquitectonico orientado a evolucion SaaS para empresas que usen Control Integral.
 Alcance: solo revision de codigo y estructura actual. Sin cambios de codigo ni de base de datos.
@@ -41,8 +41,8 @@ Alcance: solo revision de codigo y estructura actual. Sin cambios de codigo ni d
 
 ### Acoplamiento a estructuras de datos concretas
 
-- Uso intensivo de tablas y campos concretos de Control Integral (`hist_ventas_cabecera`, `cmf_visitas_comerciales`, `cmf_asignacion_zonas_clientes`, etc.).
-- Dependencia funcional de tablas `cmf_*` propias de esta implantacion (`cmf_vendedores_user`, `cmf_configuracion_app`, etc.).
+- Uso intensivo de tablas y campos concretos de Control Integral (`hist_ventas_cabecera`, `cmf_comerciales_visitas`, `cmf_comerciales_clientes_zona`, etc.).
+- Dependencia funcional de tablas `cmf_*` propias de esta implantacion (`cmf_comerciales_app_usuarios`, `cmf_comerciales_app_config`, etc.).
 
 ---
 
@@ -109,7 +109,7 @@ Sin implementacion en esta fase; lineas de evolucion recomendadas:
 
 ## 5. Veredicto
 
-**B) está parcialmente preparada.**
+**B) estÃ¡ parcialmente preparada.**
 
 Motivo:
 

@@ -31,7 +31,7 @@ $cod_seccion = ($_POST['cod_seccion'] === '' ? 'NULL' : intval($_POST['cod_secci
 try {
     $conn = db();
 
-    $query = "DELETE FROM cmf_asignacion_zonas_clientes
+    $query = "DELETE FROM cmf_comerciales_clientes_zona
               WHERE cod_cliente = $cod_cliente
               AND zona_principal = $cod_zona
               AND cod_seccion " . ($cod_seccion === 'NULL' ? 'IS NULL' : "= $cod_seccion");

@@ -38,7 +38,7 @@ if (!function_exists('__estadisticas_impl_obtenerCodVendedorUsuario')) {
 
         $sql = "
             SELECT TOP 1 cod_vendedor
-            FROM cmf_vendedores_user
+            FROM cmf_comerciales_app_usuarios
             WHERE email = ?
         ";
         $params = [$email];

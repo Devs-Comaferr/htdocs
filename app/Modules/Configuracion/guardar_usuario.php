@@ -2,7 +2,6 @@
 declare(strict_types=1);
 
 require_once BASE_PATH . '/bootstrap/auth.php';
-require_once BASE_PATH . '/app/Support/logs.php';
 
 $conn = db();
 
@@ -61,7 +60,7 @@ if ($action === 'crear') {
         $rol = 'comercial';
     }
 
-    $sqlExiste = "SELECT TOP 1 email FROM cmf_vendedores_user WHERE email = ?";
+    $sqlExiste = "SELECT TOP 1 email FROM cmf_comerciales_app_usuarios WHERE email = ?";
     $stmtExiste = odbc_prepare($conn, $sqlExiste);
     $existe = $stmtExiste && odbc_execute($stmtExiste, [$email]) && odbc_fetch_row($stmtExiste);
     if ($existe) {
@@ -74,7 +73,7 @@ if ($action === 'crear') {
     }
 
     $sqlInsert = "
-        INSERT INTO cmf_vendedores_user
+        INSERT INTO cmf_comerciales_app_usuarios
             (cod_vendedor, nombre, email, clave, rol, tipo_plan, activo, perm_productos, perm_estadisticas, perm_planificador)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ";
@@ -94,10 +93,6 @@ if ($action === 'crear') {
     ]);
 
     if ($ok) {
-        registrarLog(
-            'Alta usuario',
-            "Usuario creado: $email | Nombre: $nombre | Rol: $rol | Plan: $tipo_plan | Productos:$perm_productos | Estadisticas:$perm_estadisticas | Planificador:$perm_planificador | Activo:$activo"
-        );
         redirectUsuarios('Usuario creado correctamente.');
     }
 
@@ -113,12 +108,11 @@ if ($action === 'eliminar') {
         redirectUsuarios('No puedes eliminar tu propio usuario mientras estas conectado.', 'error');
     }
 
-    $sqlDelete = "DELETE FROM cmf_vendedores_user WHERE email = ?";
+    $sqlDelete = "DELETE FROM cmf_comerciales_app_usuarios WHERE email = ?";
     $stmtDelete = odbc_prepare($conn, $sqlDelete);
     $ok = $stmtDelete && odbc_execute($stmtDelete, [$email]);
 
     if ($ok) {
-        registrarLog('Eliminar usuario', "Usuario eliminado: $email");
         redirectUsuarios('Usuario eliminado correctamente.');
     }
 
@@ -150,12 +144,11 @@ if ($action === 'cambiar_password') {
         redirectUsuarios('No se pudo cambiar la contrasena.', 'error');
     }
 
-    $sqlPassword = "UPDATE cmf_vendedores_user SET clave = ? WHERE email = ?";
+    $sqlPassword = "UPDATE cmf_comerciales_app_usuarios SET clave = ? WHERE email = ?";
     $stmtPassword = odbc_prepare($conn, $sqlPassword);
     $ok = $stmtPassword && odbc_execute($stmtPassword, [$hash, $email]);
 
     if ($ok) {
-        registrarLog('Cambio password usuario', "Password cambiada para: $email");
         redirectUsuarios('Contrasena actualizada correctamente.');
     }
 
@@ -166,7 +159,7 @@ if ($email === '') {
     redirectUsuarios('No se pudo guardar: falta el email del usuario.', 'error');
 }
 
-$sql = "UPDATE cmf_vendedores_user
+$sql = "UPDATE cmf_comerciales_app_usuarios
         SET tipo_plan = ?,
             perm_productos = ?,
             perm_estadisticas = ?,
@@ -185,10 +178,6 @@ $ok = $stmt && odbc_execute($stmt, [
 ]);
 
 if ($ok) {
-    registrarLog(
-        'Modificacion usuario',
-        "Usuario modificado: $email | Plan: $tipo_plan | Productos:$perm_productos | Estadisticas:$perm_estadisticas | Planificador:$perm_planificador | Activo:$activo"
-    );
     if (isset($_SESSION['email']) && strcasecmp((string)$_SESSION['email'], $email) === 0) {
         $_SESSION['tipo_plan'] = $tipo_plan;
         $_SESSION['perm_productos'] = $perm_productos;

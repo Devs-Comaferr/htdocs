@@ -259,7 +259,7 @@ if (!function_exists('obtenerHorarioCliente')) {
 
         $sqlBase = "
             SELECT TOP 1 *
-            FROM [integral].[dbo].[cmf_asignacion_zonas_clientes]
+            FROM [integral].[dbo].[cmf_comerciales_clientes_zona]
             WHERE cod_cliente = ?
               AND $whereSeccion
               AND activo = 1

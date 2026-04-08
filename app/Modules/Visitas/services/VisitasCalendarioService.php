@@ -19,15 +19,15 @@ function obtenerEventosVisitasService(): array
         c.nombre_comercial,
         s.nombre AS nombre_seccion,
         vp.origen
-    FROM cmf_visitas_comerciales v
+    FROM cmf_comerciales_visitas v
     LEFT JOIN clientes c ON v.cod_cliente = c.cod_cliente
     LEFT JOIN secciones_cliente s ON v.cod_seccion = s.cod_seccion AND v.cod_cliente = s.cod_cliente
     LEFT JOIN (
         SELECT vp1.id_visita, vp1.origen
-        FROM cmf_visita_pedidos vp1
+        FROM cmf_comerciales_visitas_pedidos vp1
         INNER JOIN (
             SELECT id_visita, MIN(id_visita_pedido) AS min_id
-            FROM cmf_visita_pedidos
+            FROM cmf_comerciales_visitas_pedidos
             GROUP BY id_visita
         ) vp2 ON vp1.id_visita = vp2.id_visita AND vp1.id_visita_pedido = vp2.min_id
     ) vp ON v.id_visita = vp.id_visita

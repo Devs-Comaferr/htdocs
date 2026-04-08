@@ -10,7 +10,7 @@ if (!function_exists('normalizarOrigenPedidoDb')) {
         if ($lc === 'visita') {
             return 'Visita';
         }
-        if ($lc === 'telÃ©fono' || $lc === 'telefono') {
+        if ($lc === 'telÃƒÂ©fono' || $lc === 'telefono') {
             return 'Telefono';
         }
         if ($lc === 'whatsapp') {
@@ -28,7 +28,7 @@ if (!function_exists('recalcularTiempoPromedioVisita')) {
     {
         $cod_cliente = (int)$cod_cliente;
         if ($cod_cliente <= 0) {
-            throw new Exception('Cod cliente invÃ¡lido para recalcular promedio.');
+            throw new Exception('Cod cliente invÃƒÂ¡lido para recalcular promedio.');
         }
 
         $sinSeccion = is_null($cod_seccion) || $cod_seccion === '';
@@ -36,8 +36,8 @@ if (!function_exists('recalcularTiempoPromedioVisita')) {
         if ($sinSeccion) {
             $sqlPromedio = "
                 SELECT AVG(DATEDIFF(minute, v.hora_inicio_visita, v.hora_fin_visita)) AS promedio
-                FROM [integral].[dbo].[cmf_visitas_comerciales] v
-                INNER JOIN [integral].[dbo].[cmf_visita_pedidos] p ON v.id_visita = p.id_visita
+                FROM [integral].[dbo].[cmf_comerciales_visitas] v
+                INNER JOIN [integral].[dbo].[cmf_comerciales_visitas_pedidos] p ON v.id_visita = p.id_visita
                 WHERE v.cod_cliente = ?
                   AND (v.cod_seccion IS NULL OR v.cod_seccion = '')
                   AND LOWER(v.estado_visita) = 'realizada'
@@ -56,7 +56,7 @@ if (!function_exists('recalcularTiempoPromedioVisita')) {
             $promedioHoras = $promedioMin > 0 ? ($promedioMin / 60.0) : 0.0;
 
             $sqlUpdate = "
-                UPDATE [integral].[dbo].[cmf_asignacion_zonas_clientes]
+                UPDATE [integral].[dbo].[cmf_comerciales_clientes_zona]
                 SET tiempo_promedio_visita = ?
                 WHERE cod_cliente = ?
                   AND (cod_seccion IS NULL OR cod_seccion = '')
@@ -73,8 +73,8 @@ if (!function_exists('recalcularTiempoPromedioVisita')) {
 
             $sqlPromedio = "
                 SELECT AVG(DATEDIFF(minute, v.hora_inicio_visita, v.hora_fin_visita)) AS promedio
-                FROM [integral].[dbo].[cmf_visitas_comerciales] v
-                INNER JOIN [integral].[dbo].[cmf_visita_pedidos] p ON v.id_visita = p.id_visita
+                FROM [integral].[dbo].[cmf_comerciales_visitas] v
+                INNER JOIN [integral].[dbo].[cmf_comerciales_visitas_pedidos] p ON v.id_visita = p.id_visita
                 WHERE v.cod_cliente = ?
                   AND v.cod_seccion = ?
                   AND LOWER(v.estado_visita) = 'realizada'
@@ -93,7 +93,7 @@ if (!function_exists('recalcularTiempoPromedioVisita')) {
             $promedioHoras = $promedioMin > 0 ? ($promedioMin / 60.0) : 0.0;
 
             $sqlUpdate = "
-                UPDATE [integral].[dbo].[cmf_asignacion_zonas_clientes]
+                UPDATE [integral].[dbo].[cmf_comerciales_clientes_zona]
                 SET tiempo_promedio_visita = ?
                 WHERE cod_cliente = ?
                   AND cod_seccion = ?
@@ -155,7 +155,7 @@ if (!function_exists('crearVisitaRealizada')) {
         $horaFinNorm = $normalizarHora($hora_fin_visita);
 
         $sqlInsVisita = "
-            INSERT INTO [integral].[dbo].[cmf_visitas_comerciales]
+            INSERT INTO [integral].[dbo].[cmf_comerciales_visitas]
                 (cod_cliente, cod_seccion, cod_vendedor, fecha_visita, hora_inicio_visita, hora_fin_visita, observaciones, estado_visita)
             OUTPUT INSERTED.id_visita
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -182,7 +182,7 @@ if (!function_exists('crearVisitaRealizada')) {
         $idRow = odbc_fetch_array_utf8($stmtInsVisita);
         $id_visita = $idRow ? (int)($idRow['id_visita'] ?? $idRow['ID_VISITA'] ?? 0) : 0;
         if ($id_visita <= 0) {
-            throw new Exception('ID de visita invÃ¡lido al crear asignaciÃ³n.');
+            throw new Exception('ID de visita invÃƒÂ¡lido al crear asignaciÃƒÂ³n.');
         }
         return $id_visita;
     }
@@ -195,39 +195,39 @@ if (!function_exists('upsertRelacionVisitaPedido')) {
     function upsertRelacionVisitaPedido($conn, int $id_visita, int $cod_venta, string $origen): void
     {
         if ($id_visita <= 0 || $cod_venta <= 0) {
-            throw new Exception('Datos invÃ¡lidos para relaciÃ³n visita-pedido.');
+            throw new Exception('Datos invÃƒÂ¡lidos para relaciÃƒÂ³n visita-pedido.');
         }
 
         $origenDb = normalizarOrigenPedidoDb($origen);
-        $sqlRel = "SELECT TOP 1 id_visita_pedido FROM [integral].[dbo].[cmf_visita_pedidos] WHERE cod_venta = ?";
+        $sqlRel = "SELECT TOP 1 id_visita_pedido FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] WHERE cod_venta = ?";
         $stmtRel = odbc_prepare($conn, $sqlRel);
         if (!$stmtRel) {
-            throw new Exception('Error al preparar consulta de relaciÃ³n visita-pedido: ' . odbc_errormsg($conn));
+            throw new Exception('Error al preparar consulta de relaciÃƒÂ³n visita-pedido: ' . odbc_errormsg($conn));
         }
         if (!odbc_execute($stmtRel, [$cod_venta])) {
-            throw new Exception('Error al consultar relaciÃ³n visita-pedido: ' . odbc_errormsg($conn));
+            throw new Exception('Error al consultar relaciÃƒÂ³n visita-pedido: ' . odbc_errormsg($conn));
         }
         $rel = odbc_fetch_array_utf8($stmtRel);
 
         if ($rel) {
-            $sqlUpd = "UPDATE [integral].[dbo].[cmf_visita_pedidos] SET id_visita = ?, origen = ? WHERE cod_venta = ?";
+            $sqlUpd = "UPDATE [integral].[dbo].[cmf_comerciales_visitas_pedidos] SET id_visita = ?, origen = ? WHERE cod_venta = ?";
             $stmtUpd = odbc_prepare($conn, $sqlUpd);
             if (!$stmtUpd) {
                 throw new Exception('Error al preparar update visita-pedido: ' . odbc_errormsg($conn));
             }
             if (!odbc_execute($stmtUpd, [$id_visita, $origenDb, $cod_venta])) {
-                throw new Exception('Error al actualizar relaciÃ³n visita-pedido: ' . odbc_errormsg($conn));
+                throw new Exception('Error al actualizar relaciÃƒÂ³n visita-pedido: ' . odbc_errormsg($conn));
             }
             return;
         }
 
-        $sqlIns = "INSERT INTO [integral].[dbo].[cmf_visita_pedidos] (id_visita, cod_venta, origen) VALUES (?, ?, ?)";
+        $sqlIns = "INSERT INTO [integral].[dbo].[cmf_comerciales_visitas_pedidos] (id_visita, cod_venta, origen) VALUES (?, ?, ?)";
         $stmtIns = odbc_prepare($conn, $sqlIns);
         if (!$stmtIns) {
             throw new Exception('Error al preparar insercion visita-pedido: ' . odbc_errormsg($conn));
         }
         if (!odbc_execute($stmtIns, [$id_visita, $cod_venta, $origenDb])) {
-            throw new Exception('Error al insertar relaciÃ³n visita-pedido: ' . odbc_errormsg($conn));
+            throw new Exception('Error al insertar relaciÃƒÂ³n visita-pedido: ' . odbc_errormsg($conn));
         }
     }
 }
@@ -239,14 +239,14 @@ if (!function_exists('asegurarRelacionVisitaPedido')) {
     function asegurarRelacionVisitaPedido($conn, int $cod_venta, string $origen, array $opciones = []): array
     {
         if ($cod_venta <= 0) {
-            throw new Exception('Cod venta invÃ¡lido.');
+            throw new Exception('Cod venta invÃƒÂ¡lido.');
         }
         $origenDb = normalizarOrigenPedidoDb($origen);
 
         $sqlCtx = "
             SELECT TOP 1 vp.id_visita, vp.origen, vc.cod_cliente, vc.cod_seccion
-            FROM [integral].[dbo].[cmf_visita_pedidos] vp
-            INNER JOIN [integral].[dbo].[cmf_visitas_comerciales] vc ON vc.id_visita = vp.id_visita
+            FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
+            INNER JOIN [integral].[dbo].[cmf_comerciales_visitas] vc ON vc.id_visita = vp.id_visita
             WHERE vp.cod_venta = ?
             ORDER BY vp.id_visita_pedido ASC
         ";

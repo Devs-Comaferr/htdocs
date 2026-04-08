@@ -39,7 +39,7 @@ if (empty($frecuencia_visita)) {
 }
 
 $query = "
-    UPDATE cmf_asignacion_zonas_clientes
+    UPDATE cmf_comerciales_clientes_zona
     SET
         zona_secundaria = ?,
         frecuencia_visita = ?,

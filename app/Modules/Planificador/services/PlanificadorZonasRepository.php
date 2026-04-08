@@ -18,7 +18,7 @@ if (!function_exists('planificadorRepoCrearZonaVisita')) {
         $duracion_semanas = intval($duracion_semanas);
         $orden = intval($orden);
 
-        $query = "INSERT INTO cmf_zonas_visita (cod_vendedor, nombre_zona, descripcion, duracion_semanas, orden)
+        $query = "INSERT INTO cmf_comerciales_zonas (cod_vendedor, nombre_zona, descripcion, duracion_semanas, orden)
                   VALUES ('$cod_vendedor', '$nombre_zona', '$descripcion', '$duracion_semanas', '$orden')";
 
         $result = odbc_exec($conn, $query);
@@ -37,7 +37,7 @@ if (!function_exists('planificadorRepoObtenerZonasVisita')) {
         $conn = db();
 
         $query = "SELECT cod_zona, nombre_zona, descripcion, duracion_semanas, orden
-                  FROM cmf_zonas_visita
+                  FROM cmf_comerciales_zonas
                   WHERE cod_vendedor = '$cod_vendedor'
                   ORDER BY orden ASC";
 
@@ -63,7 +63,7 @@ if (!function_exists('planificadorRepoObtenerZonaPorCodigo')) {
         $conn = db();
         $cod_zona = intval($cod_zona);
 
-        $query = "SELECT * FROM cmf_zonas_visita WHERE cod_zona = $cod_zona AND cod_vendedor = '$cod_vendedor'";
+        $query = "SELECT * FROM cmf_comerciales_zonas WHERE cod_zona = $cod_zona AND cod_vendedor = '$cod_vendedor'";
         $resultado = odbc_exec($conn, $query);
         if (!$resultado) {
             error_log('Error al obtener la zona: ' . odbc_errormsg($conn));
@@ -82,7 +82,7 @@ if (!function_exists('planificadorRepoObtenerRutasPorZona')) {
         $cod_zona = intval($cod_zona);
 
         $query = "SELECT r.cod_ruta, COALESCE(r.descripcion, 'Sin DescripciÃ³n') AS nombre_ruta
-                  FROM cmf_zonas_rutas czr
+                  FROM cmf_comerciales_clientes_zona_rutas czr
                   JOIN rutas r ON czr.cod_ruta = r.cod_ruta
                   WHERE czr.cod_zona = $cod_zona
                   ORDER BY r.descripcion ASC";
@@ -137,7 +137,7 @@ if (!function_exists('planificadorRepoAsignarRutaZona')) {
         }
 
         $query_check = "SELECT COUNT(*) AS total
-                        FROM cmf_zonas_rutas
+                        FROM cmf_comerciales_clientes_zona_rutas
                         WHERE cod_zona = '$cod_zona' AND cod_ruta = '$cod_ruta'";
         $resultado_check = odbc_exec($conn, $query_check);
         if (!$resultado_check) {
@@ -149,7 +149,7 @@ if (!function_exists('planificadorRepoAsignarRutaZona')) {
             return false;
         }
 
-        $query = "INSERT INTO cmf_zonas_rutas (cod_zona, cod_ruta)
+        $query = "INSERT INTO cmf_comerciales_clientes_zona_rutas (cod_zona, cod_ruta)
                   VALUES ('$cod_zona', '$cod_ruta')";
         $resultado = odbc_exec($conn, $query);
         return (bool)$resultado;
@@ -165,7 +165,7 @@ if (!function_exists('planificadorRepoZonaTieneRutas')) {
             return false;
         }
 
-        $stmt = odbc_prepare($conn, "SELECT COUNT(*) AS total FROM cmf_zonas_rutas WHERE cod_zona = ?");
+        $stmt = odbc_prepare($conn, "SELECT COUNT(*) AS total FROM cmf_comerciales_clientes_zona_rutas WHERE cod_zona = ?");
         if (!$stmt || !odbc_execute($stmt, [$cod_zona])) {
             return false;
         }
@@ -184,7 +184,7 @@ if (!function_exists('planificadorRepoZonaTieneClientesAsignados')) {
             return false;
         }
 
-        $stmt = odbc_prepare($conn, "SELECT COUNT(*) AS total FROM cmf_asignacion_zonas_clientes WHERE zona_principal = ? OR zona_secundaria = ?");
+        $stmt = odbc_prepare($conn, "SELECT COUNT(*) AS total FROM cmf_comerciales_clientes_zona WHERE zona_principal = ? OR zona_secundaria = ?");
         if (!$stmt || !odbc_execute($stmt, [$cod_zona, $cod_zona])) {
             return false;
         }
@@ -206,7 +206,7 @@ if (!function_exists('planificadorRepoRutaZonaTieneClientesAsignados')) {
 
         $sql = "
             SELECT COUNT(*) AS total
-            FROM cmf_asignacion_zonas_clientes azc
+            FROM cmf_comerciales_clientes_zona azc
             INNER JOIN clientes c
                 ON c.cod_cliente = azc.cod_cliente
             WHERE (azc.zona_principal = ? OR azc.zona_secundaria = ?)
@@ -232,7 +232,7 @@ if (!function_exists('planificadorRepoEliminarRutaZona')) {
             return false;
         }
 
-        $stmt = odbc_prepare($conn, "DELETE FROM cmf_zonas_rutas WHERE cod_zona = ? AND cod_ruta = ?");
+        $stmt = odbc_prepare($conn, "DELETE FROM cmf_comerciales_clientes_zona_rutas WHERE cod_zona = ? AND cod_ruta = ?");
         if (!$stmt) {
             return false;
         }
@@ -278,7 +278,7 @@ if (!function_exists('planificadorRepoEliminarZonaSegura')) {
             return ['ok' => false, 'message' => 'No se puede eliminar la zona porque tiene clientes asignados.'];
         }
 
-        $stmt = odbc_prepare($conn, "DELETE FROM cmf_zonas_visita WHERE cod_zona = ? AND cod_vendedor = ?");
+        $stmt = odbc_prepare($conn, "DELETE FROM cmf_comerciales_zonas WHERE cod_zona = ? AND cod_vendedor = ?");
         if (!$stmt) {
             return ['ok' => false, 'message' => 'No se pudo preparar la eliminación de la zona.'];
         }
@@ -309,7 +309,7 @@ if (!function_exists('planificadorRepoObtenerSeccionesPorCliente')) {
                   WHERE sc.cod_cliente = '$cod_cliente'
                     AND sc.cod_seccion NOT IN (
                         SELECT azc.cod_seccion
-                        FROM cmf_asignacion_zonas_clientes azc
+                        FROM cmf_comerciales_clientes_zona azc
                         WHERE azc.cod_cliente = sc.cod_cliente
                     )
                   ORDER BY sc.cod_seccion ASC";

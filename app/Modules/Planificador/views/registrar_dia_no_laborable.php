@@ -71,7 +71,7 @@ function esFestivo($fechaCheck, $conn) {
     // 1) Comprueba si hay un festivo exacto (repetir_anualmente=0)
     $sqlExacto = "
         SELECT COUNT(*) AS c
-        FROM [integral].[dbo].[cmf_dias_no_laborables]
+        FROM [integral].[dbo].[cmf_comerciales_dias_no_laborables]
         WHERE tipo_evento='Festivo'
           AND repetir_anualmente=0
           AND fecha = ?
@@ -87,7 +87,7 @@ function esFestivo($fechaCheck, $conn) {
     // 2) Comprueba si hay un festivo repetible (repetir_anualmente=1) con mes/dÃ­a
     $sqlAnual = "
         SELECT COUNT(*) AS c
-        FROM [integral].[dbo].[cmf_dias_no_laborables]
+        FROM [integral].[dbo].[cmf_comerciales_dias_no_laborables]
         WHERE tipo_evento='Festivo'
           AND repetir_anualmente=1
           -- ignoramos el aÃ±o, comparamos mes/dÃ­a
@@ -160,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                         // Si pasa todos los filtros => insertamos
                         $sqlInsert = "
-                            INSERT INTO [integral].[dbo].[cmf_dias_no_laborables]
+                            INSERT INTO [integral].[dbo].[cmf_comerciales_dias_no_laborables]
                                 (cod_vendedor, fecha, tipo_evento, descripcion, repetir_anualmente)
                             VALUES (?, ?, 'Vacaciones', ?, 0)
                         ";
@@ -189,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $error = "Para Festivo, ingrese la fecha del festivo.";
             } else {
                 $sql = "
-                    INSERT INTO [integral].[dbo].[cmf_dias_no_laborables]
+                    INSERT INTO [integral].[dbo].[cmf_comerciales_dias_no_laborables]
                     (cod_vendedor, fecha, tipo_evento, descripcion, repetir_anualmente)
                     VALUES (?, ?, 'Festivo', ?, ?)
                 ";
@@ -219,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 } else {
                     // AquÃ­ podrÃ­as tambiÃ©n omitir sÃ¡b./dom. o Festivo si lo deseas
                     $sql = "
-                        INSERT INTO [integral].[dbo].[cmf_dias_no_laborables]
+                        INSERT INTO [integral].[dbo].[cmf_comerciales_dias_no_laborables]
                         (cod_vendedor, fecha, hora_inicio, hora_fin, tipo_evento, descripcion, repetir_anualmente)
                         VALUES (?, ?, ?, ?, ?, ?, 0)
                     ";

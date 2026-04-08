@@ -180,7 +180,7 @@ function pedidosTodosObtenerCodVendedor($conn) {
 
     $sql_cod_vendedor = "
         SELECT cod_vendedor 
-        FROM cmf_vendedores_user 
+        FROM cmf_comerciales_app_usuarios 
         WHERE email = '" . addslashes($_SESSION['email']) . "'
     ";
     $result_vendedor = odbc_exec($conn, $sql_cod_vendedor);

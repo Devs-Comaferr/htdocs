@@ -32,7 +32,7 @@ if ($ajaxAccion === 'lineas_visita') {
             elv.cantidad AS cantidad_servida,
             hvc_dest.fecha_venta AS fecha_entrega
         FROM [integral].[dbo].[hist_ventas_linea] hl
-        INNER JOIN [integral].[dbo].[cmf_visita_pedidos] vp
+        INNER JOIN [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
            ON hl.cod_venta = vp.cod_venta
         LEFT JOIN [integral].[dbo].[entrega_lineas_venta] elv
            ON hl.cod_venta = elv.cod_venta_origen
@@ -56,7 +56,7 @@ if ($ajaxAccion === 'lineas_visita') {
             elv.cantidad AS cantidad_servida,
             hvc_dest.fecha_venta AS fecha_entrega
         FROM [integral].[dbo].[ventas_linea_elim] vle
-        INNER JOIN [integral].[dbo].[cmf_visita_pedidos] vp
+        INNER JOIN [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
            ON vle.cod_venta = vp.cod_venta
         LEFT JOIN [integral].[dbo].[entrega_lineas_venta] elv
            ON vle.cod_venta = elv.cod_venta_origen
@@ -76,7 +76,7 @@ if ($ajaxAccion === 'lineas_visita') {
     $lineaIds = array();
     $hay = false;
     echo '<div class="modal-table-container"><table class="modal-table"><thead><tr>';
-    echo '<th>Artículo</th><th>Descripción</th><th>Cantidad</th><th>Cantidad Servida</th><th>Precio (EUR)</th><th>Dto1 (%)</th><th>Dto2 (%)</th><th>Importe (EUR)</th><th>Fecha de Entrega</th>';
+    echo '<th>ArtÃ­culo</th><th>DescripciÃ³n</th><th>Cantidad</th><th>Cantidad Servida</th><th>Precio (EUR)</th><th>Dto1 (%)</th><th>Dto2 (%)</th><th>Importe (EUR)</th><th>Fecha de Entrega</th>';
     echo '</tr></thead><tbody>';
     while ($linea = odbc_fetch_array($result_lineas_visita)) {
         $uniqueId = (string)($linea['cod_articulo'] ?? '') . '-' . (string)($linea['descripcion'] ?? '') . '-' . (string)($linea['cantidad'] ?? '');
@@ -213,7 +213,7 @@ if ($pedidoEliminadoAjax || count($lineasPedidoRows) === 0) {
 $lineaIds = array();
 $hay = false;
 echo '<div class="modal-table-container"><table class="modal-table"><thead><tr>';
-echo '<th>Artículo</th><th>Descripción</th><th>Cantidad</th><th>Cantidad Servida</th><th>Precio (EUR)</th><th>Dto1 (%)</th><th>Dto2 (%)</th><th>Importe (EUR)</th><th>Fecha de Entrega</th>';
+echo '<th>ArtÃ­culo</th><th>DescripciÃ³n</th><th>Cantidad</th><th>Cantidad Servida</th><th>Precio (EUR)</th><th>Dto1 (%)</th><th>Dto2 (%)</th><th>Importe (EUR)</th><th>Fecha de Entrega</th>';
 echo '</tr></thead><tbody>';
 foreach ($lineasPedidoRows as $linea) {
     $uniqueId = (string)($linea['cod_articulo'] ?? '') . '-' . (string)($linea['descripcion'] ?? '') . '-' . (string)($linea['cantidad'] ?? '');

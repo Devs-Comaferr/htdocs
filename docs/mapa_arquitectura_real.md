@@ -8,7 +8,7 @@ No incluye cambios de codigo.
 ### Autenticacion
 
 - `login.php`: formulario de acceso.
-- `procesar_login.php`: valida credenciales contra `cmf_vendedores_user`, crea sesion y redirige a `index.php`.
+- `procesar_login.php`: valida credenciales contra `cmf_comerciales_app_usuarios`, crea sesion y redirige a `index.php`.
 - `includes (legacy)/auth_bootstrap.php`: punto comun de inicializacion (carga config, inicia sesion, carga control de acceso y funciones compartidas).
 - `includes (legacy)/control_acceso.php`: reglas de acceso (`requiereLogin`, `requiereActivo`, `requierePermiso`, `requierePremium`).
 - `logout.php`: destruye sesion y redirige a login.
@@ -181,7 +181,7 @@ No incluye cambios de codigo.
 Flujo real observado:
 
 1. `login.php` envia formulario por POST a `procesar_login.php`.
-2. `procesar_login.php` consulta `cmf_vendedores_user` en ERP, valida password (hash moderno o texto plano legado), setea variables de sesion y redirige a `index.php`.
+2. `procesar_login.php` consulta `cmf_comerciales_app_usuarios` en ERP, valida password (hash moderno o texto plano legado), setea variables de sesion y redirige a `index.php`.
 3. Las paginas protegidas cargan `includes (legacy)/auth_bootstrap.php`.
 4. `auth_bootstrap.php` inicia sesion, carga `includes (legacy)/control_acceso.php` y `includes (legacy)/funciones.php`.
 5. Las paginas invocan `requiereLogin()` y/o `requiereActivo()` (y en casos concretos `requierePermiso()`), aplicando redireccion a `/login.php` o `/index.php`.
@@ -200,7 +200,7 @@ Archivos responsables:
 
 Datasets/tabla de trabajo destacada (por uso observable):
 
-- `cmf_vendedores_user` (autenticacion/permisos).
+- `cmf_comerciales_app_usuarios` (autenticacion/permisos).
 - Documentos comerciales (pedidos, albaranes y lineas) en estadisticas y detalle.
 - Datos de clientes, visitas y asignaciones por ruta/seccion en modulos de clientes/visitas/rutas.
 

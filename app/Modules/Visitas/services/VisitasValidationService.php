@@ -9,7 +9,7 @@ function horaVisitaATotalMinutos(string $hora): int
 function validarHorarioClienteVisita($conn, int $cod_cliente, $cod_seccion, int $inicioMinutos, int $finMinutos): bool
 {
     $sql = "SELECT TOP 1 hora_inicio_manana, hora_fin_manana, hora_inicio_tarde, hora_fin_tarde
-            FROM [integral].[dbo].[cmf_asignacion_zonas_clientes]
+            FROM [integral].[dbo].[cmf_comerciales_clientes_zona]
             WHERE cod_cliente = ?
               AND activo = 1";
     $params = [$cod_cliente];
@@ -45,7 +45,7 @@ function validarHorarioClienteVisita($conn, int $cod_cliente, $cod_seccion, int 
 function validarSolapeAgendaVisita($conn, int $cod_vendedor, string $fecha_visita, int $inicioMinutos, int $finMinutos, int $idVisitaExcluir = 0): void
 {
     $sql = "SELECT hora_inicio_visita, hora_fin_visita
-            FROM [integral].[dbo].[cmf_visitas_comerciales]
+            FROM [integral].[dbo].[cmf_comerciales_visitas]
             WHERE cod_vendedor = ?
               AND fecha_visita = ?
               AND estado_visita IN ('Planificada','Pendiente')";
@@ -58,7 +58,7 @@ function validarSolapeAgendaVisita($conn, int $cod_vendedor, string $fecha_visit
 
     $stmt = odbc_prepare($conn, $sql);
     if (!$stmt || !odbc_execute($stmt, $params)) {
-        throw new Exception('Error al validar agenda del dÃƒÂ­a: ' . odbc_errormsg($conn));
+        throw new Exception('Error al validar agenda del dÃƒÆ’Ã‚Â­a: ' . odbc_errormsg($conn));
     }
 
     while ($fila = odbc_fetch_array($stmt)) {

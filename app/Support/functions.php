@@ -346,7 +346,7 @@ if (!function_exists('obtenerConfiguracionApp')) {
             return $config;
         }
 
-        $sql = "SELECT clave, valor FROM cmf_configuracion_app";
+        $sql = "SELECT clave, valor FROM cmf_comerciales_app_config";
         $res = @odbc_exec($conn, $sql);
         if (!$res) {
             return $config;

@@ -55,7 +55,7 @@ function registrarVisitaManual(array $data, bool $forzar = false): array
         }
 
         $sqlSolape = "SELECT hora_inicio_visita, hora_fin_visita
-            FROM [integral].[dbo].[cmf_visitas_comerciales]
+            FROM [integral].[dbo].[cmf_comerciales_visitas]
             WHERE cod_vendedor = ?
               AND CONVERT(varchar(10), fecha_visita, 120) = ?
               AND LOWER(estado_visita) IN ('planificada','pendiente')";
@@ -90,7 +90,7 @@ function registrarVisitaManual(array $data, bool $forzar = false): array
     }
 
     $sqlDuplicado = "SELECT TOP 1 id_visita
-        FROM [integral].[dbo].[cmf_visitas_comerciales]
+        FROM [integral].[dbo].[cmf_comerciales_visitas]
         WHERE cod_cliente = ?
           AND CONVERT(varchar(10), fecha_visita, 120) = ?";
     $stmtDuplicado = odbc_prepare($conn, $sqlDuplicado);
@@ -108,7 +108,7 @@ function registrarVisitaManual(array $data, bool $forzar = false): array
         ];
     }
 
-    $sql_insert = "INSERT INTO [integral].[dbo].[cmf_visitas_comerciales]
+    $sql_insert = "INSERT INTO [integral].[dbo].[cmf_comerciales_visitas]
         (cod_cliente, cod_seccion, cod_vendedor, fecha_visita, hora_inicio_visita, hora_fin_visita, estado_visita, cod_zona_visita, observaciones)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -191,11 +191,11 @@ function procesarRegistroVisita(array $data): array
                     !validarHorarioClienteVisita($conn, $cod_cliente, $cod_seccion, $inicioMinutos, $finMinutos)
                     && ($estado_visita === 'Planificada' || $estado_visita === 'Pendiente')
                 ) {
-                    throw new Exception('La visita estÃ¡ fuera del horario del cliente');
+                    throw new Exception('La visita estÃƒÂ¡ fuera del horario del cliente');
                 }
 
                 $sqlUpdate = "
-                    UPDATE [integral].[dbo].[cmf_visitas_comerciales]
+                    UPDATE [integral].[dbo].[cmf_comerciales_visitas]
                     SET
                         estado_visita = 'Realizada',
                         fecha_visita = ?,
@@ -219,7 +219,7 @@ function procesarRegistroVisita(array $data): array
                     !validarHorarioClienteVisita($conn, $cod_cliente, $cod_seccion, $inicioMinutos, $finMinutos)
                     && ($estado_visita === 'Planificada' || $estado_visita === 'Pendiente')
                 ) {
-                    throw new Exception('La visita estÃ¡ fuera del horario del cliente');
+                    throw new Exception('La visita estÃƒÂ¡ fuera del horario del cliente');
                 }
 
                 insertarVisitaBase(
@@ -240,7 +240,7 @@ function procesarRegistroVisita(array $data): array
                     !validarHorarioClienteVisita($conn, $cod_cliente, $cod_seccion, $inicioMinutos, $finMinutos)
                     && ($estado_visita === 'Planificada' || $estado_visita === 'Pendiente')
                 ) {
-                    throw new Exception('La visita estÃ¡ fuera del horario del cliente');
+                    throw new Exception('La visita estÃƒÂ¡ fuera del horario del cliente');
                 }
 
                 asegurarRelacionVisitaPedido($conn, $cod_venta, 'Visita', [
@@ -250,7 +250,7 @@ function procesarRegistroVisita(array $data): array
                 ]);
 
                 $sqlUpdate = "
-                    UPDATE [integral].[dbo].[cmf_visitas_comerciales]
+                    UPDATE [integral].[dbo].[cmf_comerciales_visitas]
                     SET
                         estado_visita = 'Realizada',
                         fecha_visita = ?,
@@ -274,7 +274,7 @@ function procesarRegistroVisita(array $data): array
                     !validarHorarioClienteVisita($conn, $cod_cliente, $cod_seccion, $inicioMinutos, $finMinutos)
                     && ($estado_visita === 'Planificada' || $estado_visita === 'Pendiente')
                 ) {
-                    throw new Exception('La visita estÃ¡ fuera del horario del cliente');
+                    throw new Exception('La visita estÃƒÂ¡ fuera del horario del cliente');
                 }
 
                 $idVisita = insertarVisitaBase(
@@ -347,7 +347,7 @@ function procesarRegistroVisitaLegacy(array $data): array
     }
 
     $sql_insert_visita = "
-        INSERT INTO cmf_visitas_comerciales 
+        INSERT INTO cmf_comerciales_visitas 
         (cod_cliente, cod_seccion, cod_vendedor, fecha_visita, hora_inicio_visita, hora_fin_visita, observaciones, estado_visita, tipo_visita, event_id, cod_zona_visita)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL)
     ";
@@ -403,7 +403,7 @@ function procesarVisitaSimple(array $data, string $estado_visita): array
         return ['ok' => false, 'errors' => $errors];
     }
 
-    $sql = "INSERT INTO cmf_visitas_comerciales 
+    $sql = "INSERT INTO cmf_comerciales_visitas 
             (estado_visita, cod_vendedor, cod_cliente, cod_seccion, fecha_visita, hora_inicio_visita, hora_fin_visita, observaciones)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = odbc_prepare($conn, $sql);
@@ -450,11 +450,11 @@ function procesarEdicionVisita(int $id_visita, array $input, int $codigo_vendedo
                 $morning_start = strtotime($data['hora_inicio_manana']);
                 $morning_end = strtotime($data['hora_fin_manana']);
                 if (strtotime($hora_inicio_visita) < $morning_start) {
-                    $error = "La hora de inicio de la visita no puede ser anterior a la apertura de la maÃ±ana ({$data['hora_inicio_manana']}).";
+                    $error = "La hora de inicio de la visita no puede ser anterior a la apertura de la maÃƒÂ±ana ({$data['hora_inicio_manana']}).";
                 } elseif (strtotime($hora_inicio_visita) >= $morning_start && strtotime($hora_inicio_visita) < $morning_end) {
                     $slot = 'morning';
                     if (strtotime($hora_fin_visita) > $morning_end) {
-                        $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la maÃ±ana ({$data['hora_fin_manana']}).";
+                        $error = "La hora de fin de la visita no puede ser posterior a la hora de cierre de la maÃƒÂ±ana ({$data['hora_fin_manana']}).";
                     }
                 }
             }
@@ -473,7 +473,7 @@ function procesarEdicionVisita(int $id_visita, array $input, int $codigo_vendedo
             if (empty($slot) && empty($error)) {
                 $horarios = '';
                 if (!empty($data['hora_inicio_manana']) && !empty($data['hora_fin_manana'])) {
-                    $horarios .= "MaÃ±ana: {$data['hora_inicio_manana']} a {$data['hora_fin_manana']}. ";
+                    $horarios .= "MaÃƒÂ±ana: {$data['hora_inicio_manana']} a {$data['hora_fin_manana']}. ";
                 }
                 if (!empty($data['hora_inicio_tarde']) && !empty($data['hora_fin_tarde'])) {
                     $horarios .= "Tarde: {$data['hora_inicio_tarde']} a {$data['hora_fin_tarde']}.";
@@ -487,7 +487,7 @@ function procesarEdicionVisita(int $id_visita, array $input, int $codigo_vendedo
             if ($estadoLower == 'descartada') {
                 $skipOverlap = true;
             } elseif ($estadoLower == 'realizada') {
-                $sql_order = "SELECT TOP 1 origen FROM [integral].[dbo].[cmf_visita_pedidos] 
+                $sql_order = "SELECT TOP 1 origen FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] 
                               WHERE id_visita = ? AND LOWER(origen) = 'visita'";
                 $result_order = visitasServicePrepareExecute($conn, $sql_order, [$id_visita]);
                 if ($result_order && odbc_fetch_row($result_order)) {
@@ -500,7 +500,7 @@ function procesarEdicionVisita(int $id_visita, array $input, int $codigo_vendedo
             }
 
             if (!$skipOverlap) {
-                $sql_overlap = "SELECT * FROM [integral].[dbo].[cmf_visitas_comerciales]
+                $sql_overlap = "SELECT * FROM [integral].[dbo].[cmf_comerciales_visitas]
                                 WHERE id_visita <> ?
                                   AND cod_vendedor = ?
                                   AND CONVERT(varchar(10), fecha_visita, 120) = ?
@@ -553,7 +553,7 @@ function procesarEdicionVisita(int $id_visita, array $input, int $codigo_vendedo
     }
 
     $sql_update = "
-        UPDATE [integral].[dbo].[cmf_visitas_comerciales]
+        UPDATE [integral].[dbo].[cmf_comerciales_visitas]
         SET 
             fecha_visita = ?,
             hora_inicio_visita = ?,
@@ -585,7 +585,7 @@ function actualizarHorarioVisitaService(int $cod_cliente, $cod_seccion, string $
         $whereClause .= " AND cod_seccion IS NULL";
     }
 
-    $sql_update = "UPDATE [integral].[dbo].[cmf_asignacion_zonas_clientes]
+    $sql_update = "UPDATE [integral].[dbo].[cmf_comerciales_clientes_zona]
                    SET hora_inicio_manana = ?,
                        hora_fin_manana = ?,
                        hora_inicio_tarde = ?,
@@ -600,7 +600,7 @@ function actualizarVisitaService(int $id_visita, string $fecha_visita, string $h
 {
     $conn = db();
     $sql = "
-        UPDATE [integral].[dbo].[cmf_visitas_comerciales]
+        UPDATE [integral].[dbo].[cmf_comerciales_visitas]
         SET fecha_visita = ?,
             hora_inicio_visita = ?,
             hora_fin_visita = ?,
@@ -620,7 +620,7 @@ function actualizarOrigenVisitaService(int $cod_pedido, string $nuevo_origen): a
     try {
         odbc_autocommit($conn, false);
 
-        $sqlExiste = "SELECT TOP 1 id_visita_pedido FROM [integral].[dbo].[cmf_visita_pedidos] WHERE cod_venta = ?";
+        $sqlExiste = "SELECT TOP 1 id_visita_pedido FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] WHERE cod_venta = ?";
         $stmtExiste = odbc_prepare($conn, $sqlExiste);
         if (!$stmtExiste) {
             throw new Exception('Error al preparar validacion de relacion visita-pedido: ' . odbc_errormsg($conn));
@@ -664,8 +664,8 @@ function quitarPedidoVisitaService(int $cod_pedido): array
 
         $sqlContexto = "
             SELECT TOP 1 vc.cod_cliente, vc.cod_seccion
-            FROM [integral].[dbo].[cmf_visita_pedidos] vp
-            INNER JOIN [integral].[dbo].[cmf_visitas_comerciales] vc ON vc.id_visita = vp.id_visita
+            FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
+            INNER JOIN [integral].[dbo].[cmf_comerciales_visitas] vc ON vc.id_visita = vp.id_visita
             WHERE vp.cod_venta = ?
             ORDER BY vp.id_visita_pedido ASC
         ";
@@ -687,7 +687,7 @@ function quitarPedidoVisitaService(int $cod_pedido): array
         }
 
         $sqlDelete = "
-            DELETE FROM [integral].[dbo].[cmf_visita_pedidos]
+            DELETE FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos]
             WHERE cod_venta = ?
         ";
 
@@ -717,7 +717,7 @@ function asociarVisitaService(int $cod_venta, string $origen, int $codigo_vended
 
     $sql_visita = "
     SELECT v.cod_visita
-    FROM cmf_visitas_comerciales v
+    FROM cmf_comerciales_visitas v
     JOIN hist_ventas_cabecera h ON v.cod_cliente = h.cod_cliente
     WHERE h.cod_venta = ? AND v.fecha_visita IS NOT NULL
     ORDER BY v.fecha_visita DESC
@@ -738,7 +738,7 @@ function asociarVisitaService(int $cod_venta, string $origen, int $codigo_vended
 
     if ($visita) {
         $sql_asociar = "
-        INSERT INTO cmf_visita_pedidos (cod_visita, cod_venta, origen)
+        INSERT INTO cmf_comerciales_visitas_pedidos (cod_visita, cod_venta, origen)
         VALUES (?, ?, ?)
         ";
 
@@ -756,7 +756,7 @@ function asociarVisitaService(int $cod_venta, string $origen, int $codigo_vended
 
     $fecha_visita = date('Y-m-d H:i:s');
     $sql_crear_visita = "
-    INSERT INTO cmf_visitas_comerciales (cod_cliente, cod_vendedor, origen, fecha_visita)
+    INSERT INTO cmf_comerciales_visitas (cod_cliente, cod_vendedor, origen, fecha_visita)
     VALUES (
         (SELECT cod_cliente FROM hist_ventas_cabecera WHERE cod_venta = ? LIMIT 1),
         ?, ?, ?
@@ -774,7 +774,7 @@ function asociarVisitaService(int $cod_venta, string $origen, int $codigo_vended
     $cod_visita = odbc_insert_id($conn);
 
     $sql_asociar = "
-    INSERT INTO cmf_visita_pedidos (cod_visita, cod_venta, origen)
+    INSERT INTO cmf_comerciales_visitas_pedidos (cod_visita, cod_venta, origen)
     VALUES (?, ?, ?)
     ";
 

@@ -190,7 +190,7 @@ function clienteDetallesObtenerAsignacion($conn, string $codCliente, ?string $co
 {
     $sql = "
         SELECT *
-        FROM [integral].[dbo].[cmf_asignacion_zonas_clientes]
+        FROM [integral].[dbo].[cmf_comerciales_clientes_zona]
         WHERE cod_cliente = ?
     ";
     $params = [$codCliente];
@@ -312,7 +312,7 @@ function clienteDetallesObtenerVisitas($conn, string $codCliente, ?string $codSe
                 v.fecha_visita,
                 v.hora_inicio_visita,
                 v.hora_fin_visita
-            FROM [integral].[dbo].[cmf_visitas_comerciales] v
+            FROM [integral].[dbo].[cmf_comerciales_visitas] v
             WHERE v.cod_cliente = ?
             ORDER BY v.fecha_visita DESC
         ";
@@ -325,7 +325,7 @@ function clienteDetallesObtenerVisitas($conn, string $codCliente, ?string $codSe
             $idVisita = (string) $visita['id_visita'];
             $sqlPedidoPrincipal = "
                 SELECT TOP 1 vp.cod_venta, vp.origen
-                FROM [integral].[dbo].[cmf_visita_pedidos] vp
+                FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
                 WHERE vp.id_visita = ?
                 ORDER BY vp.id_visita_pedido ASC
             ";
@@ -338,7 +338,7 @@ function clienteDetallesObtenerVisitas($conn, string $codCliente, ?string $codSe
                 SELECT
                     vp.cod_venta AS cod_pedido,
                     vp.origen
-                FROM [integral].[dbo].[cmf_visita_pedidos] vp
+                FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
                 WHERE vp.id_visita = ?
                 ORDER BY vp.id_visita_pedido ASC
             ";

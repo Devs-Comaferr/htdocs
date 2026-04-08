@@ -6,7 +6,7 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 unset($_SESSION['origen']);
 
 
-// Obtener el código del cliente desde la URL
+// Obtener el cÃ³digo del cliente desde la URL
 if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
     header("Location: clientes.php");
     exit();
@@ -23,7 +23,7 @@ $conn = db();
 
 $cod_cliente = trim((string) $_GET['cod_cliente']);
 $cod_seccion = isset($_GET['cod_seccion']) ? trim((string) $_GET['cod_seccion']) : null;
-// Código del comisionista (para filtrar datos a las operaciones realizadas por él)
+// CÃ³digo del comisionista (para filtrar datos a las operaciones realizadas por Ã©l)
 $cod_comercial = $_SESSION['codigo'] ?? null;
 
 try {
@@ -648,12 +648,12 @@ window.onclick = function(event) {
             }
         }
 
-        // Función para quitar pedido y actualizar origen
+        // FunciÃ³n para quitar pedido y actualizar origen
         var csrfTokenVisitas = <?= json_encode(csrfToken(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
         function quitarPedido(codPedido, e) {
     e.stopPropagation();
-    if (!confirm("¿Deseas quitar este pedido de la visita?")) {
+    if (!confirm("Â¿Deseas quitar este pedido de la visita?")) {
         return;
     }
     fetch('<?= BASE_URL ?>/ajax/quitar_pedido.php', {
@@ -721,10 +721,10 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
             var contenido = document.getElementById('detalleBarrasContenido');
             if (!titulo || !contenido) return;
 
-            titulo.innerHTML = 'Detalle mensual (Pedido vs Albarán) - ' + escapeHtml(periodoTxt);
+            titulo.innerHTML = 'Detalle mensual (Pedido vs AlbarÃ¡n) - ' + escapeHtml(periodoTxt);
 
             if (!Array.isArray(items) || items.length === 0) {
-                contenido.innerHTML = '<p>No hay líneas para ese período.</p>';
+                contenido.innerHTML = '<p>No hay lÃ­neas para ese perÃ­odo.</p>';
                 abrirModal('modal-detalle-barras');
                 return;
             }
@@ -775,17 +775,17 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                 '<p><strong>Total Pedidos:</strong> ' + totalImpPedido.toFixed(2) + ' &euro; | ' +
                 '<strong>Total Albaranes:</strong> ' + totalImpAlbaran.toFixed(2) + ' &euro;</p>' +
                 '<div class="leyenda-diff">' +
-                '<span class="leyenda-item"><span class="leyenda-color" style="background:#ffe5e5;"></span>Cantidad: Pedido &gt; Albarán</span>' +
-                '<span class="leyenda-item"><span class="leyenda-color" style="background:#e7f7ea;"></span>Cantidad: Albarán &gt; Pedido</span>' +
-                '<span class="leyenda-item"><span class="leyenda-color" style="background:#fff6d6;"></span>Importe: Pedido &gt; Albarán (misma cantidad)</span>' +
-                '<span class="leyenda-item"><span class="leyenda-color" style="background:#e8f1ff;"></span>Importe: Albarán &gt; Pedido (misma cantidad)</span>' +
+                '<span class="leyenda-item"><span class="leyenda-color" style="background:#ffe5e5;"></span>Cantidad: Pedido &gt; AlbarÃ¡n</span>' +
+                '<span class="leyenda-item"><span class="leyenda-color" style="background:#e7f7ea;"></span>Cantidad: AlbarÃ¡n &gt; Pedido</span>' +
+                '<span class="leyenda-item"><span class="leyenda-color" style="background:#fff6d6;"></span>Importe: Pedido &gt; AlbarÃ¡n (misma cantidad)</span>' +
+                '<span class="leyenda-item"><span class="leyenda-color" style="background:#e8f1ff;"></span>Importe: AlbarÃ¡n &gt; Pedido (misma cantidad)</span>' +
                 '</div>' +
                 '<div class="modal-table-container">' +
                 '<table class="modal-table">' +
                 '<thead><tr>' +
-                '<th>Artículo</th><th>Descripción</th>' +
+                '<th>ArtÃ­culo</th><th>DescripciÃ³n</th>' +
                 '<th>Cant. Pedido</th><th>Importe Pedido</th>' +
-                '<th>Cant. Albarán</th><th>Importe Albarán</th>' +
+                '<th>Cant. AlbarÃ¡n</th><th>Importe AlbarÃ¡n</th>' +
                 '</tr></thead>' +
                 '<tbody>' + filas +
                 '<tr>' +
@@ -877,7 +877,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'bottom' },
-                        title: { display: true, text: 'Comparativa mensual por año (Pedidos vs Albaranes)' },
+                        title: { display: true, text: 'Comparativa mensual por aÃ±o (Pedidos vs Albaranes)' },
                         datalabels: { display: false }
                     },
                     onClick: function(evt) {
@@ -1099,7 +1099,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                     responsive: true,
                     plugins: {
                         legend: { display: false },
-                        title: { display: true, text: 'Artículos (Top 10)' },
+                        title: { display: true, text: 'ArtÃ­culos (Top 10)' },
                         datalabels: {
                             formatter: function (value, context) {
                                 var idx = context.dataIndex;
@@ -1175,10 +1175,10 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         <div class="cliente-head-copy">
             <div class="cliente-eyebrow">Ficha de cliente</div>
             <h1><?= htmlspecialchars((string)$pageTitle) ?></h1>
-            <p>Información comercial, contactos, secciones y actividad reciente del cliente.</p>
+            <p>InformaciÃ³n comercial, contactos, secciones y actividad reciente del cliente.</p>
         </div>
         <div class="cliente-head-badges">
-            <span class="cliente-badge">Código <?= htmlspecialchars((string)$cliente['cod_cliente']) ?></span>
+            <span class="cliente-badge">CÃ³digo <?= htmlspecialchars((string)$cliente['cod_cliente']) ?></span>
             <?php if (!empty($cliente['cod_tarifa'])): ?>
                 <span class="cliente-badge cliente-badge-soft">Tarifa <?= htmlspecialchars((string)$tarifa_nombre) ?></span>
             <?php endif; ?>
@@ -1194,7 +1194,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
 
     <section class="section-card">
     <h2>Datos del cliente</h2>
-    <p class="section-intro">Resumen principal de la ficha comercial y de facturación.</p>
+    <p class="section-intro">Resumen principal de la ficha comercial y de facturaciÃ³n.</p>
     <?php
         $telefonos = [];
         $mapaTelefonos = [
@@ -1217,7 +1217,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                 'icono' => $iconoTelefono,
             ];
         }
-        $telefonosHtml = 'Sin teléfonos';
+        $telefonosHtml = 'Sin telÃ©fonos';
         if ($telefonos !== []) {
             $telefonosHtml = '<div class="contact-lines">';
             foreach ($telefonos as $telefono) {
@@ -1241,13 +1241,13 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         if (trim((string)($cliente['poblacion'] ?? '')) !== '' || trim((string)($cliente['provincia'] ?? '')) !== '') {
             $ubicacion = $poblacionCompleta;
             if (trim((string)($cliente['provincia'] ?? '')) !== '') {
-                $ubicacion .= ($ubicacion !== '' ? ' · ' : '') . htmlspecialchars((string)$cliente['provincia']);
+                $ubicacion .= ($ubicacion !== '' ? ' Â· ' : '') . htmlspecialchars((string)$cliente['provincia']);
             }
             if ($ubicacion !== '') {
                 $direccionPartes[] = $ubicacion;
             }
         }
-        $direccionCompleta = $direccionPartes !== [] ? implode('<br>', $direccionPartes) : 'Sin dirección';
+        $direccionCompleta = $direccionPartes !== [] ? implode('<br>', $direccionPartes) : 'Sin direcciÃ³n';
         $documentoCliente = trim((string)($cliente['cif'] ?? ''));
         $documentoLabel = 'NIF';
         if ($documentoCliente !== '' && preg_match('/^[A-W][0-9]/i', $documentoCliente) === 1) {
@@ -1256,7 +1256,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
     ?>
     <div class="summary-grid">
         <div class="summary-item">
-            <span class="summary-label">Código</span>
+            <span class="summary-label">CÃ³digo</span>
             <div class="summary-value"><?= htmlspecialchars((string)$cliente['cod_cliente']) ?></div>
         </div>
         <div class="summary-item">
@@ -1272,15 +1272,15 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
             <div class="summary-value summary-value-soft"><?= htmlspecialchars((string)$forma_pago) ?></div>
         </div>
         <div class="summary-item summary-item-span-2">
-            <span class="summary-label">Razón social</span>
+            <span class="summary-label">RazÃ³n social</span>
             <div class="summary-value"><?= htmlspecialchars(toUTF8((string)$cliente['razon_social'])) ?></div>
         </div>
         <div class="summary-item summary-item-span-2">
-            <span class="summary-label">Dirección</span>
+            <span class="summary-label">DirecciÃ³n</span>
             <div class="summary-value summary-value-soft"><?= $direccionCompleta ?></div>
         </div>
         <div class="summary-item summary-item-span-2">
-            <span class="summary-label">Teléfonos</span>
+            <span class="summary-label">TelÃ©fonos</span>
             <div class="summary-value summary-value-soft"><?= $telefonosHtml ?></div>
         </div>
         <div class="summary-item summary-item-span-2">
@@ -1306,8 +1306,8 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
     $campos = [
         'nombre'           => 'Nombre',
         'cargo'            => 'Cargo',
-        'telefono'         => 'Teléfono',
-        'telefono_movil'   => 'Móvil',
+        'telefono'         => 'TelÃ©fono',
+        'telefono_movil'   => 'MÃ³vil',
         'e_mail'           => 'Email',
         'observaciones'    => 'Observaciones'
     ];
@@ -1370,7 +1370,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         if (!empty($asignacion['zona_principal'])) {
             $resZonaP = execPrepared(
                 $conn,
-                "SELECT nombre_zona FROM [integral].[dbo].[cmf_zonas_visita] WHERE cod_zona = ?",
+                "SELECT nombre_zona FROM [integral].[dbo].[cmf_comerciales_zonas] WHERE cod_zona = ?",
                 [(string)$asignacion['zona_principal']]
             );
             $zonaP = $resZonaP ? odbc_fetch_array($resZonaP) : false;
@@ -1381,7 +1381,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         if (!empty($asignacion['zona_secundaria'])) {
             $resZonaS = execPrepared(
                 $conn,
-                "SELECT nombre_zona FROM [integral].[dbo].[cmf_zonas_visita] WHERE cod_zona = ?",
+                "SELECT nombre_zona FROM [integral].[dbo].[cmf_comerciales_zonas] WHERE cod_zona = ?",
                 [(string)$asignacion['zona_secundaria']]
             );
             $zonaS = $resZonaS ? odbc_fetch_array($resZonaS) : false;
@@ -1408,7 +1408,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         }
 
         $pref = strtolower((string)($asignacion['preferencia_horaria'] ?? ''));
-        $prefiereManana = ($pref === 'm' || $pref === 'mañana' || $pref === 'manana');
+        $prefiereManana = ($pref === 'm' || $pref === 'maÃ±ana' || $pref === 'manana');
         $prefiereTarde  = ($pref === 't' || $pref === 'tarde');
 
         $tp = (float)($asignacion['tiempo_promedio_visita'] ?? 0);
@@ -1440,7 +1440,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                         <span class="planning-meta-pill">
                             <strong>Preferencia</strong>
                             <?php if ($prefiereManana): ?>
-                                Mañana
+                                MaÃ±ana
                             <?php elseif ($prefiereTarde): ?>
                                 Tarde
                             <?php else: ?>
@@ -1451,7 +1451,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                     <div class="planning-inline-action">
                         <div class="planning-slots">
                             <span class="planning-slot <?= $prefiereManana ? 'is-active-morning' : '' ?>">
-                                <strong>Mañana</strong>
+                                <strong>MaÃ±ana</strong>
                                 <span><?= htmlspecialchars($horaInicioManana) ?> - <?= htmlspecialchars($horaFinManana) ?></span>
                             </span>
                             <span class="planning-slot <?= $prefiereTarde ? 'is-active-afternoon' : '' ?>">
@@ -1500,12 +1500,12 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
     <?php endif; ?>
 
     <?php
-    // Contactos: ver qué campos tienen algún dato
+    // Contactos: ver quÃ© campos tienen algÃºn dato
     $campos = [
         'nombre'           => 'Nombre',
         'cargo'            => 'Cargo',
-        'telefono'         => 'Teléfono',
-        'telefono_movil'   => 'Móvil',
+        'telefono'         => 'TelÃ©fono',
+        'telefono_movil'   => 'MÃ³vil',
         'e_mail'           => 'Email',
         'observaciones'    => 'Observaciones'
     ];
@@ -1575,9 +1575,9 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         <div class="chart-toolbar">
             <label for="yearsWindow" style="font-weight:600;">A&ntilde;os:</label>
             <select id="yearsWindow" class="form-select form-select-sm" style="width:auto;">
-                <option value="2" selected>Últimos 2</option>
-                <option value="3">Últimos 3</option>
-                <option value="4">Últimos 4</option>
+                <option value="2" selected>Ãšltimos 2</option>
+                <option value="3">Ãšltimos 3</option>
+                <option value="4">Ãšltimos 4</option>
                 <option value="all">Todos</option>
             </select>
         </div>
@@ -1619,7 +1619,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         <div class="visitas-header">
             <div>
                 <h2>Visitas del cliente</h2>
-                <p class="section-intro">Histórico de visitas comerciales y pedidos asociados a cada una.</p>
+                <p class="section-intro">HistÃ³rico de visitas comerciales y pedidos asociados a cada una.</p>
             </div>
             <span class="cliente-badge cliente-badge-soft visitas-counter"><?= (int)$totalVisitas ?> visitas</span>
         </div>
@@ -1661,7 +1661,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                                 <div class="modal-summary-item"><strong>Hora de inicio</strong><?= htmlspecialchars(date("H:i", strtotime((string)$visita['hora_inicio_visita']))) ?></div>
                                 <div class="modal-summary-item"><strong>Hora de fin</strong><?= htmlspecialchars(date("H:i", strtotime((string)$visita['hora_fin_visita']))) ?></div>
                                 <div class="modal-summary-item"><strong>Importe total</strong><?= number_format((float)$visita['importe_total'], 2, ',', '.') ?> &euro;</div>
-                                <div class="modal-summary-item"><strong>Número de líneas</strong><?= htmlspecialchars((string)$visita['numero_lineas_total']) ?></div>
+                                <div class="modal-summary-item"><strong>NÃºmero de lÃ­neas</strong><?= htmlspecialchars((string)$visita['numero_lineas_total']) ?></div>
                             </div>
                             <?php if (!empty($visita['observaciones'])): ?>
                                 <div class="modal-note"><?= htmlspecialchars((string)$visita['observaciones']) ?></div>
@@ -1681,7 +1681,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                                     elv.cantidad AS cantidad_servida,
                                     hvc_dest.fecha_venta AS fecha_entrega
                                 FROM [integral].[dbo].[hist_ventas_linea] hl
-                                INNER JOIN [integral].[dbo].[cmf_visita_pedidos] vp
+                                INNER JOIN [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
                                    ON hl.cod_venta = vp.cod_venta
                                 INNER JOIN [integral].[dbo].[hist_ventas_cabecera] hvc 
                                    ON hl.cod_venta = hvc.cod_venta
@@ -1820,7 +1820,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                                         <div class="modal-summary-item"><strong>Fecha de venta</strong><?= htmlspecialchars(date("d/m/Y", strtotime((string)$pedido['fecha_venta']))) ?> (<?= obtenerDiaSemana((string)$pedido['fecha_venta']) ?>)</div>
                                         <div class="modal-summary-item"><strong>Hora de venta</strong><?= htmlspecialchars(date("H:i", strtotime((string)$pedido['hora_venta']))) ?></div>
                                         <div class="modal-summary-item"><strong>Importe</strong><?= number_format((float)$pedido['importe'], 2, ',', '.') . " &euro;" ?></div>
-                                        <div class="modal-summary-item"><strong>Número de líneas</strong><?= htmlspecialchars((string)$pedido['numero_lineas']) ?></div>
+                                        <div class="modal-summary-item"><strong>NÃºmero de lÃ­neas</strong><?= htmlspecialchars((string)$pedido['numero_lineas']) ?></div>
                                     </div>
                                     <?php if (!empty($pedido['observacion_interna'])): ?>
                                         <div class="modal-note"><?= htmlspecialchars((string)$pedido['observacion_interna']) ?></div>

@@ -22,7 +22,7 @@ $mensajeOk = '';
  */
 function guardarConfigApp($conn, string $clave, string $valor): bool
 {
-    $sqlExiste = "SELECT COUNT(*) AS total FROM cmf_configuracion_app WHERE clave = ?";
+    $sqlExiste = "SELECT COUNT(*) AS total FROM cmf_comerciales_app_config WHERE clave = ?";
     $stmtExiste = @odbc_prepare($conn, $sqlExiste);
     if (!$stmtExiste || !@odbc_execute($stmtExiste, [$clave])) {
         return false;
@@ -34,14 +34,14 @@ function guardarConfigApp($conn, string $clave, string $valor): bool
     }
 
     if ($existe) {
-        $sqlUpdate = "UPDATE cmf_configuracion_app
+        $sqlUpdate = "UPDATE cmf_comerciales_app_config
                       SET valor = ?, fecha_modificacion = GETDATE()
                       WHERE clave = ?";
         $stmtUpdate = @odbc_prepare($conn, $sqlUpdate);
         return $stmtUpdate && @odbc_execute($stmtUpdate, [$valor, $clave]);
     }
 
-    $sqlInsert = "INSERT INTO cmf_configuracion_app (clave, valor, fecha_modificacion)
+    $sqlInsert = "INSERT INTO cmf_comerciales_app_config (clave, valor, fecha_modificacion)
                   VALUES (?, ?, GETDATE())";
     $stmtInsert = @odbc_prepare($conn, $sqlInsert);
     return $stmtInsert && @odbc_execute($stmtInsert, [$clave, $valor]);

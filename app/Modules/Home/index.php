@@ -15,23 +15,23 @@ require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
 header('Content-Type: text/html; charset=utf-8');
 
-// Si el usuario no ha iniciado sesiÃ³n
+// Si el usuario no ha iniciado sesiÃƒÂ³n
 
 
-// Definir el tÃ­tulo de la pÃ¡gina (usa el que se haya pasado, o uno por defecto)
+// Definir el tÃƒÂ­tulo de la pÃƒÂ¡gina (usa el que se haya pasado, o uno por defecto)
 if (!isset($pageTitle)) {
     $pageTitle = "Panel de " . ($_SESSION['nombre'] ?? 'Usuario');
 }
 
-// ConexiÃ³n a la base de datos
+// ConexiÃƒÂ³n a la base de datos
 
 // Incluir funciones comunes
 require_once BASE_PATH . '/app/Support/functions.php';
 
 $conn = db();
 
-// Consulta para contar los pedidos abiertos (histÃ³ricos)
-// Comentario saneado para evitar basura de encoding en esta secciÃ³n.
+// Consulta para contar los pedidos abiertos (histÃƒÂ³ricos)
+// Comentario saneado para evitar basura de encoding en esta secciÃƒÂ³n.
 
 $codigoSesion = null;
 if (isset($_SESSION['codigo']) && $_SESSION['codigo'] !== '' && $_SESSION['codigo'] !== null) {
@@ -163,7 +163,7 @@ if ($codigoSesion !== null) {
 $query_pedidos_sin_visita = "
     SELECT COUNT(*) AS total
     FROM hist_ventas_cabecera h
-    LEFT JOIN cmf_visita_pedidos vp ON h.cod_venta = vp.cod_venta
+    LEFT JOIN cmf_comerciales_visitas_pedidos vp ON h.cod_venta = vp.cod_venta
     WHERE vp.cod_venta IS NULL
       AND h.tipo_venta = 1
       AND h.fecha_venta >= '2025-01-01'
@@ -353,7 +353,7 @@ if ($isJcasado) {
            FROM hist_ventas_cabecera hvc
            WHERE hvc.cod_venta IN (
                  SELECT cod_venta 
-                 FROM [integral].[dbo].[cmf_visita_pedidos]
+                 FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos]
                  WHERE id_visita = cvc.id_visita AND tipo_venta=1
            )
         ) as total_importe_pedidos,
@@ -361,16 +361,16 @@ if ($isJcasado) {
            FROM [integral].[dbo].[hist_ventas_linea] hvl
            WHERE hvl.cod_venta IN (
                  SELECT cod_venta 
-                 FROM [integral].[dbo].[cmf_visita_pedidos]
+                 FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos]
                  WHERE id_visita = cvc.id_visita
            )
            AND hvl.tipo_venta = 1
         ) as num_lineas_pedidos
-      FROM [integral].[dbo].[cmf_visitas_comerciales] cvc
+      FROM [integral].[dbo].[cmf_comerciales_visitas] cvc
       JOIN [integral].[dbo].[clientes] cl ON cvc.cod_cliente = cl.cod_cliente
       LEFT JOIN [integral].[dbo].[secciones_cliente] sc 
              ON cvc.cod_cliente = sc.cod_cliente AND cvc.cod_seccion = sc.cod_seccion
-      LEFT JOIN [integral].[dbo].[cmf_visita_pedidos] vp 
+      LEFT JOIN [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp 
              ON cvc.id_visita = vp.id_visita
       WHERE cvc.cod_vendedor = $cod_vendedor_session
         AND CONVERT(date, cvc.fecha_visita) = '$fechaConsulta'
@@ -401,7 +401,7 @@ if ($isJcasado) {
         tipo_evento,
         descripcion,
         repetir_anualmente
-      FROM [integral].[dbo].[cmf_dias_no_laborables]
+      FROM [integral].[dbo].[cmf_comerciales_dias_no_laborables]
       WHERE cod_vendedor = $cod_vendedor_session
         AND (
              (repetir_anualmente = 0 AND CONVERT(date, fecha) = '$fechaConsulta')
@@ -429,8 +429,8 @@ if ($isJcasado) {
   <!-- 
        ESTILOS: Mantiene la sidebar al 20%, y si es layout-normal => 2 columnas de 40%;
                 si es layout-jcasado => 3 columnas (c. 26.66%) para escritorio.
-       AdemÃ¡s, se mantiene el comportamiento actual para escritorio.
-       Scroll normal en mÃ³vil.
+       AdemÃƒÂ¡s, se mantiene el comportamiento actual para escritorio.
+       Scroll normal en mÃƒÂ³vil.
   -->
   <style type="text/css">
     /* ==== Reseteo general ==== */
@@ -451,7 +451,7 @@ if ($isJcasado) {
       padding-right: 12px;
     }
 
-    /* ==== Header (o .header, segÃºn header.php) ==== */
+    /* ==== Header (o .header, segÃƒÂºn header.php) ==== */
     header, .header {
       background-color: #fff; 
       /* Ajusta si quieres un header fijo en escritorio (ver media query) */
@@ -578,7 +578,7 @@ if ($isJcasado) {
     background-color: red;
     color: white;
     border-radius: 50%;
-    padding: 8px 12px; /* TamaÃ±o consistente */
+    padding: 8px 12px; /* TamaÃƒÂ±o consistente */
     font-size: 14px;
     font-weight: bold;
     box-shadow: 0 0 5px rgba(0,0,0,0.3);
@@ -811,7 +811,7 @@ if ($isJcasado) {
       color: #007BFF;
     }
 
-    /* ==== PaginaciÃ³n ==== */
+    /* ==== PaginaciÃƒÂ³n ==== */
     .pagination {
       margin-top: 20px;
       text-align: center;
@@ -882,9 +882,9 @@ if ($isJcasado) {
     /* ======== MEDIA QUERIES ===== */
     /* ============================= */
 
-    /* === MÃ³vil y tablet === */
+    /* === MÃƒÂ³vil y tablet === */
 @media (max-width: 1024px) {
-  /* Permitimos scroll normal en <body> o lo dejas oculto, segÃºn tu preferencia */
+  /* Permitimos scroll normal en <body> o lo dejas oculto, segÃƒÂºn tu preferencia */
   html, body {
     overflow-x: hidden;
     overflow-y: auto;
@@ -894,7 +894,7 @@ if ($isJcasado) {
   header, .header {
     position: fixed;
     top: 0; left: 0; right: 0;
-    height: 60px; /* Ajusta segÃºn tu header */
+    height: 60px; /* Ajusta segÃƒÂºn tu header */
     z-index: 9999;
   }
   .page-container {
@@ -1299,7 +1299,7 @@ $ui_requires_jquery = false;
     <div class="mobile-menu-backdrop" onclick="toggleMobileMenu(false)"></div>
     <div class="buttons-container">
     <?php
-    // Mostrar el botÃ³n correspondiente si procede
+    // Mostrar el botÃƒÂ³n correspondiente si procede
     if ($puedeVerProductos) {
     ?>
       <a href="productos.php" class="btn btn-productos">
@@ -1369,7 +1369,7 @@ $ui_requires_jquery = false;
     <?php
 // echo "Zona horaria: " . ini_get("date.timezone") . "<br>";
 // echo "Hora actual: " . date("Y-m-d H:i:s") . "<br>";
-// Comentario de depuraciÃ³n saneado
+// Comentario de depuraciÃƒÂ³n saneado
 ?>
     <?php 
     if (empty($pedidosHoy)) {
@@ -1434,7 +1434,7 @@ $ui_requires_jquery = false;
                 $colorOrigen = '';
                 $origen = '';
                 if (empty($ped['cod_pedido_web'])) {
-                    $queryOrigen = "SELECT origen FROM cmf_visita_pedidos WHERE cod_venta = " . intval($ped['cod_venta']);
+                    $queryOrigen = "SELECT origen FROM cmf_comerciales_visitas_pedidos WHERE cod_venta = " . intval($ped['cod_venta']);
                     $result_icon = odbc_exec($conn, $queryOrigen);
                     if ($result_icon && odbc_fetch_row($result_icon)) {
                         $origen = strtolower(trim(odbc_result($result_icon, "origen")));
@@ -1576,7 +1576,7 @@ $ui_requires_jquery = false;
                . '</div>';
             echo '<div class="group-content" id="grupoAlb_' . $codComisAlb . '" style="display:' . $displayAlb . ';">';
 
-            // Mostrar cada albarÃ¡n
+            // Mostrar cada albarÃƒÂ¡n
             foreach ($grpA['registros'] as $alb) {
                 $colorAlbaran = '#17a2b8';
                 $obsExt = !empty($alb['observacion_externa']) ? toUTF8($alb['observacion_externa']) : '';
@@ -1616,7 +1616,7 @@ $ui_requires_jquery = false;
                 } else {
                     $prefijo = "Venta";
                 }
-                // Identificador Ãºnico
+                // Identificador ÃƒÂºnico
                 $uniqueId = $codAlb . "_" . $alb['tipo_venta'];
 
                 echo '<div class="item-box js-documento-card" style="border-left:6px solid ' . $colorAlbaran . ';' . $bgAlbaran
@@ -1761,7 +1761,7 @@ $ui_requires_jquery = false;
                     $colorTexto = '#666';
                     $iconoNL = '<i class="fa fa-ban"></i>';
                     if (strpos($tipoEventoLower, 'medico') !== false 
-                        || strpos($tipoEventoLower, 'mÃ©dico') !== false) {
+                        || strpos($tipoEventoLower, 'mÃƒÂ©dico') !== false) {
                         $iconoNL = '<i class="fa fa-user-md"></i>';
                     } else if (strpos($tipoEventoLower, 'comaferr') !== false) {
                         $iconoNL = '<i class="fa fa-building"></i>';
@@ -1904,7 +1904,7 @@ function abrirModalAlbaran(codVentaTipo, codCliente) {
 var csrfTokenHome = <?= json_encode(csrfToken(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
 function abrirModalVisita(idVisita) {
-  // Redirige a la pÃ¡gina de ediciÃ³n de visita
+  // Redirige a la pÃƒÂ¡gina de ediciÃƒÂ³n de visita
   window.location.href = "editar_visita.php?id_visita=" + idVisita + "&origen=index";
 }
 
@@ -1977,7 +1977,7 @@ if (window.matchMedia('(max-width: 1024px)').matches) {
 </script>
 
 <?php
-// Cerrar la conexiÃ³n ODBC
+// Cerrar la conexiÃƒÂ³n ODBC
 ?>
 <script src="<?= BASE_URL ?>/assets/js/app-ui.js"></script>
 <?php require_once BASE_PATH . '/app/Modules/Pedidos/Views/modal_documento.php'; ?>

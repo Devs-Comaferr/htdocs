@@ -18,7 +18,7 @@ $pageTitle = 'Configuracion - Usuarios';
 $sql = "SELECT email, nombre, cod_vendedor, rol, tipo_plan,
                perm_productos, perm_estadisticas, perm_planificador,
                activo
-        FROM cmf_vendedores_user
+        FROM cmf_comerciales_app_usuarios
         ORDER BY nombre ASC";
 
 $result = odbc_exec($conn, $sql);

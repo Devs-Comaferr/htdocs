@@ -121,11 +121,11 @@ function seccionDetallesObtenerNombreSeccion($conn, string $codCliente, string $
     ";
     $result = odbc_exec($conn, $sql);
     if (!$result) {
-        throw new RuntimeException('Error al consultar la sección: ' . odbc_errormsg($conn));
+        throw new RuntimeException('Error al consultar la secciÃ³n: ' . odbc_errormsg($conn));
     }
 
     $row = odbc_fetch_array($result);
-    return $row ? (string) ($row['nombre'] ?? 'Sección desconocida') : 'Sección desconocida';
+    return $row ? (string) ($row['nombre'] ?? 'SecciÃ³n desconocida') : 'SecciÃ³n desconocida';
 }
 
 function seccionDetallesObtenerDatosBasicos($conn, string $codCliente, string $codSeccion)
@@ -152,7 +152,7 @@ function seccionDetallesObtenerDatosBasicos($conn, string $codCliente, string $c
     ";
     $result = odbc_exec($conn, $sql);
     if (!$result) {
-        throw new RuntimeException('Error al ejecutar la consulta de datos de la sección: ' . odbc_errormsg($conn));
+        throw new RuntimeException('Error al ejecutar la consulta de datos de la secciÃ³n: ' . odbc_errormsg($conn));
     }
 
     return odbc_fetch_array($result);
@@ -162,7 +162,7 @@ function seccionDetallesObtenerAsignacion($conn, string $codCliente, string $cod
 {
     $sql = "
         SELECT *
-        FROM [integral].[dbo].[cmf_asignacion_zonas_clientes]
+        FROM [integral].[dbo].[cmf_comerciales_clientes_zona]
         WHERE cod_cliente = '" . seccionDetallesSqlLiteral($codCliente) . "'
           AND cod_seccion = '" . seccionDetallesSqlLiteral($codSeccion) . "'
     ";
@@ -180,7 +180,7 @@ function seccionDetallesObtenerVisitas($connAux, $connAux2, string $codCliente, 
             v.fecha_visita,
             v.hora_inicio_visita,
             v.hora_fin_visita
-        FROM [integral].[dbo].[cmf_visitas_comerciales] v
+        FROM [integral].[dbo].[cmf_comerciales_visitas] v
         WHERE v.cod_cliente = '" . seccionDetallesSqlLiteral($codCliente) . "'
           AND v.cod_seccion = '" . seccionDetallesSqlLiteral($codSeccion) . "'
         ORDER BY v.fecha_visita DESC
@@ -201,7 +201,7 @@ function seccionDetallesObtenerVisitas($connAux, $connAux2, string $codCliente, 
 
         $sqlPedidoPrincipal = "
             SELECT TOP 1 vp.cod_venta, vp.origen
-            FROM [integral].[dbo].[cmf_visita_pedidos] vp
+            FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
             WHERE vp.id_visita = '" . seccionDetallesSqlLiteral($visita['id_visita']) . "'
             ORDER BY vp.id_visita_pedido ASC
         ";
@@ -214,7 +214,7 @@ function seccionDetallesObtenerVisitas($connAux, $connAux2, string $codCliente, 
             SELECT
                 vp.cod_venta AS cod_pedido,
                 vp.origen
-            FROM [integral].[dbo].[cmf_visita_pedidos] vp
+            FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
             WHERE vp.id_visita = '" . seccionDetallesSqlLiteral($visita['id_visita']) . "'
             ORDER BY vp.id_visita_pedido ASC
         ";
@@ -242,7 +242,7 @@ function seccionDetallesObtenerVisitas($connAux, $connAux2, string $codCliente, 
                     SELECT DISTINCT
                         vp.cod_venta AS cod_pedido,
                         vp.origen
-                    FROM [integral].[dbo].[cmf_visita_pedidos] vp
+                    FROM [integral].[dbo].[cmf_comerciales_visitas_pedidos] vp
                     WHERE vp.id_visita = '" . seccionDetallesSqlLiteral($visita['id_visita']) . "'
                 ";
                 $resPedidosFallback = odbc_exec($connAux, $sqlPedidosFallback);

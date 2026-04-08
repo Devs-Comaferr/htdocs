@@ -41,7 +41,7 @@ if (!function_exists('planificadorRepoObtenerZonaPorCodigoEditar')) {
     {
         $conn = db();
         $cod_zona = intval($cod_zona);
-        $query = "SELECT nombre_zona FROM cmf_zonas_visita WHERE cod_zona = $cod_zona";
+        $query = "SELECT nombre_zona FROM cmf_comerciales_zonas WHERE cod_zona = $cod_zona";
         $resultado = odbc_exec($conn, $query);
 
         if (!$resultado) {
@@ -67,12 +67,12 @@ if (!function_exists('planificadorRepoObtenerAsignacion')) {
                    c.nombre_comercial,
                    COALESCE(sc.nombre, 'Sin Sección') AS nombre_seccion,
                    z.nombre_zona
-            FROM cmf_asignacion_zonas_clientes azc
+            FROM cmf_comerciales_clientes_zona azc
             JOIN clientes c ON azc.cod_cliente = c.cod_cliente
             LEFT JOIN secciones_cliente sc
                 ON azc.cod_cliente = sc.cod_cliente
                 AND azc.cod_seccion = sc.cod_seccion
-            JOIN cmf_zonas_visita z ON azc.zona_principal = z.cod_zona
+            JOIN cmf_comerciales_zonas z ON azc.zona_principal = z.cod_zona
             WHERE azc.cod_cliente = $cod_cliente
               AND azc.zona_principal = $cod_zona
               AND $condicion_seccion
@@ -104,7 +104,7 @@ if (!function_exists('planificadorRepoActualizarAsignacion')) {
         $observaciones = is_null($observaciones) ? 'NULL' : "'" . addslashes($observaciones) . "'";
 
         $query = "
-            UPDATE cmf_asignacion_zonas_clientes
+            UPDATE cmf_comerciales_clientes_zona
             SET
                 zona_secundaria = $zona_secundaria,
                 tiempo_promedio_visita = $tiempo_promedio_visita,
@@ -157,7 +157,7 @@ if (!function_exists('planificadorRepoObtenerClientesDisponiblesParaAsignar')) {
                   AND c.cod_vendedor = '$cod_vendedor'
             )
             AND NOT EXISTS (
-                SELECT 1 FROM cmf_asignacion_zonas_clientes azc
+                SELECT 1 FROM cmf_comerciales_clientes_zona azc
                 WHERE azc.cod_cliente = sc.cod_cliente
                   AND azc.cod_seccion = sc.cod_seccion
             )
@@ -184,7 +184,7 @@ if (!function_exists('planificadorRepoObtenerClientesDisponiblesParaAsignar')) {
                   WHERE sc.cod_cliente = c.cod_cliente
               )
               AND NOT EXISTS (
-                  SELECT 1 FROM cmf_asignacion_zonas_clientes azc
+                  SELECT 1 FROM cmf_comerciales_clientes_zona azc
                   WHERE azc.cod_cliente = c.cod_cliente
               )
         ";
@@ -253,7 +253,7 @@ if (!function_exists('planificadorRepoAsignarClienteZona')) {
             $cod_seccion = intval($cod_seccion);
         }
 
-        $query_check = "SELECT COUNT(*) AS total FROM cmf_asignacion_zonas_clientes
+        $query_check = "SELECT COUNT(*) AS total FROM cmf_comerciales_clientes_zona
                        WHERE cod_cliente = '$cod_cliente'
                          AND (cod_seccion = " . ($cod_seccion === 'NULL' ? "NULL" : "'$cod_seccion'") . ")
                          AND zona_principal = '$zona_principal'";
@@ -267,7 +267,7 @@ if (!function_exists('planificadorRepoAsignarClienteZona')) {
             return false;
         }
 
-        $query = "INSERT INTO cmf_asignacion_zonas_clientes
+        $query = "INSERT INTO cmf_comerciales_clientes_zona
                   (cod_cliente, cod_seccion, zona_principal, zona_secundaria, tiempo_promedio_visita, preferencia_horaria, frecuencia_visita, observaciones)
                   VALUES
                   ('$cod_cliente', " .
@@ -307,7 +307,7 @@ if (!function_exists('planificadorRepoObtenerClientesPorZona')) {
                 azc.frecuencia_visita,
                 azc.observaciones,
                 'primaria' AS tipo_asignacion
-            FROM cmf_asignacion_zonas_clientes azc
+            FROM cmf_comerciales_clientes_zona azc
             JOIN clientes c ON azc.cod_cliente = c.cod_cliente
             LEFT JOIN secciones_cliente sc
                 ON azc.cod_cliente = sc.cod_cliente
@@ -326,7 +326,7 @@ if (!function_exists('planificadorRepoObtenerClientesPorZona')) {
                 azc.frecuencia_visita,
                 azc.observaciones,
                 'secundaria' AS tipo_asignacion
-            FROM cmf_asignacion_zonas_clientes azc
+            FROM cmf_comerciales_clientes_zona azc
             JOIN clientes c ON azc.cod_cliente = c.cod_cliente
             LEFT JOIN secciones_cliente sc
                 ON azc.cod_cliente = sc.cod_cliente

@@ -41,8 +41,8 @@ SELECT
 FROM hist_ventas_cabecera h
 JOIN clientes c ON h.cod_cliente = c.cod_cliente
 LEFT JOIN anexo_ventas_cabecera a ON h.cod_anexo = a.cod_anexo
-LEFT JOIN cmf_visita_pedidos vp ON h.cod_venta = vp.cod_venta
-LEFT JOIN cmf_asignacion_zonas_clientes cazc 
+LEFT JOIN cmf_comerciales_visitas_pedidos vp ON h.cod_venta = vp.cod_venta
+LEFT JOIN cmf_comerciales_clientes_zona cazc 
     ON h.cod_cliente = cazc.cod_cliente AND h.cod_seccion = cazc.cod_seccion
 WHERE vp.cod_venta IS NULL
   AND h.cod_comisionista = $codigo_vendedor
@@ -97,7 +97,7 @@ if (!empty($cod_ventas)) {
 
   $res_lineas = odbc_exec($conn, $sql_lineas);
   if (!$res_lineas) {
-    error_log("Error al ejecutar la consulta de líneas: " . odbc_errormsg($conn));
+    error_log("Error al ejecutar la consulta de lÃ­neas: " . odbc_errormsg($conn));
     echo 'Error interno';
     return;
   }
