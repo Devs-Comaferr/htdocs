@@ -920,6 +920,12 @@ if (!function_exists('eliminarZonaSeguraService')) {
     }
 }
 
+if (!function_exists('reiniciarCiclosZonasService')) {
+    function reiniciarCiclosZonasService(array $ordenesPorZona, $fecha_inicio_ciclo) {
+        return planificadorRepoReiniciarCiclosZonas($ordenesPorZona, $fecha_inicio_ciclo);
+    }
+}
+
 }
 
 

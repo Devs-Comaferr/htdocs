@@ -67,6 +67,9 @@ if (!function_exists('determinarColorVisita')) {
                 case 'email':
                     $color = '#0072C6';
                     break;
+                case '':
+                    $color = '#dc2626';
+                    break;
                 default:
                     $color = '#6c757d';
                     break;
@@ -131,6 +134,29 @@ if (!function_exists('iconoDeOrigen')) {
             default:
                 return '<i class="fa-solid fa-info-circle"></i>';
         }
+    }
+}
+
+if (!function_exists('iconoDeOrigenOpcional')) {
+    function iconoDeOrigenOpcional(?string $origen, bool $esPedidoWeb = false): string
+    {
+        if ($esPedidoWeb) {
+            return '<i class="fa-solid fa-globe" aria-hidden="true" title="Pedido web"></i>';
+        }
+
+        $origenNormalizado = strtolower(trim((string)$origen));
+        if ($origenNormalizado === '') {
+            return '';
+        }
+
+        return match ($origenNormalizado) {
+            'telefono', 'teléfono', 'telÃ©fono', 'telã©fono' => '<i class="fa-solid fa-phone" aria-hidden="true" title="Telefono"></i>',
+            'visita' => '<i class="fa-solid fa-calendar-check" aria-hidden="true" title="Visita"></i>',
+            'whatsapp' => '<i class="fa-brands fa-whatsapp" aria-hidden="true" title="WhatsApp"></i>',
+            'email' => '<i class="fa-solid fa-envelope" aria-hidden="true" title="Email"></i>',
+            'pedido web' => '<i class="fa-solid fa-globe" aria-hidden="true" title="Pedido web"></i>',
+            default => '',
+        };
     }
 }
 

@@ -56,6 +56,81 @@ if (!function_exists('planificadorRepoObtenerZonasVisita')) {
     }
 }
 
+if (!function_exists('planificadorRepoReiniciarCiclosZonas')) {
+    function planificadorRepoReiniciarCiclosZonas(array $ordenesPorZona, $fecha_inicio_ciclo, $cod_vendedor = null): array
+    {
+        $cod_vendedor = $cod_vendedor !== null ? intval($cod_vendedor) : planificadorRepoObtenerCodVendedor();
+        $fecha_inicio_ciclo = trim((string)$fecha_inicio_ciclo);
+
+        if ($cod_vendedor <= 0) {
+            return ['ok' => false, 'message' => 'Vendedor no valido.'];
+        }
+
+        if ($fecha_inicio_ciclo === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_inicio_ciclo)) {
+            return ['ok' => false, 'message' => 'Fecha de inicio de ciclo no valida.'];
+        }
+
+        $conn = db();
+        $zonas = planificadorRepoObtenerZonasVisita($cod_vendedor);
+
+        if (empty($zonas)) {
+            return ['ok' => false, 'message' => 'No hay zonas para reiniciar el ciclo.'];
+        }
+
+        $zonasValidas = [];
+        foreach ($zonas as $zona) {
+            $cod_zona = (int)($zona['cod_zona'] ?? 0);
+            if ($cod_zona > 0) {
+                $zonasValidas[$cod_zona] = $zona;
+            }
+        }
+
+        if (empty($zonasValidas)) {
+            return ['ok' => false, 'message' => 'No hay zonas validas para reiniciar el ciclo.'];
+        }
+
+        if (count($ordenesPorZona) !== count($zonasValidas)) {
+            return ['ok' => false, 'message' => 'Debes indicar el orden de todas las zonas.'];
+        }
+
+        $ordenesNormalizados = [];
+        foreach ($ordenesPorZona as $cod_zona => $orden) {
+            $cod_zona = intval($cod_zona);
+            $orden = intval($orden);
+
+            if ($cod_zona <= 0 || !isset($zonasValidas[$cod_zona])) {
+                return ['ok' => false, 'message' => 'Hay zonas no validas en el reinicio del ciclo.'];
+            }
+            if ($orden <= 0) {
+                return ['ok' => false, 'message' => 'Todos los ordenes deben ser mayores que cero.'];
+            }
+
+            $ordenesNormalizados[$cod_zona] = $orden;
+        }
+
+        $ordenesUnicos = array_values($ordenesNormalizados);
+        sort($ordenesUnicos);
+        $ordenEsperado = range(1, count($zonasValidas));
+        if ($ordenesUnicos !== $ordenEsperado) {
+            return ['ok' => false, 'message' => 'Los ordenes deben ser unicos y consecutivos, empezando en 1.'];
+        }
+
+        $stmt = odbc_prepare($conn, "UPDATE cmf_comerciales_zonas SET orden = ?, fecha_inicio_ciclo = ? WHERE cod_zona = ? AND cod_vendedor = ?");
+        if (!$stmt) {
+            return ['ok' => false, 'message' => 'No se pudo preparar la actualizacion del ciclo.'];
+        }
+
+        foreach ($ordenesNormalizados as $cod_zona => $orden) {
+            $ok = odbc_execute($stmt, [$orden, $fecha_inicio_ciclo, $cod_zona, $cod_vendedor]);
+            if (!$ok) {
+                return ['ok' => false, 'message' => 'No se pudieron actualizar las zonas del ciclo.'];
+            }
+        }
+
+        return ['ok' => true, 'message' => 'Ciclo reiniciado correctamente desde ' . $fecha_inicio_ciclo . '.'];
+    }
+}
+
 if (!function_exists('planificadorRepoObtenerZonaPorCodigo')) {
     function planificadorRepoObtenerZonaPorCodigo($cod_zona, $cod_vendedor = null): ?array
     {

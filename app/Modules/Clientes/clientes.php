@@ -18,6 +18,7 @@ $ui_requires_jquery = false;
 require_once BASE_PATH . '/app/Support/functions.php'; // AquÃ­ debe existir toUTF8($data)
 
 require_once BASE_PATH . '/app/Support/db.php';
+require_once BASE_PATH . '/app/Support/HorariosVisitasSupport.php';
 
 $conn = db();
 
@@ -75,169 +76,106 @@ function normalizarFrecuenciaPlanificacion(string $frecuencia): string {
     };
 }
 
-function construirContextoCicloPlanificacion(array $zonasCicloVendedor, int $hoyTs): ?array {
-    $fecha = date('Y-m-d', $hoyTs);
-    return $fecha !== false ? construirContextoZonaActivaDesdeCiclo($zonasCicloVendedor, $fecha) : null;
-}
-
-function calcularNumeroCicloParaFecha(int $fechaTs, array $contextoCiclo): ?int {
-    $inicioCicloTs = (int)($contextoCiclo['inicio_ciclo_ts'] ?? 0);
-    $cicloTotalSemanas = (int)($contextoCiclo['ciclo_total_semanas'] ?? 0);
-    $fechaNormalizadaTs = strtotime(date('Y-m-d', $fechaTs) . ' monday this week');
-    if ($fechaNormalizadaTs === false || $inicioCicloTs <= 0 || $cicloTotalSemanas <= 0 || $fechaNormalizadaTs < $inicioCicloTs) {
+function obtenerIndicadorFrecuenciaCliente(array $frecuenciasPorSeccion): ?array {
+    if (empty($frecuenciasPorSeccion)) {
         return null;
     }
 
-    $fechaInicio = date('Y-m-d', $inicioCicloTs);
-    $fechaObjetivo = date('Y-m-d', $fechaNormalizadaTs);
-    $diferenciaSemanas = calcularSemanasNaturalesEntreFechas($fechaInicio, $fechaObjetivo);
-    return (int)floor($diferenciaSemanas / $cicloTotalSemanas) + 1;
-}
-
-function calcularClaseEstadoVisualVisita(
-    string $codCliente,
-    array $visitasPlanificacionPorClienteSeccion,
-    array $seccionesValidasCliente,
-    array $zonasCicloVendedor,
-    array $zonaPrincipalClienteSeccion,
-    array $frecuenciaPorClienteSeccion,
-    int $hoyTs
-): string {
-    $seccionesValidasCliente = array_map(
-        fn($s) => normalizarClaveSeccionVisita($s),
-        $seccionesValidasCliente
-    );
-    $seccionesValidasCliente = array_values(array_unique($seccionesValidasCliente));
-    if (empty($seccionesValidasCliente)) {
-        return '';
+    $frecuenciasNormalizadas = [];
+    foreach ($frecuenciasPorSeccion as $frecuencia) {
+        $frecuenciasNormalizadas[] = normalizarFrecuenciaPlanificacion((string)$frecuencia);
     }
+    $frecuenciasNormalizadas = array_values(array_unique($frecuenciasNormalizadas));
 
-    $contextoCiclo = construirContextoCicloPlanificacion($zonasCicloVendedor, $hoyTs);
-    if ($contextoCiclo === null) {
-        return '';
-    }
-
-    $cicloActualInicioTs = (int)$contextoCiclo['ciclo_actual_inicio_ts'];
-    $cicloActualFinTs = (int)$contextoCiclo['ciclo_actual_fin_ts'];
-    $numeroCicloActual = (int)$contextoCiclo['numero_ciclo_actual'];
-    $zonaActual = (int)$contextoCiclo['zona_actual'];
-    $hayPlanificada = false;
-    $hayCritica = false;
-    $hayVencida = false;
-    $hayCorrecta = false;
-
-    foreach ($seccionesValidasCliente as $codSeccion) {
-        $zonaCliente = (int)($zonaPrincipalClienteSeccion[$codSeccion] ?? 0);
-        $frecuencia = normalizarFrecuenciaPlanificacion((string)($frecuenciaPorClienteSeccion[$codSeccion] ?? 'TODOS'));
-        $claveSeccion = normalizarClaveSeccionVisita($codSeccion);
-        $visitasSeccion = $visitasPlanificacionPorClienteSeccion[$codCliente][$claveSeccion] ?? [];
-
-        if ($zonaCliente !== $zonaActual) {
-            foreach ($visitasSeccion as $visitaSeccion) {
-                $fechaVisita = trim((string)($visitaSeccion['fecha_visita'] ?? ''));
-                if ($fechaVisita === '') {
-                    continue;
-                }
-                $tsVisita = strtotime($fechaVisita);
-                if ($tsVisita !== false && $tsVisita >= $hoyTs) {
-                    $hayPlanificada = true;
-                    break;
-                }
-            }
-            continue;
-        }
-
-        if ($frecuencia === 'NUNCA') {
-            continue;
-        }
-
-        $ultimoCicloRealizado = null;
-        $tieneRealizadaEnCicloActual = false;
-
-        foreach ($visitasSeccion as $visitaSeccion) {
-            $fechaVisita = trim((string)($visitaSeccion['fecha_visita'] ?? ''));
-            if ($fechaVisita !== '') {
-                $tsVisita = strtotime($fechaVisita);
-                if ($tsVisita !== false && $tsVisita >= $hoyTs) {
-                    $hayPlanificada = true;
-                }
-            }
-
-            $estadoVisita = normalizarEstadoVisitaClave((string)($visitaSeccion['estado_visita'] ?? ''));
-            if ($estadoVisita !== 'realizada') {
-                continue;
-            }
-
-            if ($fechaVisita === '') {
-                continue;
-            }
-            if ($tsVisita === false) {
-                continue;
-            }
-
-            if ($tsVisita >= $cicloActualInicioTs && $tsVisita < $cicloActualFinTs) {
-                $tieneRealizadaEnCicloActual = true;
-            }
-
-            $numeroCicloVisita = calcularNumeroCicloParaFecha($tsVisita, $contextoCiclo);
-            if ($numeroCicloVisita !== null && ($ultimoCicloRealizado === null || $numeroCicloVisita > $ultimoCicloRealizado)) {
-                $ultimoCicloRealizado = $numeroCicloVisita;
-            }
-        }
-
-        if ($tieneRealizadaEnCicloActual) {
-            $hayCorrecta = true;
-            continue;
-        }
-
-        $diferenciaCiclos = ($ultimoCicloRealizado === null) ? null : ($numeroCicloActual - $ultimoCicloRealizado);
-        $limiteCritico = match ($frecuencia) {
-            'TODOS' => 2,
-            'CADA2' => 4,
-            'CADA3' => 6,
+    if (count($frecuenciasNormalizadas) === 1) {
+        $frecuencia = $frecuenciasNormalizadas[0];
+        return match ($frecuencia) {
+            'TODOS' => [
+                'class' => 'freq-todos',
+                'short' => 'T',
+                'label' => 'Visita todos los ciclos',
+            ],
+            'CADA2' => [
+                'class' => 'freq-cada2',
+                'short' => '2',
+                'label' => 'Visita cada 2 ciclos',
+            ],
+            'CADA3' => [
+                'class' => 'freq-cada3',
+                'short' => '3',
+                'label' => 'Visita cada 3 ciclos',
+            ],
+            'NUNCA' => [
+                'class' => 'freq-nunca',
+                'short' => 'N',
+                'label' => 'Sin visitas planificadas',
+            ],
             default => null,
         };
-        if ($limiteCritico !== null && $diferenciaCiclos !== null && $diferenciaCiclos >= $limiteCritico) {
-            $hayCritica = true;
-        }
-        $tocaEnCicloActual = match ($frecuencia) {
-            'TODOS' => $diferenciaCiclos === null || $diferenciaCiclos >= 1,
-            'CADA2' => $diferenciaCiclos === null || $diferenciaCiclos >= 2,
-            'CADA3' => $diferenciaCiclos === null || $diferenciaCiclos >= 3,
-            default => false,
-        };
-
-        if (!$tocaEnCicloActual) {
-            continue;
-        }
-
-        if (!$tieneRealizadaEnCicloActual) {
-            $hayVencida = true;
-            continue;
-        }
     }
 
-    if ($hayPlanificada) {
-        return 'plan-visita-planificada';
+    sort($frecuenciasNormalizadas);
+    return [
+        'class' => 'freq-mixta',
+        'short' => 'M',
+        'label' => 'Frecuencia mixta: ' . implode(', ', $frecuenciasNormalizadas),
+    ];
+}
+
+function obtenerColorTextoContraste(string $backgroundColor): string
+{
+    $hex = ltrim(trim($backgroundColor), '#');
+    if (strlen($hex) === 3) {
+        $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
     }
 
-    if ($hayCritica) {
-        return 'plan-visita-critica';
+    if (!preg_match('/^[0-9a-fA-F]{6}$/', $hex)) {
+        return '#ffffff';
     }
 
-    if ($hayVencida) {
-        return 'plan-visita-vencida';
+    $r = hexdec(substr($hex, 0, 2));
+    $g = hexdec(substr($hex, 2, 2));
+    $b = hexdec(substr($hex, 4, 2));
+    $luminance = (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+
+    return $luminance >= 160 ? '#111827' : '#ffffff';
+}
+
+function renderFechaUltimaVisita(string $fecha, ?string $estadoVisita = null, ?string $origenVisita = null): string
+{
+    if ($fecha === '' || strtolower($fecha) === 'sin visitas') {
+        return htmlspecialchars($fecha, ENT_QUOTES, 'UTF-8');
     }
 
-    if ($hayCorrecta) {
-        return 'plan-visita-correcta';
+    $backgroundColor = function_exists('determinarColorVisita')
+        ? determinarColorVisita((string)$estadoVisita, (string)$origenVisita)
+        : '#6c757d';
+    $textColor = obtenerColorTextoContraste($backgroundColor);
+
+    return '<span class="ultima-visita-fecha-badge" style="background-color: '
+        . htmlspecialchars($backgroundColor, ENT_QUOTES, 'UTF-8')
+        . ';color: '
+        . htmlspecialchars($textColor, ENT_QUOTES, 'UTF-8')
+        . ';">'
+        . htmlspecialchars($fecha, ENT_QUOTES, 'UTF-8')
+        . '</span>';
+}
+
+function obtenerIconoOrigenPedido(?string $origenPedido, bool $esPedidoWeb = false): string
+{
+    if ($esPedidoWeb) {
+        return '<i class="fa fa-globe" aria-hidden="true" title="Pedido web"></i>';
     }
 
-    if ($haySeccionZonaSiguiente) {
-        return 'plan-visita-proxima';
-    }
-
-    return '';
+    $origen = strtolower(trim((string)$origenPedido));
+    return match ($origen) {
+        'telefono', 'teléfono' => '<i class="fa fa-phone" aria-hidden="true" title="Telefono"></i>',
+        'visita' => '<i class="fa fa-briefcase" aria-hidden="true" title="Visita"></i>',
+        'whatsapp' => '<i class="fa-brands fa-whatsapp" aria-hidden="true" title="WhatsApp"></i>',
+        'email' => '<i class="fa fa-envelope" aria-hidden="true" title="Email"></i>',
+        'pedido web' => '<i class="fa fa-globe" aria-hidden="true" title="Pedido web"></i>',
+        default => '<i class="fa fa-info-circle" aria-hidden="true" title="Origen no identificado"></i>',
+    };
 }
 
 // Leer variables GET (en UTF-8), luego convertiremos a CP1252 solo para usarlas en la query
@@ -246,6 +184,7 @@ $nombre_comercial_utf8 = filter_input(INPUT_GET, 'nombre_comercial', FILTER_UNSA
 $provincia_utf8        = filter_input(INPUT_GET, 'provincia', FILTER_UNSAFE_RAW) ?? '';
 $poblacion_utf8        = filter_input(INPUT_GET, 'poblacion', FILTER_UNSAFE_RAW) ?? '';
 $filtro_vendedor_utf8  = '';
+$solo_zona_actual_utf8 = filter_input(INPUT_GET, 'solo_zona_actual', FILTER_UNSAFE_RAW) ?? '';
 
 if (is_null($codigo_vendedor)) {
     $filtro_vendedor_utf8 = filter_input(INPUT_GET, 'vendedor', FILTER_UNSAFE_RAW) ?? '';
@@ -258,20 +197,28 @@ $nombre_comercial = toCP1252($nombre_comercial_utf8);
 $provincia        = toCP1252($provincia_utf8);
 $poblacion        = toCP1252($poblacion_utf8);
 $filtro_vendedor  = toCP1252($filtro_vendedor_utf8);
+$tienePermisoPlanificador = isset($_SESSION['perm_planificador']) && (int)$_SESSION['perm_planificador'] === 1;
+$soloZonaActual = $tienePermisoPlanificador && in_array(strtolower(trim((string)$solo_zona_actual_utf8)), ['1', 'on', 'true', 'si'], true);
 $currentYear = date('Y');
 $year1 = $currentYear - 1;
 $year2 = $currentYear - 2;
 $mostrarUltimaVisita = (
     isset($_SESSION['tipo_plan']) &&
     $_SESSION['tipo_plan'] === 'premium' &&
-    isset($_SESSION['perm_planificador']) &&
-    (int)$_SESSION['perm_planificador'] === 1
+    $tienePermisoPlanificador
 );
-$esPremiumPlanificador = $mostrarUltimaVisita;
+$zonaActualFiltro = 0;
+if ($soloZonaActual && !is_null($codigo_vendedor) && is_numeric((string)$codigo_vendedor) && function_exists('obtenerZonaActivaPorFecha')) {
+    $contextoZonaFiltro = obtenerZonaActivaPorFecha($conn, (int)$codigo_vendedor, date('Y-m-d'));
+    $zonaActualFiltro = (int)($contextoZonaFiltro['zona_actual'] ?? 0);
+    if ($zonaActualFiltro <= 0) {
+        $soloZonaActual = false;
+    }
+}
 
 // Orden
-$order_by_utf8 = filter_input(INPUT_GET, 'order_by', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'cli.nombre_comercial';
-$order_dir_utf8 = filter_input(INPUT_GET, 'order_dir', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'asc';
+$order_by_utf8 = filter_input(INPUT_GET, 'order_by', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'ultima_fecha_venta';
+$order_dir_utf8 = filter_input(INPUT_GET, 'order_dir', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'desc';
 $order_dir = strtolower($order_dir_utf8);
 if ($order_dir !== 'asc' && $order_dir !== 'desc') {
     $order_dir = 'asc';
@@ -280,7 +227,7 @@ $orderByWhitelist = [
     'cli.cod_cliente' => 'cli.cod_cliente',
     'cli.nombre_comercial' => 'cli.nombre_comercial',
     'cli.provincia' => 'cli.provincia',
-    'cli.poblacion' => 'cli.poblacion',
+    'cli.poblacion' => 'poblacion_orden',
     'ultima_fecha_venta' => 'ultima_fecha_venta',
     'importe_' . $currentYear => 'importe_' . $currentYear,
     'importe_' . $year1 => 'importe_' . $year1,
@@ -293,6 +240,29 @@ if ($mostrarUltimaVisita) {
     $orderByWhitelist['ultima_fecha_visita'] = 'ultima_fecha_visita';
 }
 $order_by = $orderByWhitelist[$order_by_utf8] ?? 'cli.nombre_comercial';
+
+$sqlPoblacionEfectiva = "
+    COALESCE(
+        NULLIF(
+            CASE
+                WHEN secinfo.total_secciones = 1 THEN secinfo.poblacion_seccion_unica
+                ELSE ''
+            END,
+            ''
+        ),
+        cli.poblacion
+    )
+";
+
+$sqlJoinPoblacionEfectiva = "
+    OUTER APPLY (
+        SELECT
+            COUNT(*) AS total_secciones,
+            MAX(LTRIM(RTRIM(ISNULL(sc.poblacion, '')))) AS poblacion_seccion_unica
+        FROM secciones_cliente sc
+        WHERE sc.cod_cliente = cli.cod_cliente
+    ) secinfo
+";
 
 /* =============================================================================
    2) Construir listas (Provincias, Poblaciones, Vendedores) en CP1252
@@ -309,7 +279,7 @@ $whereProvincias = $whereVendedorBase;
 $paramsProvincias = $paramsVendedorBase;
 $whereProvincias[] = 'cli.provincia IS NOT NULL';
 if ($poblacion !== '') {
-    $whereProvincias[] = 'cli.poblacion = ?';
+    $whereProvincias[] = $sqlPoblacionEfectiva . ' = ?';
     $paramsProvincias[] = $poblacion;
 }
 if ($filtro_vendedor !== '' && is_null($codigo_vendedor)) {
@@ -323,6 +293,7 @@ if ($filtro_vendedor !== '' && is_null($codigo_vendedor)) {
 $sql_provincias = "
     SELECT DISTINCT cli.provincia
     FROM clientes cli
+    {$sqlJoinPoblacionEfectiva}
     WHERE " . implode("\n      AND ", $whereProvincias) . "
     ORDER BY cli.provincia
 ";
@@ -337,7 +308,7 @@ while ($resProv && ($row = odbc_fetch_array($resProv))) {
 // POBLACIONES
 $wherePoblaciones = $whereVendedorBase;
 $paramsPoblaciones = $paramsVendedorBase;
-$wherePoblaciones[] = 'cli.poblacion IS NOT NULL';
+$wherePoblaciones[] = $sqlPoblacionEfectiva . ' IS NOT NULL';
 if ($provincia !== '') {
     $wherePoblaciones[] = 'cli.provincia = ?';
     $paramsPoblaciones[] = $provincia;
@@ -351,10 +322,11 @@ if ($filtro_vendedor !== '' && is_null($codigo_vendedor)) {
     }
 }
 $sql_poblaciones = "
-    SELECT DISTINCT cli.poblacion
+    SELECT DISTINCT {$sqlPoblacionEfectiva} AS poblacion
     FROM clientes cli
+    {$sqlJoinPoblacionEfectiva}
     WHERE " . implode("\n      AND ", $wherePoblaciones) . "
-    ORDER BY cli.poblacion
+    ORDER BY poblacion
 ";
 $resPob = executePreparedQuery($conn, $sql_poblaciones, $paramsPoblaciones);
 $poblaciones = [];
@@ -376,12 +348,13 @@ if (is_null($codigo_vendedor)) {
         $paramsVendedores[] = $provincia;
     }
     if ($poblacion !== '') {
-        $whereVendedores[] = 'cli.poblacion = ?';
+        $whereVendedores[] = $sqlPoblacionEfectiva . ' = ?';
         $paramsVendedores[] = $poblacion;
     }
     $sql_vendedores = "
         SELECT DISTINCT ven.cod_vendedor, ven.nombre AS nombre_vendedor
         FROM clientes cli
+        {$sqlJoinPoblacionEfectiva}
         JOIN vendedores ven ON cli.cod_vendedor = ven.cod_vendedor
         WHERE " . implode("\n          AND ", $whereVendedores) . "
         ORDER BY ven.nombre
@@ -408,6 +381,7 @@ $escapeSqlValue = static function (string $value): string {
 
 $whereClientes = ['1=1'];
 $joinFiltroComisionista = '';
+$whereFiltroComisionistaUltimoPedido = '';
 if (!is_null($codigo_vendedor)) {
     $whereClientes[] = 'cli.cod_vendedor = ' . (int)$codigo_vendedor;
 }
@@ -422,6 +396,7 @@ if (is_null($codigo_vendedor) && $filtro_vendedor !== '') {
 // Filtro por comisionista (si es AgustÃ­n Castro con cÃ³digo ''30'')
 if (!is_null($codigo_vendedor) && $codigo_vendedor === '30') {
     $joinFiltroComisionista = ' AND vent.cod_comisionista = ' . (int)$codigo_vendedor;
+    $whereFiltroComisionistaUltimoPedido = ' AND h.cod_comisionista = ' . (int)$codigo_vendedor;
 }
 
 $whereClientes[] = "cli.nombre_comercial NOT LIKE '** CLIENTE NUEVO%'";
@@ -436,7 +411,15 @@ if ($provincia !== '') {
     $whereClientes[] = 'cli.provincia = ' . $escapeSqlValue($provincia);
 }
 if ($poblacion !== '') {
-    $whereClientes[] = 'cli.poblacion = ' . $escapeSqlValue($poblacion);
+    $whereClientes[] = $sqlPoblacionEfectiva . ' = ' . $escapeSqlValue($poblacion);
+}
+if ($soloZonaActual && $zonaActualFiltro > 0) {
+    $whereClientes[] = "EXISTS (
+        SELECT 1
+        FROM cmf_comerciales_clientes_zona cz
+        WHERE cz.cod_cliente = cli.cod_cliente
+          AND (cz.zona_principal = {$zonaActualFiltro} OR cz.zona_secundaria = {$zonaActualFiltro})
+    )";
 }
 
 // Armar SQL principal
@@ -444,9 +427,13 @@ $sql = "
 SELECT " . (is_null($codigo_vendedor) ? "cli.cod_vendedor AS vendedor," : "") . "
        cli.cod_cliente,
        cli.nombre_comercial,
+       cli.fecha_baja,
        cli.provincia,
-       cli.poblacion,
-       MAX(vent.fecha_venta) AS ultima_fecha_venta,
+       {$sqlPoblacionEfectiva} AS poblacion_mostrar,
+       {$sqlPoblacionEfectiva} AS poblacion_orden,
+       MAX(op.ultima_fecha_venta) AS ultima_fecha_venta,
+       MAX(op.origen_ultimo_pedido) AS origen_ultimo_pedido,
+       MAX(op.es_pedido_web) AS es_pedido_web,
        " . ($mostrarUltimaVisita ? "MAX(uv.ultima_fecha_visita) AS ultima_fecha_visita,
        MAX(uv.estado_ultima_visita) AS estado_ultima_visita,
        MAX(uv.origen_ultima_visita) AS origen_ultima_visita," : "") . "
@@ -454,33 +441,71 @@ SELECT " . (is_null($codigo_vendedor) ? "cli.cod_vendedor AS vendedor," : "") . 
        " . subConsultaImporteAnual('importe_'.$year1, $year1) . ",
        " . subConsultaImporteAnual('importe_'.$year2, $year2) . "
 FROM clientes cli
+{$sqlJoinPoblacionEfectiva}
 LEFT JOIN hist_ventas_cabecera vent
        ON vent.cod_cliente = cli.cod_cliente
       AND vent.tipo_venta = 1
       {$joinFiltroComisionista}
+OUTER APPLY (
+       SELECT TOP 1
+              h.fecha_venta AS ultima_fecha_venta,
+              CASE
+                  WHEN h.cod_pedido_web IS NOT NULL AND LTRIM(RTRIM(h.cod_pedido_web)) <> '' THEN 'pedido web'
+                  ELSE COALESCE((
+                      SELECT TOP 1 LOWER(vp.origen)
+                      FROM cmf_comerciales_visitas_pedidos vp
+                      WHERE vp.cod_venta = h.cod_venta
+                      ORDER BY vp.id_visita_pedido DESC
+                  ), '')
+              END AS origen_ultimo_pedido,
+              CASE
+                  WHEN h.cod_pedido_web IS NOT NULL AND LTRIM(RTRIM(h.cod_pedido_web)) <> '' THEN 1
+                  ELSE 0
+              END AS es_pedido_web
+       FROM hist_ventas_cabecera h
+       WHERE h.cod_cliente = cli.cod_cliente
+         AND h.tipo_venta = 1
+         {$whereFiltroComisionistaUltimoPedido}
+       ORDER BY h.fecha_venta DESC, h.cod_venta DESC
+) op
 " . ($mostrarUltimaVisita ? "OUTER APPLY (
        SELECT TOP 1
               v.fecha_visita AS ultima_fecha_visita,
               LOWER(v.estado_visita) AS estado_ultima_visita,
-              COALESCE((
-                  SELECT TOP 1 LOWER(vp.origen)
-                  FROM cmf_comerciales_visitas_pedidos vp
-                  WHERE vp.id_visita = v.id_visita
-                  ORDER BY vp.id_visita_pedido DESC
-              ), '') AS origen_ultima_visita
+              CASE
+                  WHEN EXISTS (
+                      SELECT 1
+                      FROM cmf_comerciales_visitas_pedidos vp
+                      WHERE vp.id_visita = v.id_visita
+                        AND LOWER(vp.origen) = 'visita'
+                  ) THEN 'visita'
+                  ELSE COALESCE((
+                      SELECT TOP 1 LOWER(vp.origen)
+                      FROM cmf_comerciales_visitas_pedidos vp
+                      WHERE vp.id_visita = v.id_visita
+                      ORDER BY vp.id_visita_pedido DESC
+                  ), '')
+              END AS origen_ultima_visita
        FROM cmf_comerciales_visitas v
        WHERE v.cod_cliente = cli.cod_cliente
          AND (
-               (
+               LOWER(v.estado_visita) = 'no atendida'
+               OR (
                    LOWER(v.estado_visita) = 'realizada'
-                   AND EXISTS (
-                       SELECT 1
-                       FROM cmf_comerciales_visitas_pedidos vp
-                       WHERE vp.id_visita = v.id_visita
-                         AND LOWER(vp.origen) = 'visita'
+                   AND (
+                       EXISTS (
+                           SELECT 1
+                           FROM cmf_comerciales_visitas_pedidos vp
+                           WHERE vp.id_visita = v.id_visita
+                             AND LOWER(vp.origen) = 'visita'
+                       )
+                       OR NOT EXISTS (
+                           SELECT 1
+                           FROM cmf_comerciales_visitas_pedidos vp
+                           WHERE vp.id_visita = v.id_visita
+                       )
                    )
                )
-               OR LOWER(v.estado_visita) IN ('planificada', 'descartada')
          )
        ORDER BY v.fecha_visita DESC, v.id_visita DESC
 ) uv" : "") . "
@@ -493,8 +518,9 @@ GROUP BY
     " . (is_null($codigo_vendedor) ? "cli.cod_vendedor," : "") . "
     cli.cod_cliente,
     cli.nombre_comercial,
+    cli.fecha_baja,
     cli.provincia,
-    cli.poblacion
+    {$sqlPoblacionEfectiva}
 ORDER BY {$order_by} {$order_dir}
 ";
 
@@ -522,30 +548,12 @@ $offset = ($page - 1) * $limit;
 $totalPaginas = (int) ceil($numRegistros / $limit);
 $clientesPaginados = array_slice($clientes, $offset, $limit);
 $ultimasVisitasPorClienteSeccion = [];
-$visitasPlanificacionPorClienteSeccion = [];
 $seccionesPorCliente = [];
 $nombresSeccionPorCliente = [];
+$poblacionesSeccionPorCliente = [];
 $frecuenciaPorClienteSeccion = [];
-$zonasPorVendedor = [];
-$zonaPrincipalPorClienteSeccion = [];
-$seccionesValidasPlanificacionPorCliente = [];
 
 if ($mostrarUltimaVisita && !empty($clientesPaginados)) {
-    $codigosVendedor = [];
-    foreach ($clientesPaginados as $filaCli) {
-        if (!is_null($codigo_vendedor) && is_numeric((string)$codigo_vendedor)) {
-            $codigosVendedor[] = (int)$codigo_vendedor;
-            continue;
-        }
-        if (isset($filaCli['vendedor']) && is_numeric((string)$filaCli['vendedor'])) {
-            $codVend = (int)$filaCli['vendedor'];
-            if ($codVend > 0) {
-                $codigosVendedor[] = $codVend;
-            }
-        }
-    }
-    $codigosVendedor = array_values(array_unique($codigosVendedor));
-
     $codigosCliente = [];
     foreach ($clientesPaginados as $filaCli) {
         if (isset($filaCli['cod_cliente']) && $filaCli['cod_cliente'] !== '') {
@@ -555,45 +563,22 @@ if ($mostrarUltimaVisita && !empty($clientesPaginados)) {
     $codigosCliente = array_values(array_unique($codigosCliente));
 
     if (!empty($codigosCliente)) {
-        $placeholdersClientes = buildInClausePlaceholders($codigosCliente);
-        if (!empty($codigosVendedor)) {
-            $placeholdersVendedores = buildInClausePlaceholders($codigosVendedor);
-            $sqlZonasVendedor = "
-                SELECT cod_vendedor, cod_zona, duracion_semanas, orden, fecha_inicio_ciclo
-                FROM cmf_comerciales_zonas
-                WHERE cod_vendedor IN ($placeholdersVendedores)
-                ORDER BY cod_vendedor, orden, cod_zona
-            ";
-            $resZonasVendedor = executePreparedQuery($conn, $sqlZonasVendedor, $codigosVendedor);
-            if ($resZonasVendedor) {
-                while ($filaZona = odbc_fetch_array($resZonasVendedor)) {
-                    $codVendZona = (int)($filaZona['cod_vendedor'] ?? 0);
-                    if ($codVendZona <= 0) {
-                        continue;
-                    }
-                    if (!isset($zonasPorVendedor[$codVendZona])) {
-                        $zonasPorVendedor[$codVendZona] = [];
-                    }
-                    $zonasPorVendedor[$codVendZona][] = [
-                        'cod_zona' => (int)($filaZona['cod_zona'] ?? 0),
-                        'duracion_semanas' => (int)($filaZona['duracion_semanas'] ?? 0),
-                        'orden' => (int)($filaZona['orden'] ?? 0),
-                        'fecha_inicio_ciclo' => (string)($filaZona['fecha_inicio_ciclo'] ?? ''),
-                    ];
-                }
-            }
-        }
+        $listaCodigosClienteSql = implode(', ', array_map(
+            static fn (int $codigo): string => (string)$codigo,
+            $codigosCliente
+        ));
 
         // Secciones existentes por cliente (la secciÃ³n 0 tambiÃ©n es vÃ¡lida).
         $sqlSeccionesCliente = "
             SELECT
                 sc.cod_cliente,
                 sc.cod_seccion AS cod_seccion,
-                COALESCE(sc.nombre, '') AS nombre_seccion
+                COALESCE(sc.nombre, '') AS nombre_seccion,
+                COALESCE(sc.poblacion, '') AS poblacion_seccion
             FROM secciones_cliente sc
-            WHERE sc.cod_cliente IN ($placeholdersClientes)
+            WHERE sc.cod_cliente IN ($listaCodigosClienteSql)
         ";
-        $resSeccionesCliente = executePreparedQuery($conn, $sqlSeccionesCliente, $codigosCliente);
+        $resSeccionesCliente = odbc_exec($conn, $sqlSeccionesCliente);
         if ($resSeccionesCliente) {
             while ($filaSec = odbc_fetch_array($resSeccionesCliente)) {
                 $codCliSec = (string)($filaSec['cod_cliente'] ?? '');
@@ -606,13 +591,20 @@ if ($mostrarUltimaVisita && !empty($clientesPaginados)) {
                 if (!isset($nombresSeccionPorCliente[$codCliSec])) {
                     $nombresSeccionPorCliente[$codCliSec] = [];
                 }
-                $codSec = (int)($filaSec['cod_seccion'] ?? 0);
+                if (!isset($poblacionesSeccionPorCliente[$codCliSec])) {
+                    $poblacionesSeccionPorCliente[$codCliSec] = [];
+                }
+                $codSec = normalizarClaveSeccionVisita($filaSec['cod_seccion'] ?? null);
                 if (!in_array($codSec, $seccionesPorCliente[$codCliSec], true)) {
                     $seccionesPorCliente[$codCliSec][] = $codSec;
                 }
                 $nombreSec = trim((string)($filaSec['nombre_seccion'] ?? ''));
                 if ($nombreSec !== '') {
                     $nombresSeccionPorCliente[$codCliSec][$codSec] = $nombreSec;
+                }
+                $poblacionSec = trim((string)($filaSec['poblacion_seccion'] ?? ''));
+                if ($poblacionSec !== '') {
+                    $poblacionesSeccionPorCliente[$codCliSec][$codSec] = $poblacionSec;
                 }
             }
         }
@@ -624,18 +616,45 @@ if ($mostrarUltimaVisita && !empty($clientesPaginados)) {
                     v.cod_seccion AS cod_seccion,
                     v.fecha_visita,
                     LOWER(v.estado_visita) AS estado_visita,
-                    COALESCE((
-                        SELECT TOP 1 LOWER(vp.origen)
-                        FROM cmf_comerciales_visitas_pedidos vp
-                        WHERE vp.id_visita = v.id_visita
-                        ORDER BY vp.id_visita_pedido DESC
-                    ), '') AS origen_visita,
+                    CASE
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM cmf_comerciales_visitas_pedidos vp
+                            WHERE vp.id_visita = v.id_visita
+                              AND LOWER(vp.origen) = 'visita'
+                        ) THEN 'visita'
+                        ELSE COALESCE((
+                            SELECT TOP 1 LOWER(vp.origen)
+                            FROM cmf_comerciales_visitas_pedidos vp
+                            WHERE vp.id_visita = v.id_visita
+                            ORDER BY vp.id_visita_pedido DESC
+                        ), '')
+                    END AS origen_visita,
                     ROW_NUMBER() OVER (
                         PARTITION BY v.cod_cliente, v.cod_seccion
                         ORDER BY v.fecha_visita DESC, v.id_visita DESC
                     ) AS rn
                 FROM cmf_comerciales_visitas v
-                WHERE v.cod_cliente IN ($placeholdersClientes)
+                WHERE v.cod_cliente IN ($listaCodigosClienteSql)
+                  AND (
+                       LOWER(v.estado_visita) = 'no atendida'
+                       OR (
+                           LOWER(v.estado_visita) = 'realizada'
+                           AND (
+                               EXISTS (
+                                   SELECT 1
+                                   FROM cmf_comerciales_visitas_pedidos vp2
+                                   WHERE vp2.id_visita = v.id_visita
+                                     AND LOWER(vp2.origen) = 'visita'
+                               )
+                               OR NOT EXISTS (
+                                   SELECT 1
+                                   FROM cmf_comerciales_visitas_pedidos vp2
+                                   WHERE vp2.id_visita = v.id_visita
+                               )
+                           )
+                       )
+                  )
             )
             SELECT cod_cliente, cod_seccion, fecha_visita, estado_visita, origen_visita
             FROM visitas_validas
@@ -643,7 +662,7 @@ if ($mostrarUltimaVisita && !empty($clientesPaginados)) {
             ORDER BY cod_cliente, cod_seccion
         ";
 
-        $resVisitasSeccion = executePreparedQuery($conn, $sqlVisitasSeccion, $codigosCliente);
+        $resVisitasSeccion = odbc_exec($conn, $sqlVisitasSeccion);
         if ($resVisitasSeccion) {
             while ($filaVis = odbc_fetch_array($resVisitasSeccion)) {
                 $codCli = (string)($filaVis['cod_cliente'] ?? '');
@@ -670,9 +689,9 @@ if ($mostrarUltimaVisita && !empty($clientesPaginados)) {
                 azc.cod_seccion,
                 UPPER(COALESCE(azc.frecuencia_visita, 'Todos')) AS frecuencia_visita
             FROM cmf_comerciales_clientes_zona azc
-            WHERE azc.cod_cliente IN ($placeholdersClientes)
+            WHERE azc.cod_cliente IN ($listaCodigosClienteSql)
         ";
-        $resFrecuencias = executePreparedQuery($conn, $sqlFrecuencias, $codigosCliente);
+        $resFrecuencias = odbc_exec($conn, $sqlFrecuencias);
         if ($resFrecuencias) {
             while ($filaFreq = odbc_fetch_array($resFrecuencias)) {
                 $codCliFreq = (string)($filaFreq['cod_cliente'] ?? '');
@@ -688,73 +707,6 @@ if ($mostrarUltimaVisita && !empty($clientesPaginados)) {
                     $freq = 'TODOS';
                 }
                 $frecuenciaPorClienteSeccion[$codCliFreq][$codSecFreq] = $freq;
-                if (!isset($seccionesValidasPlanificacionPorCliente[$codCliFreq])) {
-                    $seccionesValidasPlanificacionPorCliente[$codCliFreq] = [];
-                }
-                if (!in_array($codSecFreq, $seccionesValidasPlanificacionPorCliente[$codCliFreq], true)) {
-                    $seccionesValidasPlanificacionPorCliente[$codCliFreq][] = $codSecFreq;
-                }
-            }
-        }
-
-        $sqlZonasCliente = "
-            SELECT
-                azc.cod_cliente,
-                azc.cod_seccion,
-                azc.zona_principal
-            FROM cmf_comerciales_clientes_zona azc
-            WHERE azc.cod_cliente IN ($placeholdersClientes)
-        ";
-        $resZonasCliente = executePreparedQuery($conn, $sqlZonasCliente, $codigosCliente);
-        if ($resZonasCliente) {
-            while ($filaZonaCli = odbc_fetch_array($resZonasCliente)) {
-                $codCliZona = (string)($filaZonaCli['cod_cliente'] ?? '');
-                if ($codCliZona === '') {
-                    continue;
-                }
-                if (!isset($zonaPrincipalPorClienteSeccion[$codCliZona])) {
-                    $zonaPrincipalPorClienteSeccion[$codCliZona] = [];
-                }
-                $codSeccionZona = normalizarClaveSeccionVisita($filaZonaCli['cod_seccion'] ?? null);
-                $zonaPrincipalPorClienteSeccion[$codCliZona][$codSeccionZona] = (int)($filaZonaCli['zona_principal'] ?? 0);
-                if (!isset($seccionesValidasPlanificacionPorCliente[$codCliZona])) {
-                    $seccionesValidasPlanificacionPorCliente[$codCliZona] = [];
-                }
-                if (!in_array($codSeccionZona, $seccionesValidasPlanificacionPorCliente[$codCliZona], true)) {
-                    $seccionesValidasPlanificacionPorCliente[$codCliZona][] = $codSeccionZona;
-                }
-            }
-        }
-
-        $sqlVisitasPlanificacion = "
-            SELECT
-                v.cod_cliente,
-                v.cod_seccion,
-                v.fecha_visita,
-                LOWER(v.estado_visita) AS estado_visita
-            FROM cmf_comerciales_visitas v
-            WHERE v.cod_cliente IN ($placeholdersClientes)
-              AND LOWER(v.estado_visita) = 'realizada'
-            ORDER BY v.cod_cliente, v.cod_seccion, v.fecha_visita DESC, v.id_visita DESC
-        ";
-        $resVisitasPlanificacion = executePreparedQuery($conn, $sqlVisitasPlanificacion, $codigosCliente);
-        if ($resVisitasPlanificacion) {
-            while ($filaVisPlan = odbc_fetch_array($resVisitasPlanificacion)) {
-                $codCliVisPlan = (string)($filaVisPlan['cod_cliente'] ?? '');
-                if ($codCliVisPlan === '') {
-                    continue;
-                }
-                if (!isset($visitasPlanificacionPorClienteSeccion[$codCliVisPlan])) {
-                    $visitasPlanificacionPorClienteSeccion[$codCliVisPlan] = [];
-                }
-                $codSec = normalizarClaveSeccionVisita($filaVisPlan['cod_seccion'] ?? null);
-                if (!isset($visitasPlanificacionPorClienteSeccion[$codCliVisPlan][$codSec])) {
-                    $visitasPlanificacionPorClienteSeccion[$codCliVisPlan][$codSec] = [];
-                }
-                $visitasPlanificacionPorClienteSeccion[$codCliVisPlan][$codSec][] = [
-                    'fecha_visita' => (string)($filaVisPlan['fecha_visita'] ?? ''),
-                    'estado_visita' => normalizarEstadoVisitaClave((string)($filaVisPlan['estado_visita'] ?? '')),
-                ];
             }
         }
 
@@ -777,6 +729,7 @@ $params = [
     'nombre_comercial' => $nombre_comercial_utf8,
     'provincia'        => $provincia_utf8,
     'poblacion'        => $poblacion_utf8,
+    'solo_zona_actual' => $soloZonaActual ? '1' : '',
     'order_by'         => $order_by_utf8,
     'order_dir'        => $order_dir
 ];
@@ -879,8 +832,138 @@ $query_string = http_build_query($params);
     .filter-form .btn-clear:hover {
       background-color: #cc0000;
     }
+    .filter-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+      color: #334155;
+      cursor: pointer;
+      user-select: none;
+    }
+    .filter-switch input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .filter-switch-track {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      transition: background-color 0.2s ease;
+      flex: 0 0 auto;
+    }
+    .filter-switch-track::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: transform 0.2s ease;
+    }
+    .filter-switch input:checked + .filter-switch-track {
+      background: #28a745;
+    }
+    .filter-switch input:checked + .filter-switch-track::after {
+      transform: translateX(18px);
+    }
+    .filter-switch-text {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .cliente-nombre-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .cliente-baja-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      width: 18px;
+      height: 18px;
+      color: #7c8796;
+      flex: 0 0 auto;
+    }
+    .cliente-baja-badge .fa-user {
+      font-size: 15px;
+      line-height: 1;
+    }
+    .cliente-baja-badge .cliente-baja-cross {
+      position: absolute;
+      right: -2px;
+      bottom: -2px;
+      color: #dc2626;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1;
+      background: #fff;
+      border-radius: 999px;
+    }
+    .frecuencia-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+      flex: 0 0 auto;
+      border: 1px solid transparent;
+    }
+    .frecuencia-badge.freq-todos {
+      background: rgba(22, 163, 74, 0.15);
+      color: #15803d;
+      border-color: rgba(22, 163, 74, 0.25);
+    }
+    .frecuencia-badge.freq-cada2 {
+      background: rgba(37, 99, 235, 0.15);
+      color: #1d4ed8;
+      border-color: rgba(37, 99, 235, 0.25);
+    }
+    .frecuencia-badge.freq-cada3 {
+      background: rgba(245, 158, 11, 0.18);
+      color: #b45309;
+      border-color: rgba(245, 158, 11, 0.28);
+    }
+    .frecuencia-badge.freq-nunca {
+      background: rgba(239, 68, 68, 0.16);
+      color: #b91c1c;
+      border-color: rgba(239, 68, 68, 0.24);
+    }
+    .frecuencia-badge.freq-mixta {
+      background: rgba(100, 116, 139, 0.16);
+      color: #475569;
+      border-color: rgba(100, 116, 139, 0.24);
+    }
 
     /* ============= Tabla y paginaciÃ³n ============= */
+    .ultima-visita-fecha-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      vertical-align: middle;
+    }
     .table-container {
       width: 100%;
       overflow-x: auto;
@@ -923,26 +1006,6 @@ $query_string = http_build_query($params);
       text-align: right;
       position: relative;
     }
-    tr.plan-visita-critica td {
-      background: #f1aeb5;
-      color: #000000;
-    }
-    tr.plan-visita-vencida td {
-      background: #f5b5b9;
-      color: #000000;
-    }
-    tr.plan-visita-proxima td {
-      background: #ffe08a;
-      color: #000000;
-    }
-    tr.plan-visita-correcta td {
-      background: #9fd5a6;
-      color: #000000;
-    }
-    tr.plan-visita-planificada td {
-      background: #9ec5fe;
-      color: #000000;
-    }
     tr.clickable-row {
       cursor: pointer;
     }
@@ -978,6 +1041,10 @@ $query_string = http_build_query($params);
       .filter-form button {
         width: 100%;
         font-size: 18px;
+      }
+      .filter-switch {
+        width: 100%;
+        justify-content: space-between;
       }
       table {
         font-size: 15px;
@@ -1019,6 +1086,14 @@ $query_string = http_build_query($params);
         </option>
       <?php } ?>
     </select>
+
+    <?php if ($tienePermisoPlanificador && !is_null($codigo_vendedor)) { ?>
+      <label class="filter-switch" title="Filtrar solo clientes de la zona actual">
+        <input type="checkbox" name="solo_zona_actual" value="1" <?php if ($soloZonaActual) echo 'checked'; ?> onchange="this.form.submit()">
+        <span class="filter-switch-track" aria-hidden="true"></span>
+        <span class="filter-switch-text">Solo zona actual</span>
+      </label>
+    <?php } ?>
     
     <?php if (is_null($codigo_vendedor)) { ?>
       <select name="vendedor" onchange="this.form.submit()">
@@ -1113,24 +1188,27 @@ $query_string = http_build_query($params);
           $rankingAct = rankingPorAnio($clientes, 'importe_'.$currentYear);
           $rankingY1  = rankingPorAnio($clientes, 'importe_'.$year1);
           $rankingY2  = rankingPorAnio($clientes, 'importe_'.$year2);
-          $hoyInicioTs = strtotime(date('Y-m-d')) ?: time();
-
           foreach ($clientesPaginados as $row) {
               $codCliCP1252 = $row['cod_cliente'] ?? '';
               $nomComCP1252 = $row['nombre_comercial'] ?? '';
               $provCP1252   = $row['provincia'] ?? '';
-              $pobCP1252    = $row['poblacion'] ?? '';
+              $pobCP1252    = $row['poblacion_mostrar'] ?? $row['poblacion'] ?? '';
               $vendedorCP1252 = (isset($row['vendedor'])) ? $row['vendedor'] : '';
 
               $ultimaFecha = !empty($row['ultima_fecha_venta'])
                              ? date("d/m/Y", strtotime($row['ultima_fecha_venta']))
                              : "Sin ventas";
+              $origenUltimoPedido = isset($row['origen_ultimo_pedido']) ? trim((string)$row['origen_ultimo_pedido']) : '';
+              $esPedidoWeb = isset($row['es_pedido_web']) && (int)$row['es_pedido_web'] === 1;
+              $fechaBaja = isset($row['fecha_baja']) ? trim((string)$row['fecha_baja']) : '';
+              $clienteDadoDeBaja = $fechaBaja !== '';
               $ultimaVisita = !empty($row['ultima_fecha_visita'])
                               ? date("d/m/Y", strtotime($row['ultima_fecha_visita']))
                               : "Sin visitas";
               $visitasPorSeccion = $ultimasVisitasPorClienteSeccion[(string)$codCliCP1252] ?? [];
               $seccionesCliente = $seccionesPorCliente[(string)$codCliCP1252] ?? ['NULL'];
               $nombresSeccionCliente = $nombresSeccionPorCliente[(string)$codCliCP1252] ?? [];
+              $poblacionesSeccionCliente = $poblacionesSeccionPorCliente[(string)$codCliCP1252] ?? [];
               $seccionesClienteVisita = [];
               foreach ($seccionesCliente as $codSecListado) {
                   $claveSeccion = normalizarClaveSeccionVisita($codSecListado);
@@ -1140,8 +1218,9 @@ $query_string = http_build_query($params);
                   }
                   $seccionesClienteVisita[$claveSeccion] = $nombreSecLabel;
               }
-              $visitasPlanificacionCliente = $visitasPlanificacionPorClienteSeccion[(string)$codCliCP1252] ?? [];
-              $seccionesValidasPlanificacion = $seccionesValidasPlanificacionPorCliente[(string)$codCliCP1252] ?? [];
+              $indicadorFrecuencia = $tienePermisoPlanificador
+                  ? obtenerIndicadorFrecuenciaCliente($frecuenciaPorClienteSeccion[(string)$codCliCP1252] ?? [])
+                  : null;
 
               // Convertir a float (en CP1252 no afecta, pero por seguridad)
               $importeAct = (float) $row['importe_'.$currentYear];
@@ -1153,30 +1232,8 @@ $query_string = http_build_query($params);
               $posY1  = $rankingY1[$codCliCP1252]  ?? 0;
               $posY2  = $rankingY2[$codCliCP1252]  ?? 0;
 
-              $vendedorFila = null;
-              if (!is_null($codigo_vendedor) && is_numeric((string)$codigo_vendedor)) {
-                  $vendedorFila = (int)$codigo_vendedor;
-              } elseif (isset($row['vendedor']) && is_numeric((string)$row['vendedor'])) {
-                  $vendedorFila = (int)$row['vendedor'];
-              }
-
-              $rowClasses = 'clickable-row';
-              if ($esPremiumPlanificador) {
-                  $claseEstadoVisualVisita = calcularClaseEstadoVisualVisita(
-                      (string)$codCliCP1252,
-                      $visitasPlanificacionPorClienteSeccion,
-                      $seccionesValidasPlanificacion,
-                      ($vendedorFila !== null) ? ($zonasPorVendedor[$vendedorFila] ?? []) : [],
-                      $zonaPrincipalPorClienteSeccion[(string)$codCliCP1252] ?? [],
-                      $frecuenciaPorClienteSeccion[(string)$codCliCP1252] ?? [],
-                      $hoyInicioTs
-                  );
-                  if ($claseEstadoVisualVisita !== '') {
-                      $rowClasses .= ' ' . $claseEstadoVisualVisita;
-                  }
-              }
               $detalleHref = 'cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252);
-              echo '<tr class="' . $rowClasses . '" data-href="' . htmlspecialchars($detalleHref) . '">';
+              echo '<tr class="clickable-row" data-href="' . htmlspecialchars($detalleHref) . '">';
               if (is_null($codigo_vendedor)) {
                   $vendedorMostrar = trim((string)$vendedorCP1252);
                   if ($vendedorMostrar === '0') {
@@ -1193,9 +1250,16 @@ $query_string = http_build_query($params);
                    . '</a></td>';
 
               // Nombre Comercial
-              echo '<td><a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '">'
-                   . htmlspecialchars(toUTF8($nomComCP1252))
-                   . '</a></td>';
+              echo '<td><a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '"><span class="cliente-nombre-wrap">'
+                   . htmlspecialchars(toUTF8($nomComCP1252));
+              if ($clienteDadoDeBaja) {
+                  echo '<span class="cliente-baja-badge" title="Cliente dado de baja" aria-label="Cliente dado de baja">'
+                       . '<i class="fas fa-user" aria-hidden="true"></i>'
+                       . '<span class="cliente-baja-cross" aria-hidden="true">&times;</span>'
+                       . '</span>';
+              }
+              echo ''
+                   . '</span></a></td>';
 
               // Provincia
               echo '<td><a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '">'
@@ -1203,8 +1267,15 @@ $query_string = http_build_query($params);
                    . '</a></td>';
 
               // PoblaciÃ³n
+              $poblacionMostrar = $pobCP1252;
+              if (count($seccionesCliente) === 1) {
+                  $clavePoblacionSeccion = array_key_first($seccionesClienteVisita);
+                  if ($clavePoblacionSeccion !== null && isset($poblacionesSeccionCliente[$clavePoblacionSeccion]) && trim((string)$poblacionesSeccionCliente[$clavePoblacionSeccion]) !== '') {
+                      $poblacionMostrar = (string)$poblacionesSeccionCliente[$clavePoblacionSeccion];
+                  }
+              }
               echo '<td><a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '">'
-                   . htmlspecialchars(toUTF8($pobCP1252))
+                   . htmlspecialchars(toUTF8($poblacionMostrar))
                    . '</a></td>';
 
               // Ãšltima visita (una por secciÃ³n, incluyendo secciÃ³n 0)
@@ -1223,29 +1294,25 @@ $query_string = http_build_query($params);
                       });
 
                       // Si ninguna secciÃ³n tiene visita, no desglosar por secciÃ³n.
-                      $hayAlgunaVisita = false;
-                      foreach ($clavesSeccion as $codSecListadoTmp) {
-                          if (isset($visitasPorSeccion[$codSecListadoTmp])) {
-                              $hayAlgunaVisita = true;
-                              break;
-                          }
-                      }
-                      if (!$hayAlgunaVisita) {
-                          echo '<a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '" style="display:block;margin:2px 0;color:inherit;text-decoration:none;text-align:center;">Sin visitas</a>';
-                      } else {
-
-                          foreach ($clavesSeccion as $codSecListado) {
-                              $vsec = $visitasPorSeccion[$codSecListado] ?? null;
-                              if ($vsec) {
-                                  $fechaSec = !empty($vsec['fecha_visita']) ? date("d/m/Y", strtotime($vsec['fecha_visita'])) : "Sin visitas";
-                                  $estadoSec = normalizarEstadoVisitaClave((string)($vsec['estado_visita'] ?? ''));
-                                  $origenSec = strtolower(trim((string)($vsec['origen_visita'] ?? '')));
-                                  $colorSec = determinarColorVisita($estadoSec, $origenSec);
-                                  $estiloSec = 'display:block;margin:2px 0;padding:2px 6px;border-radius:4px;background-color:' . htmlspecialchars($colorSec) . ';color:#fff;text-decoration:none;';
-                              } else {
-                                  $fechaSec = "Sin visitas";
-                                  $estiloSec = 'display:block;margin:2px 0;padding:2px 6px;border-radius:4px;color:inherit;text-decoration:none;';
+                      foreach ($clavesSeccion as $codSecListado) {
+                              $claveVisitaSeccion = normalizarClaveSeccionVisita($codSecListado);
+                              $vsec = $visitasPorSeccion[$claveVisitaSeccion] ?? null;
+                              if ($vsec === null && $claveVisitaSeccion === 0) {
+                                  $vsec = $visitasPorSeccion['NULL'] ?? null;
                               }
+                              if ($vsec === null && $claveVisitaSeccion === 'NULL') {
+                                  $vsec = $visitasPorSeccion[0] ?? null;
+                              }
+                              $fechaSec = ($vsec && !empty($vsec['fecha_visita']))
+                                  ? date("d/m/Y", strtotime($vsec['fecha_visita']))
+                                  : "Sin visitas";
+                              $estiloSec = 'display:block;margin:2px 0;padding:2px 6px;border-radius:4px;color:inherit;text-decoration:none;';
+                              $frecuenciaSeccion = $frecuenciaPorClienteSeccion[(string)$codCliCP1252][$codSecListado]
+                                  ?? $frecuenciaPorClienteSeccion[(string)$codCliCP1252][normalizarClaveSeccionVisita($codSecListado)]
+                                  ?? '';
+                              $indicadorFrecuenciaSeccion = $tienePermisoPlanificador && $frecuenciaSeccion !== ''
+                                  ? obtenerIndicadorFrecuenciaCliente([$frecuenciaSeccion])
+                                  : null;
                               $nombreSecLabel = $seccionesClienteVisita[$codSecListado] ?? '';
                               if ($nombreSecLabel === '') {
                                   $nombreSecLabel = ($codSecListado === 0) ? 'Sin secciÃ³n' : ('SecciÃ³n ' . (string)$codSecListado);
@@ -1253,28 +1320,60 @@ $query_string = http_build_query($params);
                               if ($codSecListado === 'NULL') {
                                   $nombreSecLabel = 'Sin secciÃ³n';
                               }
-                              $labelSec = $nombreSecLabel . ': ' . $fechaSec;
-                              echo '<a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '" style="' . $estiloSec . '">'
-                                   . htmlspecialchars(toUTF8($labelSec))
-                                   . '</a>';
+                              $fechaSecHtml = renderFechaUltimaVisita(
+                                  $fechaSec,
+                                  (string)($vsec['estado_visita'] ?? ''),
+                                  (string)($vsec['origen_visita'] ?? '')
+                              );
+                          echo '<a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '" style="' . $estiloSec . '">';
+                          if ($indicadorFrecuenciaSeccion !== null) {
+                              echo '<span class="frecuencia-badge ' . htmlspecialchars((string)$indicadorFrecuenciaSeccion['class'], ENT_QUOTES, 'UTF-8') . '" title="' . htmlspecialchars((string)$indicadorFrecuenciaSeccion['label'], ENT_QUOTES, 'UTF-8') . '" style="margin-right:6px;">'
+                                   . htmlspecialchars((string)$indicadorFrecuenciaSeccion['short'], ENT_QUOTES, 'UTF-8')
+                                   . '</span>';
                           }
-                      }
+                          echo $fechaSecHtml
+                               . '<span style="margin-left:8px;">&rarr; '
+                               . htmlspecialchars(toUTF8($nombreSecLabel), ENT_QUOTES, 'UTF-8')
+                               . '</span>'
+                               . '</a>';
+                          }
                   } else {
                       $claveUnica = array_key_first($seccionesClienteVisita);
-                      $vsec = ($claveUnica !== null) ? ($visitasPorSeccion[$claveUnica] ?? null) : null;
+                      $vsec = null;
+                      if ($claveUnica !== null) {
+                          $claveVisitaUnica = normalizarClaveSeccionVisita($claveUnica);
+                          $vsec = $visitasPorSeccion[$claveVisitaUnica] ?? null;
+                          if ($vsec === null && $claveVisitaUnica === 0) {
+                              $vsec = $visitasPorSeccion['NULL'] ?? null;
+                          }
+                          if ($vsec === null && $claveVisitaUnica === 'NULL') {
+                              $vsec = $visitasPorSeccion[0] ?? null;
+                          }
+                      }
                       if ($vsec) {
                           $fechaSec = !empty($vsec['fecha_visita']) ? date("d/m/Y", strtotime($vsec['fecha_visita'])) : "Sin visitas";
-                          $estadoSec = normalizarEstadoVisitaClave((string)($vsec['estado_visita'] ?? ''));
-                          $origenSec = strtolower(trim((string)($vsec['origen_visita'] ?? '')));
-                          $colorSec = determinarColorVisita($estadoSec, $origenSec);
-                          $styleSimple = ($colorSec !== '')
-                              ? 'display:block;margin:2px 0;padding:2px 6px;border-radius:4px;background-color:' . htmlspecialchars($colorSec) . ';color:#fff;text-decoration:none;text-align:center;'
-                              : 'display:block;margin:2px 0;color:inherit;text-decoration:none;text-align:center;';
-                          echo '<a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '" style="' . $styleSimple . '">'
-                               . htmlspecialchars($fechaSec)
+                          $styleSimple = 'display:block;margin:2px 0;padding:2px 6px;border-radius:4px;color:inherit;text-decoration:none;';
+                          $fechaSecHtml = renderFechaUltimaVisita(
+                              $fechaSec,
+                              (string)($vsec['estado_visita'] ?? ''),
+                              (string)($vsec['origen_visita'] ?? '')
+                          );
+                          echo '<a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '" style="' . $styleSimple . '">';
+                          if ($indicadorFrecuencia !== null) {
+                              echo '<span class="frecuencia-badge ' . htmlspecialchars((string)$indicadorFrecuencia['class'], ENT_QUOTES, 'UTF-8') . '" title="' . htmlspecialchars((string)$indicadorFrecuencia['label'], ENT_QUOTES, 'UTF-8') . '" style="margin-right:6px;">'
+                                   . htmlspecialchars((string)$indicadorFrecuencia['short'], ENT_QUOTES, 'UTF-8')
+                                   . '</span>';
+                          }
+                          echo $fechaSecHtml
                                . '</a>';
                       } else {
-                          echo '<a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '" style="display:block;margin:2px 0;color:inherit;text-decoration:none;text-align:center;">'
+                          echo '<a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '" style="display:block;margin:2px 0;padding:2px 6px;border-radius:4px;color:inherit;text-decoration:none;">';
+                          if ($indicadorFrecuencia !== null) {
+                              echo '<span class="frecuencia-badge ' . htmlspecialchars((string)$indicadorFrecuencia['class'], ENT_QUOTES, 'UTF-8') . '" title="' . htmlspecialchars((string)$indicadorFrecuencia['label'], ENT_QUOTES, 'UTF-8') . '" style="margin-right:6px;">'
+                                   . htmlspecialchars((string)$indicadorFrecuencia['short'], ENT_QUOTES, 'UTF-8')
+                                   . '</span>';
+                          }
+                          echo ''
                                . htmlspecialchars($ultimaVisita)
                                . '</a>';
                       }
@@ -1282,9 +1381,22 @@ $query_string = http_build_query($params);
                   echo '</td>';
               }
 
-              echo '<td><a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '">'
-                   . htmlspecialchars($ultimaFecha)
-                   . '</a></td>';
+              echo '<td><a href="cliente_detalles.php?cod_cliente=' . urlencode($codCliCP1252) . '">';
+              if ($ultimaFecha !== 'Sin ventas') {
+                  $iconoOrigenUltimoPedido = function_exists('iconoDeOrigenOpcional')
+                      ? iconoDeOrigenOpcional($origenUltimoPedido, $esPedidoWeb)
+                      : '';
+                  echo '<span style="display:inline-flex;align-items:center;gap:8px;">'
+                       . '<span>' . htmlspecialchars($ultimaFecha, ENT_QUOTES, 'UTF-8') . '</span>';
+                  if ($iconoOrigenUltimoPedido !== '') {
+                      echo $iconoOrigenUltimoPedido;
+                  }
+                  echo ''
+                       . '</span>';
+              } else {
+                  echo htmlspecialchars($ultimaFecha, ENT_QUOTES, 'UTF-8');
+              }
+              echo '</a></td>';
 
               // Columna aÃ±o actual (triÃ¡ngulo vs. expected)
               echo '<td class="year-column">';
