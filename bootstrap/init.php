@@ -10,5 +10,3 @@ if (!defined('BASE_PATH')) {
 }
 
 require_once BASE_PATH . '/bootstrap/app.php';
-
-error_log('BOOTSTRAP TIME: ' . (microtime(true) - $start));

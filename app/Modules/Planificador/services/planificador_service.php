@@ -282,78 +282,21 @@ function obtenerZonaActivaHoy($cod_vendedor = null) {
     if ($cod_vendedor <= 0) {
         return null;
     }
-
-    $query = "SELECT cod_zona, nombre_zona, duracion_semanas, orden, fecha_inicio_ciclo
-              FROM cmf_comerciales_zonas
-              WHERE cod_vendedor = '$cod_vendedor'
-              ORDER BY orden ASC, cod_zona ASC";
-
-    $resultado = odbc_exec($conn, $query);
-    if (!$resultado) {
-        error_log('Error al obtener la zona activa del ciclo: ' . odbc_errormsg($conn));
+    $contextoZona = obtenerZonaActivaPorFecha($conn, $cod_vendedor, date('Y-m-d'));
+    if ($contextoZona === null) {
         return null;
     }
 
-    $zonas = array();
-    $fechaInicioCiclo = '';
-
-    while ($fila = odbc_fetch_array($resultado)) {
-        $duracion = max(0, intval($fila['duracion_semanas'] ?? 0));
-        if ($duracion <= 0) {
-            continue;
-        }
-
-        $fechaFila = trim((string)($fila['fecha_inicio_ciclo'] ?? ''));
-        if ($fechaInicioCiclo === '' && $fechaFila !== '') {
-            $fechaInicioCiclo = $fechaFila;
-        }
-
-        $zonas[] = array(
-            'cod_zona' => intval($fila['cod_zona'] ?? 0),
-            'nombre' => trim((string)($fila['nombre_zona'] ?? '')),
-            'orden' => intval($fila['orden'] ?? 0),
-            'duracion_semanas' => $duracion,
-        );
-    }
-
-    if (empty($zonas) || $fechaInicioCiclo === '') {
+    $zonaActual = $contextoZona['zona_actual_detalle'] ?? null;
+    if (!is_array($zonaActual)) {
         return null;
     }
 
-    $inicioCicloTs = strtotime(substr($fechaInicioCiclo, 0, 10) . ' 00:00:00');
-    if ($inicioCicloTs === false) {
-        return null;
+    if (!isset($zonaActual['nombre']) || trim((string)$zonaActual['nombre']) === '') {
+        $zonaActual['nombre'] = trim((string)($zonaActual['nombre_zona'] ?? ''));
     }
 
-    $hoyTs = strtotime(date('Y-m-d') . ' 00:00:00');
-    if ($hoyTs === false) {
-        return null;
-    }
-
-    $totalSemanasCiclo = 0;
-    foreach ($zonas as $zona) {
-        $totalSemanasCiclo += (int)$zona['duracion_semanas'];
-    }
-
-    if ($totalSemanasCiclo <= 0) {
-        return null;
-    }
-
-    $segundosSemana = 7 * 24 * 60 * 60;
-    $semanasTranscurridas = $hoyTs >= $inicioCicloTs
-        ? (int)floor(($hoyTs - $inicioCicloTs) / $segundosSemana)
-        : 0;
-    $posicionSemana = $semanasTranscurridas % $totalSemanasCiclo;
-
-    $acumuladoSemanas = 0;
-    foreach ($zonas as $zona) {
-        $acumuladoSemanas += (int)$zona['duracion_semanas'];
-        if ($posicionSemana < $acumuladoSemanas) {
-            return $zona;
-        }
-    }
-
-    return null;
+    return $zonaActual;
 }
 
 /**
@@ -416,72 +359,8 @@ function calcularTocaVisitaPlanificador($frecuenciaVisita, int $iteracionZona): 
     return 0;
 }
 
-// === MOTOR: trazas del recomendador ===
-function registrarDebugClientesRecomendador($conn, string $queryDebug): void {
-    planificadorConfigurarDebugLog();
-
-    error_log('DEBUG RECOMENDADOR SQL:');
-    error_log($queryDebug);
-
-    $resultadoDebug = odbc_exec($conn, $queryDebug);
-    if (!$resultadoDebug) {
-        error_log('Error en debug del recomendador: ' . odbc_errormsg($conn));
-        return;
-    }
-
-    while ($row = odbc_fetch_array($resultadoDebug)) {
-        $codCliente = (int)($row['cod_cliente'] ?? 0);
-        $nombre = trim((string)($row['nombre'] ?? ''));
-        $zonaOk = (int)($row['zona_ok'] ?? 0);
-        $frecuenciaVisita = trim((string)($row['frecuencia_visita'] ?? ''));
-        $frecuenciaNormalizada = strtoupper($frecuenciaVisita);
-        $iteracionReal = (int)($row['iteracion_real'] ?? 0);
-        $tocaVisita = (int)($row['toca_visita'] ?? 0);
-        $visitaReal = (int)($row['visita_real'] ?? 0);
-        $visitadoHoy = (int)($row['visitado_hoy'] ?? 0);
-        $ultimaVisita = trim((string)($row['ultima_visita'] ?? ''));
-        $motivo = array();
-
-        if ($zonaOk !== 1) {
-            $motivo[] = 'FUERA_ZONA';
-        }
-        if ($frecuenciaNormalizada === 'NUNCA') {
-            $motivo[] = 'FREC_NUNCA';
-        }
-        if ($tocaVisita !== 1) {
-            $motivo[] = 'NO_TOCA';
-        }
-        if ($visitaReal === 1) {
-            $motivo[] = 'YA_VISITADO_CICLO';
-        }
-        if ($visitadoHoy === 1) {
-            $motivo[] = 'YA_HOY';
-        }
-        if (empty($motivo)) {
-            $motivo[] = 'ENTRA';
-        }
-
-        error_log("DEBUG CLIENTE {$codCliente} - {$nombre}");
-        error_log("  zona_ok: {$zonaOk}");
-        error_log("  frecuencia: {$frecuenciaVisita}");
-        error_log("  iteracion: {$iteracionReal}");
-        error_log("  toca: {$tocaVisita}");
-        error_log("  visita_real: {$visitaReal}");
-        error_log("  visitado_hoy: {$visitadoHoy}");
-        error_log("  ultima_visita: {$ultimaVisita}");
-        error_log('  MOTIVO: ' . implode(', ', $motivo));
-    }
-}
-
 // === MOTOR: pipeline de decision ===
 function obtenerUniversoCandidatosPlanificador($conn, string $query, ?int $iteracionZona = null) {
-    planificadorConfigurarDebugLog();
-
-    error_log('RECOMENDADOR SQL:');
-    error_log($query);
-    error_log('PARAMS:');
-    error_log(print_r(array(), true));
-
     $resultado = odbc_exec($conn, $query);
     if (!$resultado) {
         error_log('Error al obtener el cliente recomendado del planificador: ' . odbc_errormsg($conn));
@@ -497,19 +376,10 @@ function obtenerUniversoCandidatosPlanificador($conn, string $query, ?int $itera
         if ($iteracionZona !== null) {
             $fila['toca_visita'] = calcularTocaVisitaPlanificador($fila['frecuencia_visita'] ?? '', $iteracionZona);
             $fila['iteracion_zona'] = $iteracionZona;
-            error_log(
-                'FRECUENCIA candidato: ' . trim((string)($fila['frecuencia_visita'] ?? ''))
-                . ' | iteracionZona: ' . $iteracionZona
-                . ' | toca_visita: ' . (int)($fila['toca_visita'] ?? 0)
-            );
         }
 
         $clientes[] = $fila;
     }
-
-    error_log('RESULTADO RECOMENDADOR:');
-    error_log(print_r($clientes, true));
-    error_log('TOTAL FILAS: ' . count($clientes));
 
     return $clientes;
 }
@@ -530,8 +400,6 @@ function filtrarClientesElegiblesPlanificador($clientes, ?int $iteracionZona = n
         return null;
     }
 
-    error_log('Clientes candidatos: ' . count($clientes));
-
     if (empty($clientes)) {
         return array();
     }
@@ -540,17 +408,18 @@ function filtrarClientesElegiblesPlanificador($clientes, ?int $iteracionZona = n
         $clientes = array_values(array_filter($clientes, function ($cliente) {
             return (int)($cliente['toca_visita'] ?? 0) === 1;
         }));
-
-        error_log('Clientes candidatos tras filtro de frecuencia: ' . count($clientes));
     }
 
     if ($codVendedor !== null && $codVendedor > 0) {
         $clientes = array_values(array_filter($clientes, function ($cliente) use ($codVendedor, $fecha) {
             return planificadorClienteEsLaborable((array)$cliente, $codVendedor, $fecha);
         }));
-
-        error_log('Clientes candidatos tras filtro de calendario: ' . count($clientes));
     }
+
+    $clientes = array_values(array_filter($clientes, function ($cliente) {
+        $frecuencia = strtoupper(trim((string)($cliente['frecuencia_visita'] ?? '')));
+        return $frecuencia !== 'NUNCA';
+    }));
 
     return $clientes;
 }
@@ -598,29 +467,11 @@ function seleccionarMejorClientePlanificador($clientes, string $origenRecomendac
         return null;
     }
 
-    $top5Resumen = array_map(function ($cliente) {
-        return array(
-            'cod_cliente' => $cliente['cod_cliente'] ?? null,
-            'nombre' => $cliente['nombre'] ?? '',
-            'frecuencia_visita' => $cliente['frecuencia_visita'] ?? null,
-            'iteracion_zona' => $cliente['iteracion_zona'] ?? null,
-            'toca_visita' => $cliente['toca_visita'] ?? null,
-            'score' => $cliente['score'] ?? 0,
-            'motivo_score' => $cliente['motivo_score'] ?? '',
-        );
-    }, array_slice($clientes, 0, 5));
-
-    error_log('Top 5 recomendador:');
-    error_log(print_r(array_slice($clientes, 0, 5), true));
-    error_log('Top 5 recomendador resumen:');
-    error_log(print_r($top5Resumen, true));
-
     $clienteElegido = $clientes[0] ?? null;
 
     if ($clienteElegido !== null) {
         $cliente = construirClienteRecomendadoDesdeFila($clienteElegido, $origenRecomendacion);
         if ($cliente !== null) {
-            error_log('Cliente elegido: ' . ($cliente['cod_cliente'] ?? 'NULL'));
             return $cliente;
         }
     }
@@ -628,12 +479,9 @@ function seleccionarMejorClientePlanificador($clientes, string $origenRecomendac
     foreach ($clientes as $candidato) {
         $cliente = construirClienteRecomendadoDesdeFila($candidato, $origenRecomendacion);
         if ($cliente !== null) {
-            error_log('Cliente elegido: ' . ($cliente['cod_cliente'] ?? 'NULL'));
             return $cliente;
         }
     }
-
-    error_log('Cliente elegido: NULL');
 
     return array(
         'cod_cliente' => null,
@@ -707,9 +555,9 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
 
         $fechaInicioCiclo = trim((string)($filaZonaActiva['fecha_inicio_ciclo'] ?? ''));
         if ($fechaInicioCiclo !== '') {
-            $hoy = date('Y-m-d');
-            $dias = (strtotime($hoy) - strtotime(substr($fechaInicioCiclo, 0, 10))) / 86400;
-            $semanasTranscurridas = (int)floor($dias / 7);
+            $hoy = date('Y-m-d', strtotime(date('Y-m-d') . ' monday this week'));
+            $fechaInicioSemana = date('Y-m-d', strtotime(substr($fechaInicioCiclo, 0, 10) . ' monday this week'));
+            $semanasTranscurridas = calcularSemanasNaturalesEntreFechas($fechaInicioSemana, $hoy);
 
             $queryDuracionTotal = "
                 SELECT SUM(duracion_semanas) AS duracion_total_semanas
@@ -727,19 +575,12 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
 
     $iteracionZonaReal = $iteracionZona + 1;
 
-    error_log('ZONA ACTIVA ID: ' . $codZona);
-    error_log('ITERACION ZONA: ' . $iteracionZona);
-    error_log('ITERACION REAL: ' . $iteracionZonaReal);
-
     $filtroVisitasCicloActual = '';
     if ($fechaInicioCiclo !== '') {
         $filtroVisitasCicloActual = "
             AND v.fecha_visita >= '" . substr($fechaInicioCiclo, 0, 10) . "'
         ";
     }
-
-    error_log('DEBUG fechaInicioCiclo: ' . $fechaInicioCiclo);
-    error_log('DEBUG HOY: ' . $fechaHoy);
 
     $selectZonaBase = "
         SELECT
@@ -851,8 +692,6 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
                 z.frecuencia_visita
             ORDER BY c.nombre_comercial ASC
         ";
-        registrarDebugClientesRecomendador($conn, $queryZonaDebug);
-
         $whereZona = "
             WHERE c.cod_vendedor = '$codVendedor'
               AND z.cod_cliente IS NOT NULL
@@ -925,15 +764,19 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
             ISNULL(c.poblacion, '') AS poblacion,
             '' AS cod_municipio_ine,
             MAX(v.fecha_visita) AS ultima_visita,
-            NULL AS frecuencia_visita,
+            MAX(ISNULL(z.frecuencia_visita, '')) AS frecuencia_visita,
             0 AS toca_visita
         FROM clientes c
+        LEFT JOIN cmf_comerciales_clientes_zona z
+            ON z.cod_cliente = c.cod_cliente
+            AND z.activo = 1
         LEFT JOIN cmf_comerciales_visitas v
             ON v.cod_cliente = c.cod_cliente
             AND v.cod_vendedor = c.cod_vendedor
         WHERE c.cod_vendedor = '$codVendedor'
           $filtrosOperativos
         GROUP BY c.cod_cliente, c.nombre_comercial, c.provincia, c.poblacion
+        HAVING MAX(CASE WHEN UPPER(ISNULL(z.frecuencia_visita, '')) = 'NUNCA' THEN 1 ELSE 0 END) = 0
         ORDER BY
             CASE WHEN MAX(v.fecha_visita) IS NULL THEN 0 ELSE 1 END ASC,
             MAX(v.fecha_visita) ASC
@@ -955,11 +798,16 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
             ISNULL(c.poblacion, '') AS poblacion,
             '' AS cod_municipio_ine,
             NULL AS ultima_visita,
-            NULL AS frecuencia_visita,
+            MAX(ISNULL(z.frecuencia_visita, '')) AS frecuencia_visita,
             0 AS toca_visita
         FROM clientes c
+        LEFT JOIN cmf_comerciales_clientes_zona z
+            ON z.cod_cliente = c.cod_cliente
+            AND z.activo = 1
         WHERE c.cod_vendedor = '$codVendedor'
           $filtrosOperativos
+        GROUP BY c.cod_cliente, c.nombre_comercial, c.provincia, c.poblacion
+        HAVING MAX(CASE WHEN UPPER(ISNULL(z.frecuencia_visita, '')) = 'NUNCA' THEN 1 ELSE 0 END) = 0
         ORDER BY
             c.nombre_comercial ASC
     ";

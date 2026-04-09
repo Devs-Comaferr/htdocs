@@ -76,101 +76,21 @@ function normalizarFrecuenciaPlanificacion(string $frecuencia): string {
 }
 
 function construirContextoCicloPlanificacion(array $zonasCicloVendedor, int $hoyTs): ?array {
-    if (empty($zonasCicloVendedor)) {
-        return null;
-    }
-
-    usort($zonasCicloVendedor, static function (array $a, array $b): int {
-        $ordenA = (int)($a['orden'] ?? 0);
-        $ordenB = (int)($b['orden'] ?? 0);
-        if ($ordenA === $ordenB) {
-            return (int)($a['cod_zona'] ?? 0) <=> (int)($b['cod_zona'] ?? 0);
-        }
-        return $ordenA <=> $ordenB;
-    });
-
-    $fechaInicioCiclo = '';
-    foreach ($zonasCicloVendedor as $zonaCiclo) {
-        $fechaInicioTmp = trim((string)($zonaCiclo['fecha_inicio_ciclo'] ?? ''));
-        if ($fechaInicioTmp !== '') {
-            $fechaInicioCiclo = $fechaInicioTmp;
-            break;
-        }
-    }
-    if ($fechaInicioCiclo === '') {
-        return null;
-    }
-
-    $inicioCicloTs = strtotime(substr($fechaInicioCiclo, 0, 10) . ' 00:00:00');
-    if ($inicioCicloTs === false) {
-        return null;
-    }
-
-    $zonasOrdenadas = [];
-    $cicloTotalSemanas = 0;
-    foreach ($zonasCicloVendedor as $zonaCiclo) {
-        $duracion = max(0, (int)($zonaCiclo['duracion_semanas'] ?? 0));
-        if ($duracion <= 0) {
-            continue;
-        }
-        $zonasOrdenadas[] = [
-            'cod_zona' => (int)($zonaCiclo['cod_zona'] ?? 0),
-            'duracion_semanas' => $duracion,
-            'orden' => (int)($zonaCiclo['orden'] ?? 0),
-        ];
-        $cicloTotalSemanas += $duracion;
-    }
-    if ($cicloTotalSemanas <= 0 || empty($zonasOrdenadas)) {
-        return null;
-    }
-
-    $segundosSemana = 7 * 24 * 60 * 60;
-    $diferenciaSemanas = ($hoyTs >= $inicioCicloTs)
-        ? (int)floor(($hoyTs - $inicioCicloTs) / $segundosSemana)
-        : 0;
-    $indiceCicloActual = (int)floor($diferenciaSemanas / $cicloTotalSemanas);
-    $semanaCiclo = ($diferenciaSemanas % $cicloTotalSemanas) + 1;
-
-    $zonaActual = null;
-    $indiceZonaActual = 0;
-    $semanaAcumulada = 0;
-    foreach ($zonasOrdenadas as $indiceZona => $zonaCiclo) {
-        $semanaAcumulada += $zonaCiclo['duracion_semanas'];
-        if ($semanaCiclo <= $semanaAcumulada) {
-            $zonaActual = (int)$zonaCiclo['cod_zona'];
-            $indiceZonaActual = $indiceZona;
-            break;
-        }
-    }
-    if ($zonaActual === null) {
-        return null;
-    }
-
-    $cicloActualInicioTs = $inicioCicloTs + ($indiceCicloActual * $cicloTotalSemanas * $segundosSemana);
-    $cicloActualFinTs = $cicloActualInicioTs + ($cicloTotalSemanas * $segundosSemana);
-
-    return [
-        'inicio_ciclo_ts' => $inicioCicloTs,
-        'ciclo_total_semanas' => $cicloTotalSemanas,
-        'indice_ciclo_actual' => $indiceCicloActual,
-        'numero_ciclo_actual' => $indiceCicloActual + 1,
-        'semana_ciclo' => $semanaCiclo,
-        'ciclo_actual_inicio_ts' => $cicloActualInicioTs,
-        'ciclo_actual_fin_ts' => $cicloActualFinTs,
-        'zona_actual' => $zonaActual,
-        'zona_siguiente' => (int)($zonasOrdenadas[($indiceZonaActual + 1) % count($zonasOrdenadas)]['cod_zona'] ?? 0),
-    ];
+    $fecha = date('Y-m-d', $hoyTs);
+    return $fecha !== false ? construirContextoZonaActivaDesdeCiclo($zonasCicloVendedor, $fecha) : null;
 }
 
 function calcularNumeroCicloParaFecha(int $fechaTs, array $contextoCiclo): ?int {
     $inicioCicloTs = (int)($contextoCiclo['inicio_ciclo_ts'] ?? 0);
     $cicloTotalSemanas = (int)($contextoCiclo['ciclo_total_semanas'] ?? 0);
-    if ($inicioCicloTs <= 0 || $cicloTotalSemanas <= 0 || $fechaTs < $inicioCicloTs) {
+    $fechaNormalizadaTs = strtotime(date('Y-m-d', $fechaTs) . ' monday this week');
+    if ($fechaNormalizadaTs === false || $inicioCicloTs <= 0 || $cicloTotalSemanas <= 0 || $fechaNormalizadaTs < $inicioCicloTs) {
         return null;
     }
 
-    $segundosSemana = 7 * 24 * 60 * 60;
-    $diferenciaSemanas = (int)floor(($fechaTs - $inicioCicloTs) / $segundosSemana);
+    $fechaInicio = date('Y-m-d', $inicioCicloTs);
+    $fechaObjetivo = date('Y-m-d', $fechaNormalizadaTs);
+    $diferenciaSemanas = calcularSemanasNaturalesEntreFechas($fechaInicio, $fechaObjetivo);
     return (int)floor($diferenciaSemanas / $cicloTotalSemanas) + 1;
 }
 

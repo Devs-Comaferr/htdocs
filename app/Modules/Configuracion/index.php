@@ -102,6 +102,10 @@ $pageTitle = 'Configuracion';
       background: var(--blue-soft);
       color: var(--blue);
     }
+    .card-icon.import {
+      background: #ecfccb;
+      color: #3f6212;
+    }
     .card-arrow {
       color: #94a3b8;
       font-size: 18px;
@@ -144,6 +148,15 @@ $pageTitle = 'Configuracion';
         </div>
         <h3>Usuarios</h3>
         <p>Gestion de accesos, permisos, passwords y altas/bajas de usuarios.</p>
+      </a>
+
+      <a href="importar_festivos.php" class="config-card">
+        <div class="card-top">
+          <span class="card-icon import"><i class="fas fa-file-import"></i></span>
+          <span class="card-arrow"><i class="fas fa-arrow-right"></i></span>
+        </div>
+        <h3>Importar festivos</h3>
+        <p>Carga el JSON de Andalucia con seguimiento visual del progreso y del resultado por bloques.</p>
       </a>
     </div>
   </div>

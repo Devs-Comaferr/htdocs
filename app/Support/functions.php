@@ -221,6 +221,36 @@ if (!function_exists('validarFechaSQL')) {
     }
 }
 
+if (!function_exists('normalizarComparacion')) {
+    function normalizarComparacion(?string $texto): string
+    {
+        $texto = trim((string)$texto);
+        if ($texto === '') {
+            return '';
+        }
+
+        if (!mb_check_encoding($texto, 'UTF-8')) {
+            $texto = mb_convert_encoding($texto, 'UTF-8', 'Windows-1252');
+        }
+
+        $texto = mb_strtoupper($texto, 'UTF-8');
+        return strtr($texto, [
+            'Á' => 'A',
+            'É' => 'E',
+            'Í' => 'I',
+            'Ó' => 'O',
+            'Ú' => 'U',
+            'Ü' => 'U',
+            'Ñ' => 'N',
+            'À' => 'A',
+            'È' => 'E',
+            'Ì' => 'I',
+            'Ò' => 'O',
+            'Ù' => 'U',
+        ]);
+    }
+}
+
 if (!function_exists('esDiaLaborable')) {
     function esDiaLaborable(string $fecha, ?array $cliente = null, ?int $cod_vendedor = null): bool
     {
@@ -238,22 +268,24 @@ if (!function_exists('esDiaLaborable')) {
         $provincia = isset($cliente['provincia']) ? trim((string)$cliente['provincia']) : '';
         $poblacion = isset($cliente['poblacion']) ? trim((string)$cliente['poblacion']) : '';
         $codMunicipioIne = isset($cliente['cod_municipio_ine']) ? trim((string)$cliente['cod_municipio_ine']) : '';
+        $dia = (int)date('d', strtotime($fecha));
+        $mes = (int)date('m', strtotime($fecha));
 
         $sqlFestivoNacional = "
             SELECT TOP 1 1 AS existe
             FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
-            WHERE ambito = ?
+            WHERE LTRIM(RTRIM(ambito)) COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
               AND (
-                    fecha = ?
+                    CONVERT(char(10), fecha, 23) = ?
                     OR (
                         repetir_anualmente = 1
-                        AND DAY(fecha) = DAY(CAST(? AS DATE))
-                        AND MONTH(fecha) = MONTH(CAST(? AS DATE))
+                        AND DAY(fecha) = ?
+                        AND MONTH(fecha) = ?
                     )
               )
         ";
         $stmtFestivoNacional = odbc_prepare($conn, $sqlFestivoNacional);
-        if ($stmtFestivoNacional && odbc_execute($stmtFestivoNacional, ['NACIONAL', $fecha, $fecha, $fecha]) && odbc_fetch_row($stmtFestivoNacional)) {
+        if ($stmtFestivoNacional && odbc_execute($stmtFestivoNacional, ['NACIONAL', $fecha, $dia, $mes]) && odbc_fetch_row($stmtFestivoNacional)) {
             return false;
         }
 
@@ -261,19 +293,19 @@ if (!function_exists('esDiaLaborable')) {
             $sqlFestivoAutonomico = "
                 SELECT TOP 1 1 AS existe
                 FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
-                WHERE ambito = ?
-                  AND provincia COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
+                WHERE LTRIM(RTRIM(ambito)) COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
+                  AND LTRIM(RTRIM(provincia)) COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
                   AND (
-                        fecha = ?
+                        CONVERT(char(10), fecha, 23) = ?
                         OR (
                             repetir_anualmente = 1
-                            AND DAY(fecha) = DAY(CAST(? AS DATE))
-                            AND MONTH(fecha) = MONTH(CAST(? AS DATE))
+                            AND DAY(fecha) = ?
+                            AND MONTH(fecha) = ?
                         )
                   )
             ";
             $stmtFestivoAutonomico = odbc_prepare($conn, $sqlFestivoAutonomico);
-            if ($stmtFestivoAutonomico && odbc_execute($stmtFestivoAutonomico, ['AUTONOMICO', $provincia, $fecha, $fecha, $fecha]) && odbc_fetch_row($stmtFestivoAutonomico)) {
+            if ($stmtFestivoAutonomico && odbc_execute($stmtFestivoAutonomico, ['AUTONOMICO', $provincia, $fecha, $dia, $mes]) && odbc_fetch_row($stmtFestivoAutonomico)) {
                 return false;
             }
         }
@@ -282,39 +314,39 @@ if (!function_exists('esDiaLaborable')) {
             $sqlFestivoLocalIne = "
                 SELECT TOP 1 1 AS existe
                 FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
-                WHERE ambito = ?
-                  AND cod_municipio_ine = ?
+                WHERE LTRIM(RTRIM(ambito)) COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
+                  AND LTRIM(RTRIM(cod_municipio_ine)) = LTRIM(RTRIM(?))
                   AND (
-                        fecha = ?
+                        CONVERT(char(10), fecha, 23) = ?
                         OR (
                             repetir_anualmente = 1
-                            AND DAY(fecha) = DAY(CAST(? AS DATE))
-                            AND MONTH(fecha) = MONTH(CAST(? AS DATE))
+                            AND DAY(fecha) = ?
+                            AND MONTH(fecha) = ?
                         )
                   )
             ";
             $stmtFestivoLocalIne = odbc_prepare($conn, $sqlFestivoLocalIne);
-            if ($stmtFestivoLocalIne && odbc_execute($stmtFestivoLocalIne, ['LOCAL', $codMunicipioIne, $fecha, $fecha, $fecha]) && odbc_fetch_row($stmtFestivoLocalIne)) {
+            if ($stmtFestivoLocalIne && odbc_execute($stmtFestivoLocalIne, ['LOCAL', $codMunicipioIne, $fecha, $dia, $mes]) && odbc_fetch_row($stmtFestivoLocalIne)) {
                 return false;
             }
         } elseif ($provincia !== '' && $poblacion !== '') {
             $sqlFestivoLocalTexto = "
                 SELECT TOP 1 1 AS existe
                 FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
-                WHERE ambito = ?
-                  AND provincia COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
-                  AND poblacion COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
+                WHERE LTRIM(RTRIM(ambito)) COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
+                  AND LTRIM(RTRIM(provincia)) COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
+                  AND LTRIM(RTRIM(poblacion)) COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
                   AND (
-                        fecha = ?
+                        CONVERT(char(10), fecha, 23) = ?
                         OR (
                             repetir_anualmente = 1
-                            AND DAY(fecha) = DAY(CAST(? AS DATE))
-                            AND MONTH(fecha) = MONTH(CAST(? AS DATE))
+                            AND DAY(fecha) = ?
+                            AND MONTH(fecha) = ?
                         )
                   )
             ";
             $stmtFestivoLocalTexto = odbc_prepare($conn, $sqlFestivoLocalTexto);
-            if ($stmtFestivoLocalTexto && odbc_execute($stmtFestivoLocalTexto, ['LOCAL', $provincia, $poblacion, $fecha, $fecha, $fecha]) && odbc_fetch_row($stmtFestivoLocalTexto)) {
+            if ($stmtFestivoLocalTexto && odbc_execute($stmtFestivoLocalTexto, ['LOCAL', $provincia, $poblacion, $fecha, $dia, $mes]) && odbc_fetch_row($stmtFestivoLocalTexto)) {
                 return false;
             }
         }
@@ -324,7 +356,7 @@ if (!function_exists('esDiaLaborable')) {
                 SELECT TOP 1 1 AS existe
                 FROM [integral].[dbo].[cmf_comerciales_calendario_agenda]
                 WHERE cod_vendedor = ?
-                  AND fecha = ?
+                  AND CONVERT(char(10), fecha, 23) = ?
                   AND hora_inicio IS NULL
                   AND hora_fin IS NULL
             ";
@@ -335,6 +367,680 @@ if (!function_exists('esDiaLaborable')) {
         }
 
         return true;
+    }
+}
+
+if (!function_exists('obtenerDetalleDiaNoLaborable')) {
+    function obtenerDetalleDiaNoLaborable(string $fecha, ?int $cod_vendedor = null, ?array $cliente = null): ?array
+    {
+        $fecha = trim($fecha);
+        if (!validarFechaSQL($fecha)) {
+            return null;
+        }
+
+        $conn = db();
+        if (!$conn) {
+            return null;
+        }
+
+        $cliente = is_array($cliente) ? $cliente : [];
+        $provincia = isset($cliente['provincia']) ? trim((string)$cliente['provincia']) : '';
+        $poblacion = isset($cliente['poblacion']) ? trim((string)$cliente['poblacion']) : '';
+        $codMunicipioIne = isset($cliente['cod_municipio_ine']) ? trim((string)$cliente['cod_municipio_ine']) : '';
+        $dia = (int)date('d', strtotime($fecha));
+        $mes = (int)date('m', strtotime($fecha));
+
+        if ($cod_vendedor !== null) {
+            $sqlAgenda = "
+                SELECT TOP 1 tipo_evento, descripcion
+                FROM [integral].[dbo].[cmf_comerciales_calendario_agenda]
+                WHERE cod_vendedor = ?
+                  AND CONVERT(char(10), fecha, 23) = ?
+                  AND hora_inicio IS NULL
+                  AND hora_fin IS NULL
+                ORDER BY id DESC
+            ";
+            $stmtAgenda = odbc_prepare($conn, $sqlAgenda);
+            if ($stmtAgenda && odbc_execute($stmtAgenda, [$cod_vendedor, $fecha]) && odbc_fetch_row($stmtAgenda)) {
+                $descripcion = trim((string)(odbc_result($stmtAgenda, 'descripcion') ?: ''));
+                $tipoEvento = trim((string)(odbc_result($stmtAgenda, 'tipo_evento') ?: ''));
+                return [
+                    'origen' => 'agenda',
+                    'label' => $tipoEvento !== '' ? $tipoEvento : 'AGENDA',
+                    'descripcion' => $descripcion !== '' ? $descripcion : 'Bloqueo de agenda',
+                ];
+            }
+        }
+
+        $sqlFestivoNacional = "
+            SELECT TOP 1 ambito, descripcion
+            FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
+            WHERE LTRIM(RTRIM(ambito)) COLLATE Latin1_General_CI_AI = 'NACIONAL' COLLATE Latin1_General_CI_AI
+              AND (
+                    CONVERT(char(10), fecha, 23) = ?
+                    OR (
+                        repetir_anualmente = 1
+                        AND DAY(fecha) = ?
+                        AND MONTH(fecha) = ?
+                    )
+              )
+            ORDER BY id DESC
+        ";
+        $stmtFestivoNacional = odbc_prepare($conn, $sqlFestivoNacional);
+        if ($stmtFestivoNacional && odbc_execute($stmtFestivoNacional, [$fecha, $dia, $mes]) && odbc_fetch_row($stmtFestivoNacional)) {
+            $descripcion = trim((string)(odbc_result($stmtFestivoNacional, 'descripcion') ?: ''));
+            $ambito = trim((string)(odbc_result($stmtFestivoNacional, 'ambito') ?: ''));
+            return [
+                'origen' => 'festivo_nacional',
+                'label' => $ambito !== '' ? $ambito : 'NACIONAL',
+                'descripcion' => $descripcion !== '' ? $descripcion : 'Festivo nacional',
+            ];
+        }
+
+        if ($provincia !== '') {
+            $sqlFestivoAutonomico = "
+                SELECT TOP 1 ambito, descripcion
+                FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
+                WHERE LTRIM(RTRIM(ambito)) COLLATE Latin1_General_CI_AI = 'AUTONOMICO' COLLATE Latin1_General_CI_AI
+                  AND LTRIM(RTRIM(provincia)) COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
+                  AND (
+                        CONVERT(char(10), fecha, 23) = ?
+                        OR (
+                            repetir_anualmente = 1
+                            AND DAY(fecha) = ?
+                            AND MONTH(fecha) = ?
+                        )
+                  )
+                ORDER BY id DESC
+            ";
+            $stmtFestivoAutonomico = odbc_prepare($conn, $sqlFestivoAutonomico);
+            if ($stmtFestivoAutonomico && odbc_execute($stmtFestivoAutonomico, [$provincia, $fecha, $dia, $mes]) && odbc_fetch_row($stmtFestivoAutonomico)) {
+                $descripcion = trim((string)(odbc_result($stmtFestivoAutonomico, 'descripcion') ?: ''));
+                $ambito = trim((string)(odbc_result($stmtFestivoAutonomico, 'ambito') ?: ''));
+                return [
+                    'origen' => 'festivo_autonomico',
+                    'label' => $ambito !== '' ? $ambito : 'AUTONOMICO',
+                    'descripcion' => $descripcion !== '' ? $descripcion : 'Festivo autonomico',
+                ];
+            }
+        }
+
+        if ($codMunicipioIne !== '') {
+            $sqlFestivoLocalIne = "
+                SELECT TOP 1 ambito, descripcion
+                FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
+                WHERE LTRIM(RTRIM(ambito)) COLLATE Latin1_General_CI_AI = 'LOCAL' COLLATE Latin1_General_CI_AI
+                  AND LTRIM(RTRIM(cod_municipio_ine)) = LTRIM(RTRIM(?))
+                  AND (
+                        CONVERT(char(10), fecha, 23) = ?
+                        OR (
+                            repetir_anualmente = 1
+                            AND DAY(fecha) = ?
+                            AND MONTH(fecha) = ?
+                        )
+                  )
+                ORDER BY id DESC
+            ";
+            $stmtFestivoLocalIne = odbc_prepare($conn, $sqlFestivoLocalIne);
+            if ($stmtFestivoLocalIne && odbc_execute($stmtFestivoLocalIne, [$codMunicipioIne, $fecha, $dia, $mes]) && odbc_fetch_row($stmtFestivoLocalIne)) {
+                $descripcion = trim((string)(odbc_result($stmtFestivoLocalIne, 'descripcion') ?: ''));
+                $ambito = trim((string)(odbc_result($stmtFestivoLocalIne, 'ambito') ?: ''));
+                return [
+                    'origen' => 'festivo_local',
+                    'label' => $ambito !== '' ? $ambito : 'LOCAL',
+                    'descripcion' => $descripcion !== '' ? $descripcion : 'Festivo local',
+                ];
+            }
+        } elseif ($provincia !== '' && $poblacion !== '') {
+            $sqlFestivoLocalTexto = "
+                SELECT TOP 1 ambito, descripcion
+                FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
+                WHERE LTRIM(RTRIM(ambito)) COLLATE Latin1_General_CI_AI = 'LOCAL' COLLATE Latin1_General_CI_AI
+                  AND LTRIM(RTRIM(provincia)) COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
+                  AND LTRIM(RTRIM(poblacion)) COLLATE Latin1_General_CI_AI = ? COLLATE Latin1_General_CI_AI
+                  AND (
+                        CONVERT(char(10), fecha, 23) = ?
+                        OR (
+                            repetir_anualmente = 1
+                            AND DAY(fecha) = ?
+                            AND MONTH(fecha) = ?
+                        )
+                  )
+                ORDER BY id DESC
+            ";
+            $stmtFestivoLocalTexto = odbc_prepare($conn, $sqlFestivoLocalTexto);
+            if ($stmtFestivoLocalTexto && odbc_execute($stmtFestivoLocalTexto, [$provincia, $poblacion, $fecha, $dia, $mes]) && odbc_fetch_row($stmtFestivoLocalTexto)) {
+                $descripcion = trim((string)(odbc_result($stmtFestivoLocalTexto, 'descripcion') ?: ''));
+                $ambito = trim((string)(odbc_result($stmtFestivoLocalTexto, 'ambito') ?: ''));
+                return [
+                    'origen' => 'festivo_local',
+                    'label' => $ambito !== '' ? $ambito : 'LOCAL',
+                    'descripcion' => $descripcion !== '' ? $descripcion : 'Festivo local',
+                ];
+            }
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('normalizarFechaInicioSemanaCiclo')) {
+    function normalizarFechaInicioSemanaCiclo(string $fecha): ?int
+    {
+        $fecha = trim($fecha);
+        if ($fecha === '') {
+            return null;
+        }
+
+        $fechaBase = substr($fecha, 0, 10);
+        $lunesSemana = date('Y-m-d', strtotime($fechaBase . ' monday this week'));
+        $timestamp = strtotime($lunesSemana . ' 00:00:00');
+
+        return $timestamp === false ? null : $timestamp;
+    }
+}
+
+if (!function_exists('calcularSemanasNaturalesEntreFechas')) {
+    function calcularSemanasNaturalesEntreFechas(string $fechaInicio, string $fechaFin): int
+    {
+        $inicio = DateTimeImmutable::createFromFormat('Y-m-d', $fechaInicio);
+        $fin = DateTimeImmutable::createFromFormat('Y-m-d', $fechaFin);
+
+        if (!$inicio || !$fin) {
+            return 0;
+        }
+
+        if ($fin < $inicio) {
+            return 0;
+        }
+
+        $diferencia = $inicio->diff($fin);
+        $dias = (int)($diferencia->days ?? 0);
+
+        return intdiv($dias, 7);
+    }
+}
+
+if (!function_exists('construirContextoZonaActivaDesdeCiclo')) {
+    function construirContextoZonaActivaDesdeCiclo(array $zonasCicloVendedor, string $fecha): ?array
+    {
+        if (empty($zonasCicloVendedor) || !validarFechaSQL($fecha)) {
+            return null;
+        }
+
+        usort($zonasCicloVendedor, static function (array $a, array $b): int {
+            $ordenA = (int)($a['orden'] ?? 0);
+            $ordenB = (int)($b['orden'] ?? 0);
+            if ($ordenA === $ordenB) {
+                return (int)($a['cod_zona'] ?? 0) <=> (int)($b['cod_zona'] ?? 0);
+            }
+            return $ordenA <=> $ordenB;
+        });
+
+        $fechaInicioCiclo = '';
+        $zonasOrdenadas = [];
+        $cicloTotalSemanas = 0;
+
+        foreach ($zonasCicloVendedor as $zonaCiclo) {
+            $duracion = max(0, (int)($zonaCiclo['duracion_semanas'] ?? 0));
+            if ($duracion <= 0) {
+                continue;
+            }
+
+            $fechaInicioTmp = trim((string)($zonaCiclo['fecha_inicio_ciclo'] ?? ''));
+            if ($fechaInicioCiclo === '' && $fechaInicioTmp !== '') {
+                $fechaInicioCiclo = $fechaInicioTmp;
+            }
+
+            $zonasOrdenadas[] = [
+                'cod_zona' => (int)($zonaCiclo['cod_zona'] ?? 0),
+                'duracion_semanas' => $duracion,
+                'orden' => (int)($zonaCiclo['orden'] ?? 0),
+                'nombre_zona' => trim((string)($zonaCiclo['nombre_zona'] ?? ($zonaCiclo['nombre'] ?? ''))),
+            ];
+            $cicloTotalSemanas += $duracion;
+        }
+
+        if ($fechaInicioCiclo === '' || empty($zonasOrdenadas) || $cicloTotalSemanas <= 0) {
+            return null;
+        }
+
+        $inicioCicloTs = normalizarFechaInicioSemanaCiclo($fechaInicioCiclo);
+        $fechaObjetivoTs = normalizarFechaInicioSemanaCiclo($fecha);
+        $lunesInicio = $inicioCicloTs !== null ? date('Y-m-d', $inicioCicloTs) : '';
+        $lunesObjetivo = $fechaObjetivoTs !== null ? date('Y-m-d', $fechaObjetivoTs) : '';
+        if ($inicioCicloTs === null || $fechaObjetivoTs === null || $lunesInicio === '' || $lunesObjetivo === '') {
+            return null;
+        }
+
+        $segundosSemana = 7 * 24 * 60 * 60;
+        $diferenciaSemanas = calcularSemanasNaturalesEntreFechas($lunesInicio, $lunesObjetivo);
+        $indiceCicloActual = (int)floor($diferenciaSemanas / $cicloTotalSemanas);
+        $semanaCiclo = ($diferenciaSemanas % $cicloTotalSemanas) + 1;
+
+        $zonaActual = null;
+        $indiceZonaActual = 0;
+        $semanaAcumulada = 0;
+        foreach ($zonasOrdenadas as $indiceZona => $zonaCiclo) {
+            $semanaAcumulada += (int)$zonaCiclo['duracion_semanas'];
+            if ($semanaCiclo <= $semanaAcumulada) {
+                $zonaActual = $zonaCiclo;
+                $indiceZonaActual = $indiceZona;
+                break;
+            }
+        }
+
+        if ($zonaActual === null) {
+            return null;
+        }
+
+        $cicloActualInicioTs = $inicioCicloTs + ($indiceCicloActual * $cicloTotalSemanas * $segundosSemana);
+        $cicloActualFinTs = $cicloActualInicioTs + ($cicloTotalSemanas * $segundosSemana);
+        $zonaSiguiente = $zonasOrdenadas[($indiceZonaActual + 1) % count($zonasOrdenadas)] ?? null;
+
+        return [
+            'inicio_ciclo_ts' => $inicioCicloTs,
+            'ciclo_total_semanas' => $cicloTotalSemanas,
+            'indice_ciclo_actual' => $indiceCicloActual,
+            'numero_ciclo_actual' => $indiceCicloActual + 1,
+            'semana_ciclo' => $semanaCiclo,
+            'ciclo_actual_inicio_ts' => $cicloActualInicioTs,
+            'ciclo_actual_fin_ts' => $cicloActualFinTs,
+            'zona_actual' => (int)($zonaActual['cod_zona'] ?? 0),
+            'zona_actual_detalle' => $zonaActual,
+            'zona_siguiente' => (int)($zonaSiguiente['cod_zona'] ?? 0),
+        ];
+    }
+}
+
+if (!function_exists('obtenerZonaActivaPorFecha')) {
+    function obtenerZonaActivaPorFecha($conn, int $codVendedor, string $fecha): ?array
+    {
+        if ($codVendedor <= 0 || !validarFechaSQL($fecha) || !$conn) {
+            return null;
+        }
+
+        $sql = "
+            SELECT cod_zona, nombre_zona, duracion_semanas, orden, fecha_inicio_ciclo
+            FROM cmf_comerciales_zonas
+            WHERE cod_vendedor = ?
+            ORDER BY orden ASC, cod_zona ASC
+        ";
+        $stmt = odbc_prepare($conn, $sql);
+        if (!$stmt || !odbc_execute($stmt, [$codVendedor])) {
+            return null;
+        }
+
+        $zonas = [];
+        while ($row = odbc_fetch_array($stmt)) {
+            $zonas[] = [
+                'cod_zona' => (int)($row['cod_zona'] ?? 0),
+                'nombre_zona' => trim((string)($row['nombre_zona'] ?? '')),
+                'duracion_semanas' => (int)($row['duracion_semanas'] ?? 0),
+                'orden' => (int)($row['orden'] ?? 0),
+                'fecha_inicio_ciclo' => trim((string)($row['fecha_inicio_ciclo'] ?? '')),
+            ];
+        }
+
+        return construirContextoZonaActivaDesdeCiclo($zonas, $fecha);
+    }
+}
+
+if (!function_exists('obtenerEventosCalendarioDia')) {
+    if (!function_exists('descripcionFestivoIncluyeUbicacion')) {
+        function descripcionFestivoIncluyeUbicacion(?string $descripcion, ?string $provincia, ?string $poblacion): bool
+        {
+            $descripcionNorm = normalizarComparacion($descripcion);
+            $provinciaNorm = normalizarComparacion($provincia);
+            $poblacionNorm = normalizarComparacion($poblacion);
+
+            if ($descripcionNorm === '') {
+                return false;
+            }
+
+            if ($poblacionNorm !== '' && strpos($descripcionNorm, $poblacionNorm) === false) {
+                return false;
+            }
+
+            if ($provinciaNorm !== '' && strpos($descripcionNorm, $provinciaNorm) === false) {
+                return false;
+            }
+
+            return $poblacionNorm !== '' || $provinciaNorm !== '';
+        }
+    }
+
+    if (!function_exists('descripcionFestivoLocalEsGenerica')) {
+        function descripcionFestivoLocalEsGenerica(?string $descripcion, ?string $provincia, ?string $poblacion): bool
+        {
+            $descripcionNorm = normalizarComparacion($descripcion);
+            if ($descripcionNorm === '') {
+                return false;
+            }
+
+            if (strpos($descripcionNorm, 'FIESTA LOCAL EN ') !== 0 && strpos($descripcionNorm, 'FESTIVO LOCAL EN ') !== 0) {
+                return false;
+            }
+
+            return descripcionFestivoIncluyeUbicacion($descripcion, $provincia, $poblacion);
+        }
+    }
+
+    if (!function_exists('formatearUbicacionFestivo')) {
+        function formatearUbicacionFestivo(?string $provincia, ?string $poblacion): string
+        {
+            $provincia = trim((string)$provincia);
+            $poblacion = trim((string)$poblacion);
+
+            if ($poblacion !== '' && $provincia !== '') {
+                return $poblacion . ' (' . $provincia . ')';
+            }
+
+            if ($poblacion !== '') {
+                return $poblacion;
+            }
+
+            return $provincia;
+        }
+    }
+
+    if (!function_exists('obtenerZonaActivaCalendarioFecha')) {
+        function obtenerZonaActivaCalendarioFecha($conn, int $codVendedor, string $fecha): ?int
+        {
+            $contextoZona = obtenerZonaActivaPorFecha($conn, $codVendedor, $fecha);
+            return $contextoZona !== null ? (int)($contextoZona['zona_actual'] ?? 0) : null;
+        }
+    }
+
+    if (!function_exists('obtenerPoblacionesZonaActivaCalendario')) {
+        function obtenerPoblacionesZonaActivaCalendario($conn, int $codVendedor, ?int $codZona): array
+        {
+            if ($codVendedor <= 0 || $codZona === null || $codZona <= 0) {
+                return [];
+            }
+
+            $sql = "
+                SELECT DISTINCT
+                    LTRIM(RTRIM(ISNULL(c.provincia, ''))) AS provincia,
+                    LTRIM(RTRIM(ISNULL(c.poblacion, ''))) AS poblacion
+                FROM clientes c
+                INNER JOIN cmf_comerciales_clientes_zona cz
+                    ON cz.cod_cliente = c.cod_cliente
+                WHERE c.cod_vendedor = ?
+                  AND cz.zona_principal = ?
+                  AND cz.activo = 1
+            ";
+            $stmt = odbc_prepare($conn, $sql);
+            if (!$stmt || !odbc_execute($stmt, [$codVendedor, $codZona])) {
+                return [];
+            }
+
+            $poblacionesZona = [];
+            while ($row = odbc_fetch_array($stmt)) {
+                $provincia = trim(toUTF8((string)($row['provincia'] ?? '')));
+                $poblacion = trim(toUTF8((string)($row['poblacion'] ?? '')));
+                if ($provincia === '' || $poblacion === '') {
+                    continue;
+                }
+
+                $clave = normalizarComparacion($provincia) . '|' . normalizarComparacion($poblacion);
+                $poblacionesZona[$clave] = true;
+            }
+
+            return $poblacionesZona;
+        }
+    }
+
+    function obtenerEventosCalendarioDia(string $fecha, ?int $cod_vendedor = null): array
+    {
+        $fecha = trim($fecha);
+        if (!validarFechaSQL($fecha)) {
+            return [];
+        }
+
+        $conn = db();
+        if (!$conn) {
+            return [];
+        }
+
+        $eventos = [];
+        $eventosVistos = [];
+        $festivosLocalesAgrupados = [];
+        $dia = (int)date('d', strtotime($fecha));
+        $mes = (int)date('m', strtotime($fecha));
+        $provinciasCliente = [];
+        $poblacionesCliente = [];
+        $poblacionesZonaActiva = [];
+
+        if ($cod_vendedor !== null) {
+            $codZonaActivaFecha = obtenerZonaActivaCalendarioFecha($conn, (int)$cod_vendedor, $fecha);
+            $poblacionesZonaActiva = obtenerPoblacionesZonaActivaCalendario($conn, (int)$cod_vendedor, $codZonaActivaFecha);
+        }
+
+        if ($cod_vendedor !== null) {
+            $sqlClientesComercial = "
+                SELECT DISTINCT
+                    LTRIM(RTRIM(ISNULL(provincia, ''))) AS provincia,
+                    LTRIM(RTRIM(ISNULL(poblacion, ''))) AS poblacion
+                FROM [integral].[dbo].[clientes]
+                WHERE cod_vendedor = ?
+            ";
+            $stmtClientesComercial = odbc_prepare($conn, $sqlClientesComercial);
+            if ($stmtClientesComercial && odbc_execute($stmtClientesComercial, [$cod_vendedor])) {
+                while ($rowCliente = odbc_fetch_array($stmtClientesComercial)) {
+                    $provinciaCliente = trim((string)($rowCliente['provincia'] ?? ''));
+                    $poblacionCliente = trim((string)($rowCliente['poblacion'] ?? ''));
+
+                    if ($provinciaCliente !== '') {
+                        $claveProvincia = normalizarComparacion($provinciaCliente);
+                        $provinciasCliente[$claveProvincia] = true;
+                    }
+
+                    if ($provinciaCliente !== '' && $poblacionCliente !== '') {
+                        $clavePoblacion = normalizarComparacion($provinciaCliente) . '|' . normalizarComparacion($poblacionCliente);
+                        $poblacionesCliente[$clavePoblacion] = true;
+                    }
+                }
+            }
+        }
+
+        if ($cod_vendedor !== null) {
+            $sqlAgenda = "
+                SELECT id, fecha, hora_inicio, hora_fin, tipo_evento, descripcion
+                FROM [integral].[dbo].[cmf_comerciales_calendario_agenda]
+                WHERE cod_vendedor = ?
+                  AND CONVERT(char(10), fecha, 23) = ?
+                ORDER BY
+                    CASE WHEN hora_inicio IS NULL THEN 0 ELSE 1 END,
+                    hora_inicio,
+                    id
+            ";
+            $stmtAgenda = odbc_prepare($conn, $sqlAgenda);
+            if ($stmtAgenda && odbc_execute($stmtAgenda, [$cod_vendedor, $fecha])) {
+                while ($row = odbc_fetch_array($stmtAgenda)) {
+                    $horaInicio = trim((string)($row['hora_inicio'] ?? ''));
+                    $horaFin = trim((string)($row['hora_fin'] ?? ''));
+                    $tipoEvento = trim(toUTF8((string)($row['tipo_evento'] ?? '')));
+                    $descripcion = trim(toUTF8((string)($row['descripcion'] ?? '')));
+                    $claveEvento = implode('|', [
+                        'agenda',
+                        $fecha,
+                        $horaInicio,
+                        $horaFin,
+                        normalizarComparacion($tipoEvento),
+                        normalizarComparacion($descripcion),
+                    ]);
+                    if (isset($eventosVistos[$claveEvento])) {
+                        continue;
+                    }
+                    $eventosVistos[$claveEvento] = true;
+
+                    $eventos[] = [
+                        'tipo_registro' => 'calendario',
+                        'origen_calendario' => 'agenda',
+                        'start' => $horaInicio !== '' ? $horaInicio : '00:00:00',
+                        'titulo' => $tipoEvento !== '' ? $tipoEvento : 'AGENDA',
+                        'descripcion' => $descripcion,
+                        'hora_inicio' => $horaInicio,
+                        'hora_fin' => $horaFin,
+                        'ambito' => '',
+                        'provincia' => '',
+                        'poblacion' => '',
+                    ];
+                }
+            }
+        }
+
+        $sqlFestivos = "
+            SELECT id, fecha, ambito, provincia, poblacion, descripcion, repetir_anualmente
+            FROM [integral].[dbo].[cmf_comerciales_calendario_festivos]
+            WHERE CONVERT(char(10), fecha, 23) = ?
+               OR (
+                    repetir_anualmente = 1
+                    AND DAY(fecha) = ?
+                    AND MONTH(fecha) = ?
+               )
+            ORDER BY
+                CASE LTRIM(RTRIM(ambito))
+                    WHEN 'NACIONAL' THEN 1
+                    WHEN 'AUTONOMICO' THEN 2
+                    WHEN 'LOCAL' THEN 3
+                    ELSE 4
+                END,
+                provincia,
+                poblacion,
+                id
+        ";
+        $stmtFestivos = odbc_prepare($conn, $sqlFestivos);
+        if ($stmtFestivos && odbc_execute($stmtFestivos, [$fecha, $dia, $mes])) {
+            while ($row = odbc_fetch_array($stmtFestivos)) {
+                $ambito = trim(toUTF8((string)($row['ambito'] ?? '')));
+                $provincia = trim(toUTF8((string)($row['provincia'] ?? '')));
+                $poblacion = trim(toUTF8((string)($row['poblacion'] ?? '')));
+                $descripcion = trim(toUTF8((string)($row['descripcion'] ?? '')));
+
+                if ($cod_vendedor !== null) {
+                    if (strcasecmp($ambito, 'AUTONOMICO') === 0) {
+                        $claveProvincia = $provincia !== '' ? normalizarComparacion($provincia) : '';
+                        if ($claveProvincia === '' || !isset($provinciasCliente[$claveProvincia])) {
+                            continue;
+                        }
+                    }
+
+                    if (strcasecmp($ambito, 'LOCAL') === 0) {
+                        $clavePoblacion = ($provincia !== '' && $poblacion !== '')
+                            ? normalizarComparacion($provincia) . '|' . normalizarComparacion($poblacion)
+                            : '';
+                        if ($clavePoblacion === '' || !isset($poblacionesCliente[$clavePoblacion])) {
+                            continue;
+                        }
+                    }
+                }
+
+                $claveEvento = implode('|', [
+                    'festivo',
+                    $fecha,
+                    normalizarComparacion($ambito),
+                    normalizarComparacion($provincia),
+                    normalizarComparacion($poblacion),
+                    normalizarComparacion($descripcion),
+                ]);
+                if (isset($eventosVistos[$claveEvento])) {
+                    continue;
+                }
+                $eventosVistos[$claveEvento] = true;
+
+                if (strcasecmp($ambito, 'LOCAL') === 0) {
+                    $provinciaLocal = $provincia !== '' ? $provincia : 'SIN PROVINCIA';
+                    $poblacionLocal = $poblacion !== '' ? $poblacion : $provinciaLocal;
+                    $claveProvinciaLocal = normalizarComparacion($provinciaLocal);
+                    $clavePoblacionLocal = normalizarComparacion($poblacionLocal);
+
+                    if (!isset($festivosLocalesAgrupados[$claveProvinciaLocal])) {
+                        $festivosLocalesAgrupados[$claveProvinciaLocal] = [
+                            'provincia' => $provinciaLocal,
+                            'poblaciones' => [],
+                        ];
+                    }
+
+                    $claveZona = normalizarComparacion($provinciaLocal) . '|' . normalizarComparacion($poblacionLocal);
+                    $festivosLocalesAgrupados[$claveProvinciaLocal]['poblaciones'][$clavePoblacionLocal] = [
+                        'texto' => $poblacionLocal,
+                        'resaltado' => isset($poblacionesZonaActiva[$claveZona]),
+                    ];
+                    continue;
+                }
+
+                $eventos[] = [
+                    'tipo_registro' => 'calendario',
+                    'origen_calendario' => 'festivo',
+                    'start' => '00:00:00',
+                    'titulo' => $ambito !== '' ? ('FESTIVO ' . $ambito) : 'FESTIVO',
+                    'descripcion' => $descripcion,
+                    'hora_inicio' => '',
+                    'hora_fin' => '',
+                    'ambito' => $ambito,
+                    'provincia' => $provincia,
+                    'poblacion' => $poblacion,
+                    'mostrar_ubicacion' => !descripcionFestivoIncluyeUbicacion($descripcion, $provincia, $poblacion),
+                ];
+            }
+        }
+
+        if (!empty($festivosLocalesAgrupados)) {
+            uasort($festivosLocalesAgrupados, static function (array $a, array $b): int {
+                return strcasecmp((string)$a['provincia'], (string)$b['provincia']);
+            });
+
+            $lineasLocales = [];
+            foreach ($festivosLocalesAgrupados as $grupoProvincia) {
+                $lineasLocales[] = [
+                    'texto' => (string)$grupoProvincia['provincia'] . ':',
+                    'resaltado' => false,
+                    'cabecera' => true,
+                ];
+
+                $poblacionesLocales = array_values($grupoProvincia['poblaciones']);
+                usort($poblacionesLocales, static function (array $a, array $b): int {
+                    return strcasecmp((string)$a['texto'], (string)$b['texto']);
+                });
+
+                foreach ($poblacionesLocales as $poblacionLocal) {
+                    $lineasLocales[] = [
+                        'texto' => ' - ' . (string)$poblacionLocal['texto'],
+                        'resaltado' => !empty($poblacionLocal['resaltado']),
+                        'cabecera' => false,
+                    ];
+                }
+
+                $lineasLocales[] = [
+                    'texto' => '',
+                    'resaltado' => false,
+                    'cabecera' => false,
+                ];
+            }
+
+            if (!empty($lineasLocales) && (string)(end($lineasLocales)['texto'] ?? '') === '') {
+                array_pop($lineasLocales);
+            }
+
+            $eventos[] = [
+                'tipo_registro' => 'calendario',
+                'origen_calendario' => 'festivo',
+                'start' => '00:00:00',
+                'titulo' => 'FESTIVO LOCAL',
+                'descripcion' => '',
+                'lineas_descripcion' => $lineasLocales,
+                'hora_inicio' => '',
+                'hora_fin' => '',
+                'ambito' => 'LOCAL',
+                'provincia' => '',
+                'poblacion' => '',
+                'mostrar_ubicacion' => false,
+            ];
+        }
+
+        return $eventos;
     }
 }
 

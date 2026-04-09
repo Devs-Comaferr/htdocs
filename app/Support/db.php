@@ -115,6 +115,10 @@ if (!function_exists('openOdbcConnection')) {
 if (!function_exists('dbLogOdbcAttempt')) {
     function dbLogOdbcAttempt(string $dsn, string $driver, string $result, string $errorMessage = ''): void
     {
+        if ($result === 'OK' && $errorMessage === '') {
+            return;
+        }
+
         $logPath = BASE_PATH . '/storage/logs/php_debug.log';
         $safeDsn = preg_replace('/(Pwd|Password)\s*=\s*[^;]*/i', '$1=***', $dsn);
         if (!is_string($safeDsn) || $safeDsn === '') {

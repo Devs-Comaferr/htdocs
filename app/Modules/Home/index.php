@@ -386,13 +386,7 @@ if ($isJcasado) {
     }
 }
 
-/* ===========================================================================
-   CONSULTA 4: Comentario saneado
-   =========================================================================== */
-$esDiaLaborableHome = true;
-if ($isJcasado && $cod_vendedor_session !== null) {
-    $esDiaLaborableHome = esDiaLaborable($fechaConsulta, null, $cod_vendedor_session);
-}
+$eventosCalendarioHoy = obtenerEventosCalendarioDia($fechaConsulta, $cod_vendedor_session);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -1652,21 +1646,16 @@ $ui_requires_jquery = false;
 
   <!-- COLUMNA 4: VISITAS (solo para jcasado) -->
   <?php if ($isJcasado) { 
-      $visitasTransform = [];
+      $registrosDia = [];
       foreach ($visitasHoy as $v) {
           $v['tipo_registro'] = 'visita';
           $v['start'] = $v['hora_inicio_visita'];
-          $visitasTransform[] = $v;
+          $registrosDia[] = $v;
       }
-      if (!$esDiaLaborableHome) {
-          $visitasTransform[] = [
-              'tipo_registro' => 'no_laborable',
-              'start' => '00:00:00',
-              'tipo_evento' => 'No laborable',
-              'descripcion' => 'El calendario del comercial bloquea este d&iacute;a completo.',
-          ];
+      foreach ($eventosCalendarioHoy as $eventoCalendario) {
+          $registrosDia[] = $eventoCalendario;
       }
-      $merged = $visitasTransform;
+      $merged = $registrosDia;
       usort($merged, 'cmpStart');
       ?>
       <div class="column content-column">
@@ -1674,7 +1663,7 @@ $ui_requires_jquery = false;
         <div class="column-scroll">
         <?php
         if (empty($merged)) {
-            echo '<p class="no-data">No hay visitas para hoy</p>';
+            echo '<p class="no-data">No hay visitas ni eventos de calendario para hoy</p>';
         } else {
             foreach ($merged as $vis) {
                 if ($vis['tipo_registro'] === 'visita') {
@@ -1730,11 +1719,54 @@ $ui_requires_jquery = false;
                     echo '</a>';
 
                 } else {
+                    $origenCalendario = (string)($vis['origen_calendario'] ?? '');
+                    $iconoCalendario = $origenCalendario === 'agenda'
+                        ? '<i class="fa fa-calendar"></i>'
+                        : '<i class="fa fa-flag"></i>';
+                    $descripcionCalendario = trim((string)($vis['descripcion'] ?? ''));
+                    $provinciaCalendario = trim((string)($vis['provincia'] ?? ''));
+                    $poblacionCalendario = trim((string)($vis['poblacion'] ?? ''));
+                    $horaInicioCalendario = trim((string)($vis['hora_inicio'] ?? ''));
+                    $horaFinCalendario = trim((string)($vis['hora_fin'] ?? ''));
+                    $metaCalendario = '';
+                    if ($origenCalendario === 'agenda') {
+                        if ($horaInicioCalendario !== '' || $horaFinCalendario !== '') {
+                            $metaCalendario = trim(substr($horaInicioCalendario, 0, 5) . ' - ' . substr($horaFinCalendario, 0, 5), ' -');
+                        } else {
+                            $metaCalendario = 'Todo el dia';
+                        }
+                    } else {
+                        $ubicacionFestivo = trim($provinciaCalendario . ($provinciaCalendario !== '' && $poblacionCalendario !== '' ? ' - ' : '') . $poblacionCalendario);
+                        $mostrarUbicacionFestivo = !isset($vis['mostrar_ubicacion']) || (bool)$vis['mostrar_ubicacion'];
+                        if ($mostrarUbicacionFestivo && $ubicacionFestivo !== '') {
+                            $metaCalendario = $ubicacionFestivo;
+                        }
+                    }
                     echo '<div class="item-box" style="border-left:6px solid black;color:#666;">';
-                    echo '  <div class="item-title-visita"><i class="fa fa-ban"></i> '
-                         . htmlspecialchars((string)$vis['tipo_evento'])
+                    echo '  <div class="item-title-visita">' . $iconoCalendario . ' '
+                         . htmlspecialchars((string)($vis['titulo'] ?? 'Calendario'))
                          . '</div>';
-                    echo '  <div class="item-subtitle">' . (string)$vis['descripcion'] . '</div>';
+                    echo '  <div class="item-subtitle">';
+                    $lineasDescripcionCalendario = is_array($vis['lineas_descripcion'] ?? null) ? $vis['lineas_descripcion'] : [];
+                    if (!empty($lineasDescripcionCalendario)) {
+                        foreach ($lineasDescripcionCalendario as $lineaDescripcionCalendario) {
+                            $textoLineaCalendario = (string)($lineaDescripcionCalendario['texto'] ?? '');
+                            $resaltadoLineaCalendario = !empty($lineaDescripcionCalendario['resaltado']);
+                            if ($textoLineaCalendario === '') {
+                                echo '<br>';
+                                continue;
+                            }
+
+                            $estiloLineaCalendario = $resaltadoLineaCalendario ? ' style="color:#b91c1c;font-weight:700;"' : '';
+                            echo '<span' . $estiloLineaCalendario . '>' . htmlspecialchars($textoLineaCalendario) . '</span><br>';
+                        }
+                    } elseif ($descripcionCalendario !== '') {
+                        echo nl2br(htmlspecialchars($descripcionCalendario), false);
+                    }
+                    if ($metaCalendario !== '') {
+                        echo ($descripcionCalendario !== '' ? ' - ' : '') . htmlspecialchars($metaCalendario);
+                    }
+                    echo '  </div>';
                     echo '</div>';
                 }
             }
