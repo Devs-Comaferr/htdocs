@@ -18,14 +18,32 @@ require_once BASE_PATH . '/app/Support/db.php';
 
 require_once BASE_PATH . '/app/Modules/Planificador/services/planificador_service.php';
 
+if (!function_exists('planificadorRedirectZonasClientes')) {
+    function planificadorRedirectZonasClientes(int $cod_zona, string $mensaje, string $estado = 'error'): void
+    {
+        $params = [
+            'estado' => $estado,
+            'mensaje' => $mensaje,
+        ];
+
+        if ($cod_zona > 0) {
+            $params['cod_zona'] = $cod_zona;
+        }
+
+        header('Location: zonas_clientes.php?' . http_build_query($params));
+        exit;
+    }
+}
+
+$cod_zona = isset($_POST['cod_zona']) ? intval($_POST['cod_zona']) : 0;
+
 if (!isset($_SESSION['codigo'], $_POST['cod_cliente'], $_POST['cod_zona'], $_POST['cod_seccion'])) {
-    appExitTextError('Acceso no autorizado o datos incompletos.', 400);
+    planificadorRedirectZonasClientes($cod_zona, 'Acceso no autorizado o datos incompletos.');
 }
 
 csrfValidateRequest('planificador.borrar_asignacion');
 
 $cod_cliente = intval($_POST['cod_cliente']);
-$cod_zona = intval($_POST['cod_zona']);
 $cod_seccion = ($_POST['cod_seccion'] === '' ? 'NULL' : intval($_POST['cod_seccion']));
 
 try {
@@ -41,9 +59,9 @@ try {
         throw new Exception('Error al eliminar la asignacion.');
     }
 
-    header("Location: zonas_clientes.php?cod_zona=$cod_zona&mensaje=Eliminado con exito");
-    exit();
+    planificadorRedirectZonasClientes($cod_zona, 'Eliminado con exito.', 'ok');
 } catch (Exception $e) {
-    appExitTextError('No se pudo eliminar la asignacion.', 500, 'borrar_asignacion', $e->getMessage());
+    error_log('borrar_asignacion: ' . $e->getMessage());
+    planificadorRedirectZonasClientes($cod_zona, 'No se pudo eliminar la asignacion.');
 }
 

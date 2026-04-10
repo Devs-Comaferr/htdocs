@@ -253,6 +253,22 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
             color: red;
             margin-bottom: 15px;
         }
+        .flash-message {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 12px 16px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .flash-message.ok {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .flash-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
         /* Estilo para asignaciones secundarias */
         .asignacion-secundaria {
             color: gray;
@@ -273,7 +289,13 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
 </head>
 <body>
     <div class="container">
-        
+        <?php $flashMensaje = trim((string)($_GET['mensaje'] ?? '')); ?>
+        <?php $flashEstado = trim((string)($_GET['estado'] ?? '')); ?>
+        <?php if ($flashMensaje !== ''): ?>
+            <div class="flash-message <?= $flashEstado === 'ok' ? 'ok' : 'error' ?>">
+                <?= htmlspecialchars($flashMensaje, ENT_QUOTES, 'UTF-8') ?>
+            </div>
+        <?php endif; ?>
         
     <?php if (!$cod_zona): ?>
     
