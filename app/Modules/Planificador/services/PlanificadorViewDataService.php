@@ -1,5 +1,8 @@
 <?php
 
+// Legacy compatibility wrapper. The canonical implementation lives in
+// PlanificadorViewsDataService.php and this file remains only to preserve
+// old includes and function calls.
 require_once __DIR__ . '/PlanificadorViewsDataService.php';
 
 if (!function_exists('planificadorViewObtenerDatosZonas')) {

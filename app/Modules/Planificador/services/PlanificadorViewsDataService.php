@@ -1,5 +1,6 @@
 <?php
 
+// Canonical implementation for Planificador view-data helpers.
 if (!function_exists('planificadorViewsDataObtenerDatosZonas')) {
     function planificadorViewsDataObtenerDatosZonas(): array
     {
