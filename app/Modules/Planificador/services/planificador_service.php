@@ -55,7 +55,7 @@ if (!function_exists('planificadorConfigurarDebugLog')) {
 
 require_once __DIR__ . '/PlanificadorZonasRepository.php';
 require_once __DIR__ . '/PlanificadorAsignacionesRepository.php';
-require_once __DIR__ . '/PlanificadorViewDataService.php';
+require_once __DIR__ . '/PlanificadorViewsDataService.php';
 require_once __DIR__ . '/PlanificadorRecomendacionService.php';
 
 function obtenerCodVendedorPlanificacionService() {
@@ -358,22 +358,22 @@ function obtenerSiguienteClienteRecomendado($zonaActivaId = 0, $codVendedor = nu
 // VIEW: preparacion de vistas del modulo
 if (!function_exists('obtenerDatosZonasView')) {
     function obtenerDatosZonasView() {
-        return planificadorViewObtenerDatosZonas();
+        return planificadorViewsDataObtenerDatosZonas();
     }
 }
 if (!function_exists('obtenerDatosZonasClientesView')) {
     function obtenerDatosZonasClientesView($cod_zona = null) {
-        return planificadorViewObtenerDatosZonasClientes($cod_zona);
+        return planificadorViewsDataObtenerDatosZonasClientes($cod_zona);
     }
 }
 if (!function_exists('obtenerDatosZonasRutasView')) {
     function obtenerDatosZonasRutasView($cod_zona = null, $cod_ruta_seleccionada = 0) {
-        return planificadorViewObtenerDatosZonasRutas($cod_zona, $cod_ruta_seleccionada);
+        return planificadorViewsDataObtenerDatosZonasRutas($cod_zona, $cod_ruta_seleccionada);
     }
 }
 if (!function_exists('obtenerDatosCompletarDia')) {
     function obtenerDatosCompletarDia($codigo_vendedor, $fecha) {
-        return planificadorViewObtenerDatosCompletarDia($codigo_vendedor, $fecha);
+        return planificadorViewsDataObtenerDatosCompletarDia($codigo_vendedor, $fecha);
     }
 }
 
