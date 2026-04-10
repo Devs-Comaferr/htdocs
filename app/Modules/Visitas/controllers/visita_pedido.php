@@ -97,7 +97,7 @@ if (!empty($cod_ventas)) {
 
   $res_lineas = odbc_exec($conn, $sql_lineas);
   if (!$res_lineas) {
-    error_log("Error al ejecutar la consulta de lÃ­neas: " . odbc_errormsg($conn));
+    error_log("Error al ejecutar la consulta de lÃƒÂ­neas: " . odbc_errormsg($conn));
     echo 'Error interno';
     return;
   }
@@ -119,4 +119,4 @@ function formatoHora($horaSql)
   return date('H:i', strtotime($horaSql));
 }
 
-require_once BASE_PATH . '/app/Modules/Visitas/views/visita_pedido.php';
+require_once BASE_PATH . '/app/Modules/Visitas/views/visita_pedido/index.php';
