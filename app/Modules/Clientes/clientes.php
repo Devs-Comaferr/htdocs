@@ -1052,14 +1052,331 @@ $query_string = http_build_query($params);
       /* Si quieres header fijo tambiÃ©n en mÃ³vil, pon position:fixed y margin-top */
       /* header, .header { ... } .page-content { margin-top: ... } */
     }
+    :root {
+      --clientes-bg: #eef4f7;
+      --clientes-panel: rgba(255, 255, 255, 0.92);
+      --clientes-panel-strong: #ffffff;
+      --clientes-border: rgba(15, 23, 42, 0.1);
+      --clientes-text: #102132;
+      --clientes-muted: #5f7082;
+      --clientes-accent: #0f766e;
+      --clientes-shadow: 0 22px 48px rgba(15, 23, 42, 0.08);
+      --clientes-shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.05);
+    }
+    html, body {
+      font-family: "Trebuchet MS", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+      color: var(--clientes-text);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 26%),
+        radial-gradient(circle at top right, rgba(217, 119, 6, 0.12), transparent 24%),
+        linear-gradient(180deg, #f7fbfc 0%, var(--clientes-bg) 100%);
+    }
+    header, .header {
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+    .page-content {
+      max-width: 1600px;
+      padding: 20px 18px 28px;
+    }
+    .clientes-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .filter-card,
+    .results-card {
+      border: 1px solid var(--clientes-border);
+      border-radius: 22px;
+      background: var(--clientes-panel);
+      box-shadow: var(--clientes-shadow-soft);
+      backdrop-filter: blur(10px);
+    }
+    .filter-card {
+      padding: 18px;
+    }
+    .filter-card-header,
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-title-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.18), rgba(14, 116, 144, 0.16));
+      color: var(--clientes-accent);
+      font-size: 18px;
+    }
+    .section-title h2,
+    .section-title h3 {
+      margin: 0;
+      font-size: 19px;
+      letter-spacing: -0.02em;
+    }
+    .section-title p {
+      margin: 4px 0 0;
+      color: var(--clientes-muted);
+      font-size: 13px;
+    }
+    .results-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .results-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.82);
+      border: 1px solid var(--clientes-border);
+      color: var(--clientes-text);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .results-chip strong {
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .filter-form {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 12px;
+      background: transparent;
+      padding: 0;
+      border: 0;
+      box-shadow: none;
+      margin-bottom: 0;
+    }
+    .filter-form input,
+    .filter-form select {
+      width: 100%;
+      min-width: 0;
+      min-height: 48px;
+      padding: 12px 14px;
+      border: 1px solid rgba(148, 163, 184, 0.38);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.95);
+      color: var(--clientes-text);
+      font-size: 15px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .filter-form input:focus,
+    .filter-form select:focus {
+      border-color: rgba(15, 118, 110, 0.55);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+      transform: translateY(-1px);
+      outline: none;
+    }
+    .filter-form input[name="cod_cliente"] { grid-column: span 2; }
+    .filter-form input[name="nombre_comercial"] { grid-column: span 3; }
+    .filter-form select[name="provincia"] { grid-column: span 2; }
+    .filter-form select[name="poblacion"] { grid-column: span 2; }
+    .filter-form select[name="vendedor"] { grid-column: span 2; }
+    .filter-form .filter-switch { grid-column: span 2; }
+    .filter-form .btn-search,
+    .filter-form .btn-clear { grid-column: span 1; }
+    .filter-form button {
+      min-height: 48px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      justify-content: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .filter-form .btn-search {
+      background: linear-gradient(135deg, var(--clientes-accent) 0%, #0e7490 100%);
+      box-shadow: 0 16px 28px rgba(15, 118, 110, 0.24);
+    }
+    .filter-form .btn-clear {
+      background: #fff8f5;
+      color: #c2410c;
+      border: 1px solid rgba(194, 65, 12, 0.18);
+    }
+    .filter-switch {
+      min-height: 48px;
+      border: 1px solid rgba(148, 163, 184, 0.34);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.95);
+      justify-content: space-between;
+    }
+    .filter-switch input:checked + .filter-switch-track {
+      background: var(--clientes-accent);
+    }
+    .results-card {
+      padding: 18px;
+    }
+    .table-container {
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 20px;
+      background: var(--clientes-panel-strong);
+      box-shadow: none;
+    }
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 15px;
+    }
+    th, td {
+      padding: 14px 16px;
+      vertical-align: top;
+      border: 0;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    }
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #f7fbfc;
+      color: #385168;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    tr.clickable-row {
+      transition: background-color 0.18s ease;
+    }
+    tr.clickable-row:hover td {
+      background: rgba(15, 118, 110, 0.045);
+    }
+    .cliente-nombre-wrap {
+      font-weight: 700;
+    }
+    .ultima-visita-fecha-badge {
+      padding: 4px 9px;
+      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.18);
+    }
+    .empty-state {
+      padding: 40px 18px;
+      text-align: center;
+      color: var(--clientes-muted);
+      font-size: 15px;
+    }
+    .pagination {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .pagination a, .pagination span {
+      min-width: 42px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.86);
+      color: var(--clientes-text);
+      border-color: rgba(148, 163, 184, 0.24);
+      font-weight: 700;
+    }
+    .pagination a:hover {
+      background: rgba(15, 118, 110, 0.08);
+      border-color: rgba(15, 118, 110, 0.24);
+    }
+    .pagination .current {
+      background: linear-gradient(135deg, var(--clientes-accent) 0%, #0e7490 100%);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 14px 24px rgba(15, 118, 110, 0.22);
+    }
+    .results-footer {
+      margin-top: 14px;
+      text-align: right;
+      color: var(--clientes-muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    @media (max-width: 1180px) {
+      .filter-form input[name="cod_cliente"],
+      .filter-form input[name="nombre_comercial"],
+      .filter-form select[name="provincia"],
+      .filter-form select[name="poblacion"],
+      .filter-form select[name="vendedor"],
+      .filter-form .filter-switch,
+      .filter-form .btn-search,
+      .filter-form .btn-clear {
+        grid-column: span 3;
+      }
+      .filter-card-header,
+      .results-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .results-summary {
+        justify-content: flex-start;
+      }
+    }
+    @media (max-width: 860px) {
+      .page-content {
+        padding: 14px 12px 24px;
+      }
+      .filter-card,
+      .results-card {
+        border-radius: 20px;
+      }
+      .filter-form {
+        grid-template-columns: 1fr;
+      }
+      .filter-form input[name="cod_cliente"],
+      .filter-form input[name="nombre_comercial"],
+      .filter-form select[name="provincia"],
+      .filter-form select[name="poblacion"],
+      .filter-form select[name="vendedor"],
+      .filter-form .filter-switch,
+      .filter-form .btn-search,
+      .filter-form .btn-clear {
+        grid-column: auto;
+      }
+      .filter-form input,
+      .filter-form select,
+      .filter-form button {
+        font-size: 17px;
+      }
+      table {
+        font-size: 14px;
+      }
+      th, td {
+        padding: 12px 12px;
+      }
+      .results-footer {
+        text-align: center;
+      }
+    }
   </style>
 </head>
 <body>
 <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
 
 <div class="page-content">
-  <!-- FILTROS -->
-  <form class="filter-form" method="GET" action="clientes.php">
+  <div class="clientes-shell">
+  <section class="filter-card">
+    <div class="filter-card-header">
+      <div class="section-title">
+        <span class="section-title-icon"><i class="fa-solid fa-sliders"></i></span>
+        <div>
+          <h2>Filtros</h2>
+          <p>Ajusta la b&uacute;squeda para encontrar clientes m&aacute;s r&aacute;pido.</p>
+        </div>
+      </div>
+    </div>
+    <form class="filter-form" method="GET" action="clientes.php">
     <input type="text" name="cod_cliente" maxlength="6"
            value="<?php echo htmlspecialchars($cod_cliente_utf8); ?>"
            placeholder="Codigo Cliente">
@@ -1115,10 +1432,24 @@ $query_string = http_build_query($params);
             onclick="window.location.href='clientes.php';">
       <i class="fas fa-trash-alt"></i> Limpiar
     </button>
-  </form>
+    </form>
+  </section>
   
-  <!-- TABLA DE RESULTADOS -->
-  <div class="table-container">
+  <section class="results-card">
+    <div class="results-header">
+      <div class="section-title">
+        <span class="section-title-icon"><i class="fa-solid fa-table-list"></i></span>
+        <div>
+          <h3>Resultados</h3>
+          <p>Listado ordenable con actividad comercial, visitas y ventas.</p>
+        </div>
+      </div>
+      <div class="results-summary">
+        <span class="results-chip"><i class="fa-solid fa-database"></i> <strong><?php echo number_format($numRegistros, 0, ',', '.'); ?></strong> registros</span>
+        <span class="results-chip"><i class="fa-solid fa-layer-group"></i> <strong><?php echo number_format(count($clientesPaginados), 0, ',', '.'); ?></strong> visibles</span>
+      </div>
+    </div>
+    <div class="table-container">
     <table>
       <thead>
         <tr>
@@ -1182,7 +1513,7 @@ $query_string = http_build_query($params);
       <?php
       $colspan = 8 + (is_null($codigo_vendedor) ? 1 : 0) + ($mostrarUltimaVisita ? 1 : 0);
       if (empty($clientesPaginados)) {
-          echo '<tr><td colspan="' . $colspan . '">No se encontraron registros</td></tr>';
+          echo '<tr><td colspan="' . $colspan . '" class="empty-state">No se encontraron registros con los filtros actuales.</td></tr>';
       } else {
           // Ranking
           $rankingAct = rankingPorAnio($clientes, 'importe_'.$currentYear);
@@ -1449,7 +1780,7 @@ $query_string = http_build_query($params);
       ?>
       </tbody>
     </table>
-  </div>
+    </div>
 
   <!-- PAGINACION -->
   <div class="pagination">
@@ -1476,7 +1807,9 @@ $query_string = http_build_query($params);
     <?php endif; ?>
   </div>
 
-  <p>Total de registros: <?php echo $numRegistros; ?></p>
+    <div class="results-footer">Total de registros: <?php echo number_format($numRegistros, 0, ',', '.'); ?></div>
+  </section>
+</div>
 </div> <!-- /.page-content -->
 
 <!-- Bootstrap 5 JS Bundle (local via Composer) -->
