@@ -17,28 +17,20 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 requierePermiso('perm_planificador');
 // zonas_clientes.php
 require_once BASE_PATH . '/app/Modules/Planificador/services/planificador_service.php';
+require_once BASE_PATH . '/app/Modules/Planificador/services/PlanificadorZonasClientesViewBuilder.php';
 require_once BASE_PATH . '/app/Support/functions.php';
 
-$pageTitle = "Asignar Clientes a Zonas";
+$zonasClientesPageData = planificadorBuildZonasClientesViewData();
+if (!empty($zonasClientesPageData['zonasClientesViewData']['error'])) {
+    echo $zonasClientesPageData['zonasClientesViewData']['error'];
+    return;
+}
+
+extract($zonasClientesPageData, EXTR_OVERWRITE);
+
 $ui_version = 'bs5';
 $ui_requires_jquery = false;
 include BASE_PATH . '/resources/views/layouts/header.php';
-
-$zonasClientesViewData = obtenerDatosZonasClientesView(isset($_GET['cod_zona']) ? intval($_GET['cod_zona']) : null);
-if (!empty($zonasClientesViewData['error'])) {
-    echo $zonasClientesViewData['error'];
-    return;
-}
-$zonas = $zonasClientesViewData['zonas'];
-$zonas_alertas = $zonasClientesViewData['zonas_alertas'];
-$clientes_desalineados = $zonasClientesViewData['clientes_desalineados'];
-$asignaciones_por_zona = $zonasClientesViewData['asignaciones_por_zona'];
-$zona_actual = $zonasClientesViewData['zona_actual'];
-$rutas_asignadas = $zonasClientesViewData['rutas_asignadas'];
-$clientes_disponibles = $zonasClientesViewData['clientes_disponibles'];
-$asignaciones_actuales = $zonasClientesViewData['asignaciones_actuales'];
-$cod_zona = $zonasClientesViewData['cod_zona'];
-$numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -289,8 +281,6 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
 </head>
 <body>
     <div class="container">
-        <?php $flashMensaje = trim((string)($_GET['mensaje'] ?? '')); ?>
-        <?php $flashEstado = trim((string)($_GET['estado'] ?? '')); ?>
         <?php if ($flashMensaje !== ''): ?>
             <div class="flash-message <?= $flashEstado === 'ok' ? 'ok' : 'error' ?>">
                 <?= htmlspecialchars($flashMensaje, ENT_QUOTES, 'UTF-8') ?>
@@ -299,19 +289,15 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
         
     <?php if (!$cod_zona): ?>
     
-    <?php if (!empty($zonas)): ?>
+    <?php if (!empty($zonasBotones)): ?>
         <div class="buttons-container">
-            <?php foreach ($zonas as $zona): ?>
-                <?php
-                    $codZona = (string)($zona['cod_zona'] ?? '');
-                    $totalDesalineados = (int)($zonas_alertas[$codZona] ?? 0);
-                ?>
-                <a href="zonas_clientes.php?cod_zona=<?php echo htmlspecialchars($zona['cod_zona']); ?>" class="btn-zona">
-                    <?php if ($totalDesalineados > 0): ?>
-                        <span class="zona-alerta-badge"><?php echo $totalDesalineados; ?></span>
+            <?php foreach ($zonasBotones as $zonaBoton): ?>
+                <a href="zonas_clientes.php?cod_zona=<?php echo htmlspecialchars((string)$zonaBoton['cod_zona'], ENT_QUOTES, 'UTF-8'); ?>" class="btn-zona">
+                    <?php if ((int)$zonaBoton['total_desalineados'] > 0): ?>
+                        <span class="zona-alerta-badge"><?php echo (int)$zonaBoton['total_desalineados']; ?></span>
                     <?php endif; ?>
                     <i class="fas fa-map-marker-alt"></i>
-                    <?php echo htmlspecialchars(toUTF8((string)$zona['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?>
+                    <?php echo htmlspecialchars((string)$zonaBoton['nombre_zona'], ENT_QUOTES, 'UTF-8'); ?>
                 </a>
             <?php endforeach; ?>
         </div>
@@ -319,9 +305,9 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
         <div class="no-data">No tienes zonas disponibles. <a href="zonas.php">Crear Zonas</a></div>
     <?php endif; ?>
 <?php else: ?>
-            <h2><?php echo htmlspecialchars(toUTF8((string)$zona_actual['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?></h2>
+            <h2><?php echo htmlspecialchars((string)$zonaActualNombre, ENT_QUOTES, 'UTF-8'); ?></h2>
             
-            <?php if (!empty($clientes_disponibles)): ?>
+            <?php if (!empty($clientesDisponiblesOptions)): ?>
             <div class="assign-form">
                 <h3>Asignar Nuevo Cliente a la Zona</h3>
                 
@@ -335,10 +321,10 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
                     <label for="cod_cliente">Selecciona el Cliente:</label>
                     <select id="cod_cliente" name="cod_cliente" class="form-select" required>
                         <option value="">--Selecciona un Cliente--</option>
-                        <?php if (!empty($clientes_disponibles)): ?>
-                            <?php foreach ($clientes_disponibles as $cliente): ?>
-                                <option value="<?php echo $cliente['cod_cliente']; ?>">
-                                    <?php echo htmlspecialchars(toUTF8((string)$cliente['nombre_cliente']), ENT_QUOTES, 'UTF-8'); ?>
+                        <?php if (!empty($clientesDisponiblesOptions)): ?>
+                            <?php foreach ($clientesDisponiblesOptions as $clienteOption): ?>
+                                <option value="<?php echo htmlspecialchars((string)$clienteOption['cod_cliente'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <?php echo htmlspecialchars((string)$clienteOption['nombre_cliente'], ENT_QUOTES, 'UTF-8'); ?>
                                 </option>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -358,12 +344,10 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
                     <label for="zona_secundaria">Zona Secundaria (Opcional):</label>
                     <select id="zona_secundaria" name="zona_secundaria" class="form-select">
                         <option value="">--Selecciona una Zona Secundaria--</option>
-                        <?php foreach ($zonas as $zona): ?>
-                            <?php if ($zona['cod_zona'] != $cod_zona): ?>
-                                <option value="<?php echo htmlspecialchars($zona['cod_zona']); ?>">
-                                    <?php echo htmlspecialchars(toUTF8((string)$zona['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?>
-                                </option>
-                            <?php endif; ?>
+                        <?php foreach ($zonasSecundariasOptions as $zonaSecundariaOption): ?>
+                            <option value="<?php echo htmlspecialchars((string)$zonaSecundariaOption['cod_zona'], ENT_QUOTES, 'UTF-8'); ?>">
+                                <?php echo htmlspecialchars((string)$zonaSecundariaOption['nombre_zona'], ENT_QUOTES, 'UTF-8'); ?>
+                            </option>
                         <?php endforeach; ?>
                     </select>
                     
@@ -408,49 +392,23 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
         <th>Frecuencia</th>
         <th colspan="2"><center>Acciones</center></th>
     </tr>
-    <?php if (!empty($asignaciones_actuales)): ?>
-        <?php foreach ($asignaciones_actuales as $asignacion): ?>
-            <?php
-                // Determinar la clase CSS basada en el tipo de asignación
-                $clase = '';
-                if ($asignacion['tipo_asignacion'] === 'secundaria') {
-                    $clase = 'asignacion-secundaria';
-                }
-                if ($asignacion['frecuencia_visita'] === 'Nunca') {
-                    $clase = 'frecuencia-nunca';
-                }
-                if (isset($asignacion['cod_cliente']) && isset($clientes_desalineados[(string)$asignacion['cod_cliente']])) {
-                    $clase = trim($clase . ' cliente-desalineado');
-                }
-            ?>
-            <tr class="<?php echo $clase; ?>">
+    <?php if (!empty($asignacionesPreparadas)): ?>
+        <?php foreach ($asignacionesPreparadas as $asignacionRender): ?>
+            <tr class="<?php echo htmlspecialchars((string)$asignacionRender['row_class'], ENT_QUOTES, 'UTF-8'); ?>">
                 <td>
-                    <?php
-                        $poblacionCliente = trim((string)($asignacion['poblacion_cliente'] ?? ''));
-                        $poblacionSeccion = trim((string)($asignacion['poblacion_seccion'] ?? ''));
-                        $municipioLineaPrincipal = !empty($asignacion['nombre_seccion'])
-                            ? ($poblacionSeccion !== '' ? $poblacionSeccion : $poblacionCliente)
-                            : $poblacionCliente;
-                        echo htmlspecialchars(toUTF8((string)$asignacion['nombre_cliente']), ENT_QUOTES, 'UTF-8')
-                            . " - " .
-                            htmlspecialchars(toUTF8((string)$municipioLineaPrincipal), ENT_QUOTES, 'UTF-8');
-                    ?>
-                    <?php
-                    $codCliFila = (string)($asignacion['cod_cliente'] ?? '');
-                    $tieneVariasSecciones = $codCliFila !== '' && isset($numSeccionesPorCliente[$codCliFila]) && count($numSeccionesPorCliente[$codCliFila]) > 1;
-                    if ($tieneVariasSecciones && !empty($asignacion['nombre_seccion'])) {
-                        echo '<br>&nbsp;&nbsp;&nbsp;&nbsp; &#128204; ' . htmlspecialchars(toUTF8((string)$asignacion['nombre_seccion']), ENT_QUOTES, 'UTF-8');
-                    }
-                    ?>
-                    <?php if (!empty($asignacion['observaciones'])) { ?>
+                    <?php echo htmlspecialchars((string)$asignacionRender['nombre_linea_principal'], ENT_QUOTES, 'UTF-8'); ?>
+                    <?php if (!empty($asignacionRender['mostrar_seccion'])): ?>
+                        <?php echo '<br>&nbsp;&nbsp;&nbsp;&nbsp; &#128204; ' . htmlspecialchars((string)$asignacionRender['nombre_seccion'], ENT_QUOTES, 'UTF-8'); ?>
+                    <?php endif; ?>
+                    <?php if (!empty($asignacionRender['observaciones'])) { ?>
                         <br>
-                        <span class="asignacion-secundaria">&#9997; <?php echo htmlspecialchars(toUTF8((string)$asignacion['observaciones']), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <span class="asignacion-secundaria">&#9997; <?php echo htmlspecialchars((string)$asignacionRender['observaciones'], ENT_QUOTES, 'UTF-8'); ?></span>
                     <?php } ?>
 
                 </td>
-                <td><center><?php echo ucfirst($asignacion['frecuencia_visita']); ?></center></td>
+                <td><center><?php echo htmlspecialchars((string)$asignacionRender['frecuencia_label'], ENT_QUOTES, 'UTF-8'); ?></center></td>
                 <td>
-                <?php if ($asignacion['tipo_asignacion'] === 'primaria') {?>
+                <?php if (!empty($asignacionRender['permitir_acciones'])) {?>
                     
                 
     <!-- Botón de Editar -->
@@ -461,26 +419,26 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
         title="Editar Asignación"
         data-bs-toggle="modal"
         data-bs-target="#editarAsignacionModal"
-        data-cod-cliente="<?php echo htmlspecialchars((string)$asignacion['cod_cliente'], ENT_QUOTES, 'UTF-8'); ?>"
+        data-cod-cliente="<?php echo htmlspecialchars((string)$asignacionRender['cod_cliente'], ENT_QUOTES, 'UTF-8'); ?>"
         data-cod-zona="<?php echo htmlspecialchars((string)$cod_zona, ENT_QUOTES, 'UTF-8'); ?>"
-        data-cod-seccion="<?php echo isset($asignacion['cod_seccion']) ? htmlspecialchars((string)$asignacion['cod_seccion'], ENT_QUOTES, 'UTF-8') : 'NULL'; ?>"
-        data-nombre-cliente="<?php echo htmlspecialchars(toUTF8((string)$asignacion['nombre_cliente']), ENT_QUOTES, 'UTF-8'); ?>"
-        data-nombre-seccion="<?php echo htmlspecialchars(toUTF8((string)($asignacion['nombre_seccion'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>"
-        data-nombre-zona="<?php echo htmlspecialchars(toUTF8((string)$zona_actual['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?>"
-        data-zona-secundaria="<?php echo htmlspecialchars((string)($asignacion['zona_secundaria'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
-        data-tiempo-promedio-visita="<?php echo htmlspecialchars((string)($asignacion['tiempo_promedio_visita'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
-        data-preferencia-horaria="<?php echo htmlspecialchars((string)($asignacion['preferencia_horaria'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
-        data-frecuencia-visita="<?php echo htmlspecialchars((string)($asignacion['frecuencia_visita'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
-        data-observaciones="<?php echo htmlspecialchars(toUTF8((string)($asignacion['observaciones'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>">
+        data-cod-seccion="<?php echo htmlspecialchars((string)$asignacionRender['cod_seccion_data'], ENT_QUOTES, 'UTF-8'); ?>"
+        data-nombre-cliente="<?php echo htmlspecialchars((string)$asignacionRender['nombre_cliente_data'], ENT_QUOTES, 'UTF-8'); ?>"
+        data-nombre-seccion="<?php echo htmlspecialchars((string)$asignacionRender['nombre_seccion_data'], ENT_QUOTES, 'UTF-8'); ?>"
+        data-nombre-zona="<?php echo htmlspecialchars((string)$asignacionRender['nombre_zona_data'], ENT_QUOTES, 'UTF-8'); ?>"
+        data-zona-secundaria="<?php echo htmlspecialchars((string)$asignacionRender['zona_secundaria_data'], ENT_QUOTES, 'UTF-8'); ?>"
+        data-tiempo-promedio-visita="<?php echo htmlspecialchars((string)$asignacionRender['tiempo_promedio_visita_data'], ENT_QUOTES, 'UTF-8'); ?>"
+        data-preferencia-horaria="<?php echo htmlspecialchars((string)$asignacionRender['preferencia_horaria_data'], ENT_QUOTES, 'UTF-8'); ?>"
+        data-frecuencia-visita="<?php echo htmlspecialchars((string)$asignacionRender['frecuencia_visita_data'], ENT_QUOTES, 'UTF-8'); ?>"
+        data-observaciones="<?php echo htmlspecialchars((string)$asignacionRender['observaciones_data'], ENT_QUOTES, 'UTF-8'); ?>">
         <i class="fas fa-pencil"></i>
     </button>
 
     <!-- Botón de Eliminar -->
     <form action="borrar_asignacion.php" method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta asignación?');">
         <?= csrfInput() ?>
-        <input type="hidden" name="cod_cliente" value="<?php echo htmlspecialchars($asignacion['cod_cliente']); ?>">
-        <input type="hidden" name="cod_zona" value="<?php echo htmlspecialchars($cod_zona); ?>">
-        <input type="hidden" name="cod_seccion" value="<?php echo htmlspecialchars($asignacion['cod_seccion']); ?>">
+        <input type="hidden" name="cod_cliente" value="<?php echo htmlspecialchars((string)$asignacionRender['cod_cliente'], ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="cod_zona" value="<?php echo htmlspecialchars((string)$cod_zona, ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="cod_seccion" value="<?php echo htmlspecialchars((string)$asignacionRender['cod_seccion_hidden'], ENT_QUOTES, 'UTF-8'); ?>">
         <button type="submit" class="btn btn-sm btn-danger" title="Eliminar Asignación">
             <i class="fas fa-trash"></i>
         </button>
@@ -523,12 +481,10 @@ $numSeccionesPorCliente = $zonasClientesViewData['numSeccionesPorCliente'];
                                 <label for="modal-zona-secundaria">Zona Secundaria (Opcional):</label>
                                 <select name="zona_secundaria" id="modal-zona-secundaria" class="form-select">
                                     <option value="">--Selecciona una Zona--</option>
-                                    <?php foreach ($zonas as $z): ?>
-                                        <?php if ($z['cod_zona'] != $cod_zona): ?>
-                                            <option value="<?php echo htmlspecialchars((string)$z['cod_zona'], ENT_QUOTES, 'UTF-8'); ?>">
-                                                <?php echo htmlspecialchars(toUTF8((string)$z['nombre_zona']), ENT_QUOTES, 'UTF-8'); ?>
+                                    <?php foreach ($zonasSecundariasOptions as $zonaSecundariaOption): ?>
+                                            <option value="<?php echo htmlspecialchars((string)$zonaSecundariaOption['cod_zona'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                <?php echo htmlspecialchars((string)$zonaSecundariaOption['nombre_zona'], ENT_QUOTES, 'UTF-8'); ?>
                                             </option>
-                                        <?php endif; ?>
                                     <?php endforeach; ?>
                                 </select>
 
