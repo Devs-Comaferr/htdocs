@@ -103,8 +103,8 @@
         <h1>Registrar Visita Manual</h1>
 
         <div class="mb-3">
-            <span class="badge <?php echo $cod_cliente == 0 ? 'bg-primary' : 'bg-secondary'; ?>">Paso 1: Buscar cliente</span>
-            <?php if ($cod_cliente > 0): ?>
+            <span class="badge <?php echo htmlspecialchars($paso1BadgeClass, ENT_QUOTES, 'UTF-8'); ?>">Paso 1: Buscar cliente</span>
+            <?php if ($mostrarPasosSeleccion): ?>
                 <span class="badge bg-primary ms-1">Paso 2: Cliente seleccionado</span>
                 <span class="badge bg-primary ms-1">Paso 3: Registrar visita</span>
             <?php endif; ?>
@@ -113,8 +113,8 @@
         <form method="POST" action="<?= BASE_URL ?>/registrar_visita.php" class="form" id="flujoVisitaManual">
             <?= csrfInput() ?>
             <input type="hidden" name="origen" value="manual">
-            <input type="hidden" name="cod_cliente" id="cod_cliente" value="<?php echo $cod_cliente > 0 ? htmlspecialchars((string)$cod_cliente) : ''; ?>">
-            <input type="hidden" name="cod_seccion" id="cod_seccion" value="<?php echo $cod_seccion !== null ? htmlspecialchars((string)$cod_seccion) : ''; ?>">
+            <input type="hidden" name="cod_cliente" id="cod_cliente" value="<?php echo htmlspecialchars($codClienteHiddenValue, ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="cod_seccion" id="cod_seccion" value="<?php echo htmlspecialchars($codSeccionHiddenValue, ENT_QUOTES, 'UTF-8'); ?>">
 
             <?php if ($cod_cliente == 0): ?>
                 <div class="mb-3">
@@ -128,83 +128,58 @@
             <?php if ($mostrarResultados && $cod_cliente == 0): ?>
                 <hr>
                 <h3>Resultados de la búsqueda</h3>
-                <?php if (empty($resultadosBusqueda)): ?>
+                <?php if (empty($resultadosBusquedaRender)): ?>
                     <p class="text-center">No se encontraron clientes que cumplan con la búsqueda.</p>
                 <?php else: ?>
-                    <?php foreach ($resultadosBusqueda as $cliente): ?>
-                        <?php
-                        $displayName = htmlspecialchars((string)$cliente['nombre_comercial']);
-                        $clienteCod = (int)$cliente['cod_cliente'];
-                        $clienteSeccion = ($cliente['cod_seccion'] === null || $cliente['cod_seccion'] === '') ? '' : (string)$cliente['cod_seccion'];
-                        if ($clienteSeccion !== '') {
-                            $displayName .= ' - ' . htmlspecialchars((string)$cliente['nombre_seccion']);
-                        }
-                        ?>
+                    <?php foreach ($resultadosBusquedaRender as $clienteRender): ?>
                         <button
                             type="submit"
                             name="accion"
                             value="seleccionar_cliente"
                             formaction="<?= BASE_URL ?>/visita_manual.php"
                             class="result-button"
-                            onclick="document.getElementById('cod_cliente').value='<?php echo htmlspecialchars((string)$clienteCod, ENT_QUOTES, 'UTF-8'); ?>'; document.getElementById('cod_seccion').value='<?php echo htmlspecialchars($clienteSeccion, ENT_QUOTES, 'UTF-8'); ?>';"
+                            onclick="document.getElementById('cod_cliente').value='<?php echo htmlspecialchars($clienteRender['cod_cliente'], ENT_QUOTES, 'UTF-8'); ?>'; document.getElementById('cod_seccion').value='<?php echo htmlspecialchars($clienteRender['cod_seccion'], ENT_QUOTES, 'UTF-8'); ?>';"
                         >
-                            <?php echo $displayName; ?>
+                            <?php echo htmlspecialchars($clienteRender['display_name'], ENT_QUOTES, 'UTF-8'); ?>
                         </button>
                     <?php endforeach; ?>
                 <?php endif; ?>
             <?php endif; ?>
 
-            <?php if ($cod_cliente > 0 && $assignment): ?>
+            <?php if ($mostrarFormularioRegistro): ?>
                 <hr>
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                     <div class="alert alert-primary mb-0 py-2 px-3">
                         <strong>Cliente seleccionado:</strong>
-                        <?php echo htmlspecialchars($nombreCliente); ?>
+                        <?php echo htmlspecialchars($nombreCliente, ENT_QUOTES, 'UTF-8'); ?>
                         <span class="badge bg-light text-dark ms-2">#<?php echo htmlspecialchars((string)$cod_cliente); ?></span>
                     </div>
                     <button type="button" class="btn btn-secondary" onclick="window.location='<?= BASE_URL ?>/visita_manual.php'">Cambiar cliente</button>
                 </div>
 
-                <?php if (count($citas) > 0): ?>
-                    <?php foreach ($citas as $cita): ?>
-                        <?php
-                        $estado = strtolower(trim((string)$cita['estado_visita']));
-                        $alertClass = $estado === 'planificada' ? 'alert-info' : ($estado === 'pendiente' ? 'alert-warning' : 'alert-secondary');
-                        ?>
-                        <div class="alert <?php echo $alertClass; ?>">
-                            <strong><?php echo htmlspecialchars((string)$cita['estado_visita']); ?>:</strong>
-                            <?php echo htmlspecialchars(date('d/m/Y', strtotime((string)$cita['fecha_visita']))); ?>
-                            de <?php echo htmlspecialchars(date('H:i', strtotime((string)$cita['hora_inicio_visita']))); ?>
-                            a <?php echo htmlspecialchars(date('H:i', strtotime((string)$cita['hora_fin_visita']))); ?>
+                <?php if (!empty($citasRender)): ?>
+                    <?php foreach ($citasRender as $citaRender): ?>
+                        <div class="alert <?php echo htmlspecialchars($citaRender['alert_class'], ENT_QUOTES, 'UTF-8'); ?>">
+                            <strong><?php echo htmlspecialchars($citaRender['estado_label'], ENT_QUOTES, 'UTF-8'); ?>:</strong>
+                            <?php echo htmlspecialchars($citaRender['fecha_label'], ENT_QUOTES, 'UTF-8'); ?>
+                            de <?php echo htmlspecialchars($citaRender['hora_inicio_label'], ENT_QUOTES, 'UTF-8'); ?>
+                            a <?php echo htmlspecialchars($citaRender['hora_fin_label'], ENT_QUOTES, 'UTF-8'); ?>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
 
-                <?php if (!empty($assignment['frecuencia_visita']) && strtolower((string)$assignment['frecuencia_visita']) === 'nunca'): ?>
+                <?php if ($mostrarAvisoNunca): ?>
                     <div class="alert alert-danger">Atención: Este cliente no se visita habitualmente.</div>
                 <?php endif; ?>
 
                 <h3>Datos del Cliente y Disponibilidad</h3>
                 <?php if ($nombreSeccion !== ''): ?>
-                    <p><strong>Sección:</strong> <?php echo htmlspecialchars($nombreSeccion); ?></p>
+                    <p><strong>Sección:</strong> <?php echo htmlspecialchars($nombreSeccion, ENT_QUOTES, 'UTF-8'); ?></p>
                 <?php endif; ?>
-                <p><strong>Tiempo Promedio de Visita:</strong>
-                    <?php
-                    if ($tiempo_promedio_minutes >= 60) {
-                        $hours = floor($tiempo_promedio_minutes / 60);
-                        $minutes = $tiempo_promedio_minutes % 60;
-                        echo $hours . ' ' . ($hours == 1 ? 'hora' : 'horas');
-                        if ($minutes > 0) {
-                            echo ' ' . $minutes . ' minutos';
-                        }
-                    } else {
-                        echo $tiempo_promedio_minutes . ' minutos';
-                    }
-                    ?>
-                </p>
-                <p><strong>Disponibilidad Mañana:</strong> <?php echo $hora_inicio_manana !== '' ? htmlspecialchars($hora_inicio_manana) : 'No definido'; ?> a <?php echo $hora_fin_manana !== '' ? htmlspecialchars($hora_fin_manana) : 'No definido'; ?></p>
-                <p><strong>Disponibilidad Tarde:</strong> <?php echo $hora_inicio_tarde !== '' ? htmlspecialchars($hora_inicio_tarde) : 'No definido'; ?> a <?php echo $hora_fin_tarde !== '' ? htmlspecialchars($hora_fin_tarde) : 'No definido'; ?></p>
-                <p><strong>Preferencia Horaria:</strong> <?php echo !empty($assignment['preferencia_horaria']) ? htmlspecialchars((string)$assignment['preferencia_horaria']) : 'No definida'; ?></p>
+                <p><strong>Tiempo Promedio de Visita:</strong> <?php echo htmlspecialchars($tiempoPromedioLabel, ENT_QUOTES, 'UTF-8'); ?></p>
+                <p><strong>Disponibilidad Mañana:</strong> <?php echo htmlspecialchars($disponibilidadMananaLabel, ENT_QUOTES, 'UTF-8'); ?></p>
+                <p><strong>Disponibilidad Tarde:</strong> <?php echo htmlspecialchars($disponibilidadTardeLabel, ENT_QUOTES, 'UTF-8'); ?></p>
+                <p><strong>Preferencia Horaria:</strong> <?php echo htmlspecialchars($preferenciaHorariaLabel, ENT_QUOTES, 'UTF-8'); ?></p>
 
                 <button id="horario_btnDefinirHorario" type="button" class="btn btn-info" style="margin-bottom:15px;">Definir Horario</button>
 
