@@ -8,7 +8,7 @@
   <?php include BASE_PATH . '/resources/views/layouts/header.php'; ?>
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/main.min.css" rel="stylesheet" />
   <link href="<?= BASE_URL ?>/assets/css/planner-calendar-shared.css" rel="stylesheet" />
-  <link href="<?= BASE_URL ?>/app/Modules/Visitas/views/visita_pedido/css/visita_pedido.css" rel="stylesheet" />
+  <link href="<?= BASE_URL ?>/assets/modules/visitas/visita_pedido.css" rel="stylesheet" />
   </head>
 
 <body class="planner-page">
@@ -30,7 +30,7 @@
       csrfToken: <?= json_encode(csrfToken(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
     };
   </script>
-  <script src="<?= BASE_URL ?>/app/Modules/Visitas/views/visita_pedido/js/visita_pedido.js"></script>
+  <script src="<?= BASE_URL ?>/assets/modules/visitas/visita_pedido.js"></script>
   <script src="<?= BASE_URL ?>/assets/js/app-ui.js"></script>
   <script src="<?= BASE_URL ?>/assets/js/app-utils.js"></script>
 </body>
