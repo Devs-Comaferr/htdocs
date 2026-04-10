@@ -151,7 +151,8 @@
       enforceTimeDifference('#t_hora_inicio_visita', '#t_hora_fin_visita', 15, 300);
       enforceTimeDifference('#e_hora_inicio_visita', '#e_hora_fin_visita', 15, 300);
 
-      var csrfTokenVisitas = <?= json_encode(csrfToken(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+      var visitaPedidoConfig = window.visitaPedidoConfig || {};
+      var csrfTokenVisitas = visitaPedidoConfig.csrfToken || '';
 
       function checkVisitaPreviaGeneral(modal, cod_cliente, cod_seccion, fecha, checkboxSelector, previousIdSelector) {
         var payload = new URLSearchParams();
@@ -160,7 +161,7 @@
         payload.set('cod_seccion', cod_seccion !== '' ? cod_seccion : '');
         payload.set('_csrf_token', csrfTokenVisitas);
 
-        fetch('<?= BASE_URL ?>/check_visita_previa.php', {
+        fetch(visitaPedidoConfig.baseUrl + '/check_visita_previa.php', {
           method: 'POST',
           credentials: 'same-origin',
           headers: {
