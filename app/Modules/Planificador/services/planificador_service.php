@@ -268,6 +268,14 @@ function actualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secun
     return planificadorRepoActualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones);
 }
 
+function seccionDisponibleParaAsignacion($cod_cliente, $cod_seccion): ?bool {
+    return planificadorRepoSeccionDisponibleParaAsignacion($cod_cliente, $cod_seccion);
+}
+
+function borrarAsignacion($cod_cliente, $cod_zona, $cod_seccion): bool {
+    return planificadorRepoBorrarAsignacion($cod_cliente, $cod_zona, $cod_seccion);
+}
+
 
 
 if (!function_exists('crearZonaVisitaService')) {
@@ -412,6 +420,18 @@ if (!function_exists('obtenerClientesPorZonaYRutaService')) {
 if (!function_exists('asignarClienteZonaService')) {
     function asignarClienteZonaService($cod_cliente, $cod_seccion, $zona_principal, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones = '') {
         return asignarClienteZona($cod_cliente, $cod_seccion, $zona_principal, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones);
+    }
+}
+
+if (!function_exists('seccionDisponibleParaAsignacionService')) {
+    function seccionDisponibleParaAsignacionService($cod_cliente, $cod_seccion): ?bool {
+        return seccionDisponibleParaAsignacion($cod_cliente, $cod_seccion);
+    }
+}
+
+if (!function_exists('borrarAsignacionService')) {
+    function borrarAsignacionService($cod_cliente, $cod_zona, $cod_seccion): bool {
+        return borrarAsignacion($cod_cliente, $cod_zona, $cod_seccion);
     }
 }
 

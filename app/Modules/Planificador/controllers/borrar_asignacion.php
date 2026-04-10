@@ -14,7 +14,6 @@ if (php_sapi_name() !== 'cli' && realpath((string)($_SERVER['SCRIPT_FILENAME'] ?
 }
 require_once BASE_PATH . '/bootstrap/init.php';
 require_once BASE_PATH . '/bootstrap/auth.php';
-require_once BASE_PATH . '/app/Support/db.php';
 
 require_once BASE_PATH . '/app/Modules/Planificador/services/planificador_service.php';
 
@@ -45,23 +44,9 @@ csrfValidateRequest('planificador.borrar_asignacion');
 
 $cod_cliente = intval($_POST['cod_cliente']);
 $cod_seccion = ($_POST['cod_seccion'] === '' ? 'NULL' : intval($_POST['cod_seccion']));
-
-try {
-    $conn = db();
-
-    $query = "DELETE FROM cmf_comerciales_clientes_zona
-              WHERE cod_cliente = $cod_cliente
-              AND zona_principal = $cod_zona
-              AND cod_seccion " . ($cod_seccion === 'NULL' ? 'IS NULL' : "= $cod_seccion");
-
-    $resultado = odbc_exec($conn, $query);
-    if (!$resultado) {
-        throw new Exception('Error al eliminar la asignacion.');
-    }
-
+if (borrarAsignacionService($cod_cliente, $cod_zona, $cod_seccion)) {
     planificadorRedirectZonasClientes($cod_zona, 'Eliminado con exito.', 'ok');
-} catch (Exception $e) {
-    error_log('borrar_asignacion: ' . $e->getMessage());
-    planificadorRedirectZonasClientes($cod_zona, 'No se pudo eliminar la asignacion.');
 }
+
+planificadorRedirectZonasClientes($cod_zona, 'No se pudo eliminar la asignacion.');
 

@@ -42,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 csrfValidateRequest('planificador.procesar_asignar_cliente_zona');
 
-$conn = db();
 $cod_zona = isset($_POST['cod_zona']) ? intval($_POST['cod_zona']) : 0;
 $cod_cliente = isset($_POST['cod_cliente']) ? intval($_POST['cod_cliente']) : 0;
 
@@ -64,16 +63,11 @@ if (empty($cod_cliente)) {
 }
 
 if ($cod_seccion !== 'NULL') {
-    $query_verificar = "SELECT COUNT(*) AS total FROM cmf_comerciales_clientes_zona
-                        WHERE cod_cliente = '$cod_cliente' AND cod_seccion = '$cod_seccion'";
-    $resultado_verificar = odbc_exec($conn, $query_verificar);
-    if (!$resultado_verificar) {
-        error_log('Error al verificar la disponibilidad de la seccion: ' . odbc_errormsg($conn));
+    $seccionDisponible = seccionDisponibleParaAsignacionService($cod_cliente, $cod_seccion);
+    if ($seccionDisponible === null) {
         planificadorRedirectZonasClientes($cod_zona, 'No se pudo verificar la disponibilidad de la seccion.');
     }
-
-    $fila_verificar = odbc_fetch_array($resultado_verificar);
-    if (($fila_verificar['total'] ?? 0) > 0) {
+    if ($seccionDisponible === false) {
         error_log('La seccion seleccionada ya esta asignada a una zona.');
         planificadorRedirectZonasClientes($cod_zona, 'La seccion seleccionada ya esta asignada a una zona.');
     }

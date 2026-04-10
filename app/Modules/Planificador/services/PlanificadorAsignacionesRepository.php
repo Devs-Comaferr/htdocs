@@ -290,6 +290,55 @@ if (!function_exists('planificadorRepoAsignarClienteZona')) {
     }
 }
 
+if (!function_exists('planificadorRepoSeccionDisponibleParaAsignacion')) {
+    function planificadorRepoSeccionDisponibleParaAsignacion($cod_cliente, $cod_seccion): ?bool
+    {
+        if ($cod_seccion === 'NULL' || $cod_seccion === null || $cod_seccion === '') {
+            return true;
+        }
+
+        $conn = db();
+        $cod_cliente = intval($cod_cliente);
+        $cod_seccion = intval($cod_seccion);
+
+        $query = "SELECT COUNT(*) AS total FROM cmf_comerciales_clientes_zona
+                  WHERE cod_cliente = '$cod_cliente' AND cod_seccion = '$cod_seccion'";
+        $resultado = odbc_exec($conn, $query);
+        if (!$resultado) {
+            error_log('Error al verificar la disponibilidad de la seccion: ' . odbc_errormsg($conn));
+            return null;
+        }
+
+        $fila = odbc_fetch_array($resultado);
+        return ((int)($fila['total'] ?? 0)) === 0;
+    }
+}
+
+if (!function_exists('planificadorRepoBorrarAsignacion')) {
+    function planificadorRepoBorrarAsignacion($cod_cliente, $cod_zona, $cod_seccion): bool
+    {
+        $conn = db();
+        $cod_cliente = intval($cod_cliente);
+        $cod_zona = intval($cod_zona);
+        $condicionSeccion = ($cod_seccion === 'NULL' || $cod_seccion === null || $cod_seccion === '')
+            ? 'IS NULL'
+            : '= ' . intval($cod_seccion);
+
+        $query = "DELETE FROM cmf_comerciales_clientes_zona
+                  WHERE cod_cliente = $cod_cliente
+                  AND zona_principal = $cod_zona
+                  AND cod_seccion $condicionSeccion";
+
+        $resultado = odbc_exec($conn, $query);
+        if (!$resultado) {
+            error_log('Error al eliminar la asignacion: ' . odbc_errormsg($conn));
+            return false;
+        }
+
+        return true;
+    }
+}
+
 if (!function_exists('planificadorRepoObtenerClientesPorZona')) {
     function planificadorRepoObtenerClientesPorZona($cod_zona): array
     {
