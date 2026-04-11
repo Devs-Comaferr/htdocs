@@ -6,7 +6,7 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 unset($_SESSION['origen']);
 
 
-// Obtener el cÃ³digo del cliente desde la URL
+// Obtener el código del cliente desde la URL
 if (!isset($_GET['cod_cliente']) || empty($_GET['cod_cliente'])) {
     header("Location: clientes.php");
     exit();
@@ -23,7 +23,7 @@ $conn = db();
 
 $cod_cliente = trim((string) $_GET['cod_cliente']);
 $cod_seccion = isset($_GET['cod_seccion']) ? trim((string) $_GET['cod_seccion']) : null;
-// CÃ³digo del comisionista (para filtrar datos a las operaciones realizadas por Ã©l)
+// Código del comisionista (para filtrar datos a las operaciones realizadas por él)
 $cod_comercial = $_SESSION['codigo'] ?? null;
 
 try {
@@ -338,36 +338,155 @@ $pageTitle = toUTF8($cliente['nombre_comercial']);
 
     <!-- Se asume que en header.php se incluye Font Awesome 6.4 -->
     <style>
-        body { padding-top: 20px; background: linear-gradient(180deg, #f4f7fb 0%, #eef3f8 100%); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #16324a; }
-        .container { max-width: 1240px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 18px; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08); }
-        table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
-        th, td { padding: 12px; text-align: left; border: 1px solid #dde5ee; }
-        th { background-color: #f4f7fb; color: #36506a; font-weight: 700; }
-        td { background-color: #fbfcfe; }
+        :root {
+            --clientes-bg: #eef4f7;
+            --clientes-panel: rgba(255, 255, 255, 0.92);
+            --clientes-panel-strong: #ffffff;
+            --clientes-border: rgba(15, 23, 42, 0.1);
+            --clientes-text: #102132;
+            --clientes-muted: #5f7082;
+            --clientes-accent: #0f766e;
+            --clientes-shadow: 0 22px 48px rgba(15, 23, 42, 0.08);
+            --clientes-shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.05);
+        }
+        html, body {
+            font-family: "Trebuchet MS", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+            color: var(--clientes-text);
+            background:
+                radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 26%),
+                radial-gradient(circle at top right, rgba(217, 119, 6, 0.12), transparent 24%),
+                linear-gradient(180deg, #f7fbfc 0%, var(--clientes-bg) 100%);
+        }
+        header, .header {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        body { padding-top: 20px; }
         a { text-decoration: none; color: #0f5cab; }
         a:hover { text-decoration: underline; }
-        .back-button { background-color: #0f5cab; color: white; padding: 12px 24px; border-radius: 999px; text-decoration: none; font-size: 15px; font-weight: 700; margin-top: 20px; display: inline-block; box-shadow: 0 10px 22px rgba(15, 92, 171, 0.18); }
-        .back-button:hover { background-color: #0056b3; }
-        .faltas-button, .historico-button { display: inline-block; padding: 10px 20px; border-radius: 999px; font-size: 14px; font-weight: bold; text-align: center; text-decoration: none; transition: all 0.3s ease; margin-right: 10px; }
-        .faltas-button { background-color: #ff4d4d; color: white; }
-        .faltas-button:hover { background-color: #e63939; transform: translateY(-2px); }
-        .historico-button { background-color: #28a745; color: white; }
-        .historico-button:hover { background-color: #218838; transform: translateY(-2px); }
-        .button-container { text-align: center; margin-top: 18px; }
-        .moroso { margin: 0 0 14px; padding: 10px 14px; border-radius: 12px; background: #fff1f0; border: 1px solid #f7c6c1; color: #b42318; font-weight: 800; text-align: center; font-size: 15px; }
-        .cliente-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
-        .cliente-head-copy h1 { margin: 0 0 4px; color: #12344d; font-size: 28px; }
-        .cliente-head-copy p { margin: 0; color: #62748a; font-size: 15px; }
+        .page-content {
+            max-width: 1600px;
+            padding: 20px 18px 28px;
+            margin: 0 auto;
+        }
+        .clientes-shell.cliente-detalle-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .detail-hero,
+        .section-card,
+        .detail-actions-bar {
+            border: 1px solid var(--clientes-border);
+            border-radius: 22px;
+            background: var(--clientes-panel);
+            box-shadow: var(--clientes-shadow-soft);
+            backdrop-filter: blur(10px);
+        }
+        .detail-hero {
+            padding: 22px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .detail-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(14, 116, 144, 0.1), transparent 28%);
+            pointer-events: none;
+        }
+        .detail-hero > * { position: relative; z-index: 1; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 0; font-size: 15px; }
+        th, td { padding: 14px 16px; text-align: left; border: 0; border-bottom: 1px solid rgba(148, 163, 184, 0.14); vertical-align: top; }
+        tbody tr:last-child td { border-bottom: 0; }
+        th {
+            background: #f7fbfc;
+            color: #385168;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        td { background-color: rgba(255,255,255,0.94); color: #17324d; }
+        .back-button, .faltas-button, .historico-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 10px 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .back-button:hover, .faltas-button:hover, .historico-button:hover {
+            transform: translateY(-1px);
+            text-decoration: none;
+        }
+        .back-button {
+            background: linear-gradient(135deg, var(--clientes-accent) 0%, #0e7490 100%);
+            color: #ffffff;
+            box-shadow: 0 16px 28px rgba(15, 118, 110, 0.24);
+            margin-top: 0;
+        }
+        .back-button:hover { color: #ffffff; }
+        .faltas-button {
+            background: #fff8f5;
+            color: #c2410c;
+            border-color: rgba(194, 65, 12, 0.18);
+        }
+        .historico-button {
+            background: rgba(255,255,255,0.86);
+            color: var(--clientes-text);
+            border-color: rgba(148, 163, 184, 0.24);
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .detail-actions-bar {
+            padding: 18px;
+        }
+        .moroso {
+            margin: 0;
+            padding: 14px 18px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(185, 28, 28, 0.08), rgba(220, 38, 38, 0.12));
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            color: #991b1b;
+            font-weight: 800;
+            text-align: center;
+            font-size: 15px;
+            letter-spacing: 0.04em;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+        }
+        .cliente-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 0;
+        }
+        .cliente-head-copy h1 { margin: 0 0 4px; color: #12344d; font-size: 30px; letter-spacing: -0.03em; }
+        .cliente-head-copy p { margin: 0; color: var(--clientes-muted); font-size: 15px; max-width: 720px; }
         .cliente-eyebrow { margin-bottom: 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #6b7c93; }
         .cliente-head-badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
-        .cliente-badge { display: inline-flex; align-items: center; padding: 7px 11px; border-radius: 999px; background: #eef5ff; color: #0f5cab; font-size: 12px; font-weight: 700; }
-        .cliente-badge-soft { background: #f4f7fb; color: #506273; }
-        .section-card { margin-top: 16px; padding: 16px 18px; border: 1px solid #e3eaf2; border-radius: 16px; background: #ffffff; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04); }
+        .cliente-badge { display: inline-flex; align-items: center; padding: 10px 12px; border-radius: 999px; background: rgba(255,255,255,0.86); border: 1px solid var(--clientes-border); color: var(--clientes-text); font-size: 13px; font-weight: 700; }
+        .cliente-badge-soft { background: rgba(244, 247, 251, 0.92); color: #506273; }
+        .section-card { margin-top: 0; padding: 18px; }
         .section-card h2,
-        .section-card h3 { margin: 0 0 4px; color: #16324a; }
-        .section-card > p.section-intro { margin: 0 0 10px; color: #6b7c93; font-size: 13px; }
+        .section-card h3 { margin: 0 0 4px; color: #16324a; font-size: 20px; letter-spacing: -0.02em; }
+        .section-card > p.section-intro { margin: 0 0 16px; color: var(--clientes-muted); font-size: 13px; }
         .summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-        .summary-item { padding: 11px 13px; border-radius: 14px; background: linear-gradient(180deg, #fbfcfe 0%, #f5f8fc 100%); border: 1px solid #e1e8f0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8); min-height: 62px; }
+        .summary-item { padding: 12px 14px; border-radius: 14px; background: linear-gradient(180deg, #fbfcfe 0%, #f5f8fc 100%); border: 1px solid #e1e8f0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8); min-height: 62px; }
         .summary-item-wide { grid-column: 1 / -1; }
         .summary-item-span-2 { grid-column: span 2; }
         .summary-label { display: block; margin-bottom: 4px; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #6b7c93; }
@@ -404,16 +523,17 @@ $pageTitle = toUTF8($cliente['nombre_comercial']);
         .planning-meta-pill { display: inline-flex; align-items: center; padding: 6px 9px; border-radius: 999px; background: #f4f7fb; border: 1px solid #dfe7f0; color: #486581; font-size: 12px; font-weight: 700; }
         .planning-meta-pill strong { color: #17324d; margin-right: 6px; }
         .planning-inline-separator { color: #9aa9b8; font-weight: 700; }
+        .planning-block-full { grid-column: 1 / -1; }
         .planning-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 8px 14px; border-radius: 12px; border: 1px solid transparent; text-decoration: none; font-size: 13px; font-weight: 700; line-height: 1; transition: all 0.2s ease; }
         .planning-btn:hover { transform: translateY(-1px); text-decoration: none; }
         .planning-btn-secondary { background: #f4f7fb; border-color: #dfe7f0; color: #17324d; }
         .planning-btn-secondary:hover { background: #edf3fa; color: #0f5cab; }
-        .planning-btn-primary { background: #0f5cab; border-color: #0f5cab; color: #ffffff; box-shadow: 0 8px 18px rgba(15, 92, 171, 0.18); }
+        .planning-btn-primary { background: linear-gradient(135deg, var(--clientes-accent) 0%, #0e7490 100%); border-color: transparent; color: #ffffff; box-shadow: 0 16px 28px rgba(15, 118, 110, 0.24); }
         .planning-btn-primary:hover { background: #0c4f93; color: #ffffff; }
-        .table-scroll { margin-top: 10px; overflow-x: auto; border-radius: 14px; border: 1px solid #dfe7f0; background: #ffffff; }
+        .table-scroll { margin-top: 10px; overflow-x: auto; border-radius: 20px; border: 1px solid rgba(148, 163, 184, 0.18); background: var(--clientes-panel-strong); }
         .detail-table { margin-top: 0; border-collapse: separate; border-spacing: 0; min-width: 680px; }
         .detail-table th, .detail-table td { padding: 9px 11px; }
-        .detail-table th { width: 18%; background: #f5f8fc; color: #486581; }
+        .detail-table th { width: 18%; background: #f7fbfc; color: #486581; }
         .detail-table td { background: #ffffff; color: #17324d; }
         .detail-table tr:nth-child(even) td { background: #fbfcfe; }
         .detail-table th:first-child { border-top-left-radius: 12px; }
@@ -431,9 +551,13 @@ $pageTitle = toUTF8($cliente['nombre_comercial']);
             text-decoration: none;
         }
         .detail-table td .fa-brands.fa-whatsapp { margin-left: 8px; color: #1f9d55; }
-        .empty-state { margin: 0; padding: 13px 15px; border-radius: 12px; background: #f4f7fb; border: 1px solid #e2e8f0; color: #506273; }
+        .empty-state { margin: 0; padding: 18px 16px; border-radius: 16px; background: #f4f7fb; border: 1px solid #e2e8f0; color: #506273; text-align: center; }
         .section-card.section-chart { padding-bottom: 20px; }
         .chart-toolbar { display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-bottom:10px; }
+        .chart-toolbar label { color: #486581; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+        .chart-toolbar select { width: auto; min-height: 40px; border: 1px solid rgba(148, 163, 184, 0.38); border-radius: 14px; background: rgba(255,255,255,0.95); color: var(--clientes-text); box-shadow: none; }
+        .chart-stage { position: relative; height: 420px; }
+        .chart-title-spacer { min-height: 22px; margin-bottom: 10px; text-align: center; }
         .chart-grid { margin-top: 18px; }
 
         .section-card.section-visitas { margin-top: 20px; }
@@ -441,8 +565,8 @@ $pageTitle = toUTF8($cliente['nombre_comercial']);
         .visitas-header h2 { margin: 0 0 4px; }
         .visitas-counter { white-space: nowrap; }
         .visitas-container { margin-top: 0; }
-        .visita-item { padding: 13px 15px; margin-bottom: 12px; border-radius: 14px; color: #fff; display: block; transition: background-color 0.3s ease, transform 0.2s; cursor: pointer; box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08); }
-        .visita-item:hover { opacity: 0.9; transform: scale(1.01); }
+        .visita-item { padding: 13px 15px; margin-bottom: 12px; border-radius: 16px; color: #fff; display: block; cursor: pointer; box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08); background-color: var(--visita-color, #6c757d); transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease; overflow: hidden; }
+        .visita-item:hover { opacity: 0.96; transform: translateY(-1px); box-shadow: 0 16px 28px rgba(15, 23, 42, 0.12); }
         .visita-linea { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; }
         .visita-linea span { margin-right: 8px; margin-bottom: 6px; font-size: 13px; font-weight: 700; padding: 6px 9px; border-radius: 999px; background: rgba(255,255,255,0.16); backdrop-filter: blur(2px); }
         .visita-observaciones { display: block; margin-top: 6px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.18); font-style: italic; color: #ffffff; }
@@ -450,9 +574,9 @@ $pageTitle = toUTF8($cliente['nombre_comercial']);
             .visita-linea { flex-direction: column; align-items: flex-start; }
             .visita-linea span { margin-right: 0; }
         }
-        .pedido-item { position: relative; background: #fff; padding: 12px 16px; margin-left: 22px; margin-bottom: 11px; border-radius: 14px; border: 1px solid #e6edf5; box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08); transition: transform 0.2s; cursor: pointer; }
-        .pedido-item:hover { transform: scale(1.02); }
-        .pedido-item::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 100%; border-radius: 14px 0 0 14px; background-color: #6c757d; }
+        .pedido-item { position: relative; background: #fff; padding: 12px 16px; margin-left: 22px; margin-bottom: 11px; border-radius: 16px; border: 1px solid #e6edf5; box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08); transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; overflow: hidden; }
+        .pedido-item:hover { transform: translateY(-1px); box-shadow: 0 14px 24px rgba(15, 23, 42, 0.12); }
+        .pedido-item::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 100%; border-radius: 16px 0 0 16px; background-color: var(--pedido-color, #6c757d); }
         .pedido-content { margin-left: 8px; }
         .pedido-info { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
         .pedido-info > div { margin-right: 0; margin-bottom: 0; padding: 6px 9px; border-radius: 999px; background: #f4f7fb; color: #17324d; font-size: 12px; font-weight: 700; }
@@ -478,6 +602,7 @@ $pageTitle = toUTF8($cliente['nombre_comercial']);
         .modal-note { margin-top: 10px; padding-top: 10px; border-top: 1px solid #edf2f7; color: #0f5cab; font-style: italic; }
         .page-nav { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top: 14px; }
         .page-nav .back-button { margin-top: 0; margin-right: 0 !important; padding: 9px 16px; font-size: 14px; }
+        .page-nav .page-link-current { background: #6c757d; cursor: default; box-shadow: none; }
         .close { color: #6b7c93; position: absolute; top: 14px; right: 20px; font-size: 30px; font-weight: bold; cursor: pointer; z-index: 9999; }
         .close:hover, .close:focus { color: #12344d; text-decoration: none; cursor: pointer; }
         .modal-table-container { width: 100%; overflow-x: auto; }
@@ -491,21 +616,30 @@ $pageTitle = toUTF8($cliente['nombre_comercial']);
         .leyenda-diff { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 10px; font-size: 12px; }
         .leyenda-item { display: inline-flex; align-items: center; gap: 6px; padding: 3px 7px; border: 1px solid #ddd; border-radius: 14px; background: #fff; }
         .leyenda-color { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.15); }
+        .leyenda-color-pedido-cantidad { background: #ffe5e5; }
+        .leyenda-color-albaran-cantidad { background: #e7f7ea; }
+        .leyenda-color-pedido-importe { background: #fff6d6; }
+        .leyenda-color-albaran-importe { background: #e8f1ff; }
         .descripcion-con-observacion { position: relative; }
         .descripcion-con-observacion .observacion { display: block; color: #007bff; font-style: italic; margin-top: 5px; }
+        .detail-text-danger { color: #b91c1c; }
+        .detail-status-note { margin-top: 10px; color: #b91c1c; font-weight: 600; }
+        .label-spaced { margin-left: 8px; }
         .section-card .button-container { margin-top: 12px; }
 
         @media (max-width: 1100px) {
             .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .summary-item-span-2 { grid-column: 1 / -1; }
             .planning-row { grid-template-columns: 1fr; gap: 10px; }
+            .chart-toolbar { justify-content: flex-start; }
         }
 
         @media (max-width: 767px) {
             .cliente-head { flex-direction: column; }
             .cliente-head-badges { justify-content: flex-start; }
             .chart-col { margin-bottom: 22px; }
-            .container { padding: 22px 16px; border-radius: 0; margin: 0; }
+            .page-content { padding: 14px 12px 24px; }
+            .detail-hero, .section-card, .detail-actions-bar { border-radius: 20px; }
             .section-card { padding: 14px; border-radius: 14px; }
             .summary-grid { grid-template-columns: 1fr; }
             .summary-item-wide { grid-column: auto; }
@@ -513,6 +647,12 @@ $pageTitle = toUTF8($cliente['nombre_comercial']);
             .pedido-item { margin-left: 0; }
             .visitas-header { flex-direction: column; }
             .visitas-counter { white-space: normal; }
+            .button-container { justify-content: stretch; }
+            .button-container a { width: 100%; }
+            .chart-toolbar { flex-direction: column; align-items: stretch; }
+            .chart-toolbar select { width: 100%; }
+            .chart-stage { height: 340px; }
+            .page-nav .back-button, .page-nav .page-link-current { width: auto; }
         }
     </style>
 
@@ -648,12 +788,12 @@ window.onclick = function(event) {
             }
         }
 
-        // FunciÃ³n para quitar pedido y actualizar origen
+        // Función para quitar pedido y actualizar origen
         var csrfTokenVisitas = <?= json_encode(csrfToken(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
         function quitarPedido(codPedido, e) {
     e.stopPropagation();
-    if (!confirm("Â¿Deseas quitar este pedido de la visita?")) {
+    if (!confirm("¿Deseas quitar este pedido de la visita?")) {
         return;
     }
     fetch('<?= BASE_URL ?>/ajax/quitar_pedido.php', {
@@ -721,10 +861,10 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
             var contenido = document.getElementById('detalleBarrasContenido');
             if (!titulo || !contenido) return;
 
-            titulo.innerHTML = 'Detalle mensual (Pedido vs AlbarÃ¡n) - ' + escapeHtml(periodoTxt);
+            titulo.innerHTML = 'Detalle mensual (Pedido vs Albarán) - ' + escapeHtml(periodoTxt);
 
             if (!Array.isArray(items) || items.length === 0) {
-                contenido.innerHTML = '<p>No hay lÃ­neas para ese perÃ­odo.</p>';
+                contenido.innerHTML = '<p>No hay líneas para ese período.</p>';
                 abrirModal('modal-detalle-barras');
                 return;
             }
@@ -775,17 +915,17 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                 '<p><strong>Total Pedidos:</strong> ' + totalImpPedido.toFixed(2) + ' &euro; | ' +
                 '<strong>Total Albaranes:</strong> ' + totalImpAlbaran.toFixed(2) + ' &euro;</p>' +
                 '<div class="leyenda-diff">' +
-                '<span class="leyenda-item"><span class="leyenda-color" style="background:#ffe5e5;"></span>Cantidad: Pedido &gt; AlbarÃ¡n</span>' +
-                '<span class="leyenda-item"><span class="leyenda-color" style="background:#e7f7ea;"></span>Cantidad: AlbarÃ¡n &gt; Pedido</span>' +
-                '<span class="leyenda-item"><span class="leyenda-color" style="background:#fff6d6;"></span>Importe: Pedido &gt; AlbarÃ¡n (misma cantidad)</span>' +
-                '<span class="leyenda-item"><span class="leyenda-color" style="background:#e8f1ff;"></span>Importe: AlbarÃ¡n &gt; Pedido (misma cantidad)</span>' +
+                '<span class="leyenda-item"><span class="leyenda-color leyenda-color-pedido-cantidad"></span>Cantidad: Pedido &gt; Albarán</span>' +
+                '<span class="leyenda-item"><span class="leyenda-color leyenda-color-albaran-cantidad"></span>Cantidad: Albarán &gt; Pedido</span>' +
+                '<span class="leyenda-item"><span class="leyenda-color leyenda-color-pedido-importe"></span>Importe: Pedido &gt; Albarán (misma cantidad)</span>' +
+                '<span class="leyenda-item"><span class="leyenda-color leyenda-color-albaran-importe"></span>Importe: Albarán &gt; Pedido (misma cantidad)</span>' +
                 '</div>' +
                 '<div class="modal-table-container">' +
                 '<table class="modal-table">' +
                 '<thead><tr>' +
-                '<th>ArtÃ­culo</th><th>DescripciÃ³n</th>' +
+                '<th>Artículo</th><th>Descripción</th>' +
                 '<th>Cant. Pedido</th><th>Importe Pedido</th>' +
-                '<th>Cant. AlbarÃ¡n</th><th>Importe AlbarÃ¡n</th>' +
+                '<th>Cant. Albarán</th><th>Importe Albarán</th>' +
                 '</tr></thead>' +
                 '<tbody>' + filas +
                 '<tr>' +
@@ -877,7 +1017,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'bottom' },
-                        title: { display: true, text: 'Comparativa mensual por aÃ±o (Pedidos vs Albaranes)' },
+                        title: { display: true, text: 'Comparativa mensual por año (Pedidos vs Albaranes)' },
                         datalabels: { display: false }
                     },
                     onClick: function(evt) {
@@ -1099,7 +1239,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                     responsive: true,
                     plugins: {
                         legend: { display: false },
-                        title: { display: true, text: 'ArtÃ­culos (Top 10)' },
+                        title: { display: true, text: 'Artículos (Top 10)' },
                         datalabels: {
                             formatter: function (value, context) {
                                 var idx = context.dataIndex;
@@ -1169,16 +1309,17 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
 </head>
 <body>
 <?php include_once BASE_PATH . '/resources/views/layouts/header.php'; ?>
-<div class="container">
+<div class="page-content">
+<div class="clientes-shell cliente-detalle-shell">
 
-    <div class="cliente-head">
+    <div class="cliente-head detail-hero">
         <div class="cliente-head-copy">
             <div class="cliente-eyebrow">Ficha de cliente</div>
             <h1><?= htmlspecialchars((string)$pageTitle) ?></h1>
-            <p>InformaciÃ³n comercial, contactos, secciones y actividad reciente del cliente.</p>
+            <p>Información comercial, contactos, secciones y actividad reciente del cliente.</p>
         </div>
         <div class="cliente-head-badges">
-            <span class="cliente-badge">CÃ³digo <?= htmlspecialchars((string)$cliente['cod_cliente']) ?></span>
+            <span class="cliente-badge">Código <?= htmlspecialchars((string)$cliente['cod_cliente']) ?></span>
             <?php if (!empty($cliente['cod_tarifa'])): ?>
                 <span class="cliente-badge cliente-badge-soft">Tarifa <?= htmlspecialchars((string)$tarifa_nombre) ?></span>
             <?php endif; ?>
@@ -1194,7 +1335,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
 
     <section class="section-card">
     <h2>Datos del cliente</h2>
-    <p class="section-intro">Resumen principal de la ficha comercial y de facturaciÃ³n.</p>
+    <p class="section-intro">Resumen principal de la ficha comercial y de facturación.</p>
     <?php
         $telefonos = [];
         $mapaTelefonos = [
@@ -1217,7 +1358,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                 'icono' => $iconoTelefono,
             ];
         }
-        $telefonosHtml = 'Sin telÃ©fonos';
+        $telefonosHtml = 'Sin teléfonos';
         if ($telefonos !== []) {
             $telefonosHtml = '<div class="contact-lines">';
             foreach ($telefonos as $telefono) {
@@ -1241,13 +1382,13 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         if (trim((string)($cliente['poblacion'] ?? '')) !== '' || trim((string)($cliente['provincia'] ?? '')) !== '') {
             $ubicacion = $poblacionCompleta;
             if (trim((string)($cliente['provincia'] ?? '')) !== '') {
-                $ubicacion .= ($ubicacion !== '' ? ' Â· ' : '') . htmlspecialchars((string)$cliente['provincia']);
+                $ubicacion .= ($ubicacion !== '' ? ' · ' : '') . htmlspecialchars((string)$cliente['provincia']);
             }
             if ($ubicacion !== '') {
                 $direccionPartes[] = $ubicacion;
             }
         }
-        $direccionCompleta = $direccionPartes !== [] ? implode('<br>', $direccionPartes) : 'Sin direcciÃ³n';
+        $direccionCompleta = $direccionPartes !== [] ? implode('<br>', $direccionPartes) : 'Sin dirección';
         $documentoCliente = trim((string)($cliente['cif'] ?? ''));
         $documentoLabel = 'NIF';
         if ($documentoCliente !== '' && preg_match('/^[A-W][0-9]/i', $documentoCliente) === 1) {
@@ -1256,7 +1397,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
     ?>
     <div class="summary-grid">
         <div class="summary-item">
-            <span class="summary-label">CÃ³digo</span>
+            <span class="summary-label">Código</span>
             <div class="summary-value"><?= htmlspecialchars((string)$cliente['cod_cliente']) ?></div>
         </div>
         <div class="summary-item">
@@ -1272,15 +1413,15 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
             <div class="summary-value summary-value-soft"><?= htmlspecialchars((string)$forma_pago) ?></div>
         </div>
         <div class="summary-item summary-item-span-2">
-            <span class="summary-label">RazÃ³n social</span>
+            <span class="summary-label">Razón social</span>
             <div class="summary-value"><?= htmlspecialchars(toUTF8((string)$cliente['razon_social'])) ?></div>
         </div>
         <div class="summary-item summary-item-span-2">
-            <span class="summary-label">DirecciÃ³n</span>
+            <span class="summary-label">Dirección</span>
             <div class="summary-value summary-value-soft"><?= $direccionCompleta ?></div>
         </div>
         <div class="summary-item summary-item-span-2">
-            <span class="summary-label">TelÃ©fonos</span>
+            <span class="summary-label">Teléfonos</span>
             <div class="summary-value summary-value-soft"><?= $telefonosHtml ?></div>
         </div>
         <div class="summary-item summary-item-span-2">
@@ -1306,8 +1447,8 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
     $campos = [
         'nombre'           => 'Nombre',
         'cargo'            => 'Cargo',
-        'telefono'         => 'TelÃ©fono',
-        'telefono_movil'   => 'MÃ³vil',
+        'telefono'         => 'Teléfono',
+        'telefono_movil'   => 'Móvil',
         'e_mail'           => 'Email',
         'observaciones'    => 'Observaciones'
     ];
@@ -1408,7 +1549,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         }
 
         $pref = strtolower((string)($asignacion['preferencia_horaria'] ?? ''));
-        $prefiereManana = ($pref === 'm' || $pref === 'maÃ±ana' || $pref === 'manana');
+        $prefiereManana = ($pref === 'm' || $pref === 'mañana' || $pref === 'manana');
         $prefiereTarde  = ($pref === 't' || $pref === 'tarde');
 
         $tp = (float)($asignacion['tiempo_promedio_visita'] ?? 0);
@@ -1440,7 +1581,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                         <span class="planning-meta-pill">
                             <strong>Preferencia</strong>
                             <?php if ($prefiereManana): ?>
-                                MaÃ±ana
+                                Mañana
                             <?php elseif ($prefiereTarde): ?>
                                 Tarde
                             <?php else: ?>
@@ -1451,7 +1592,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                     <div class="planning-inline-action">
                         <div class="planning-slots">
                             <span class="planning-slot <?= $prefiereManana ? 'is-active-morning' : '' ?>">
-                                <strong>MaÃ±ana</strong>
+                                <strong>Mañana</strong>
                                 <span><?= htmlspecialchars($horaInicioManana) ?> - <?= htmlspecialchars($horaFinManana) ?></span>
                             </span>
                             <span class="planning-slot <?= $prefiereTarde ? 'is-active-afternoon' : '' ?>">
@@ -1474,7 +1615,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                 </div>
             </div>
             <div class="planning-row">
-                <div class="planning-block" style="grid-column: 1 / -1;">
+                <div class="planning-block planning-block-full">
                     <span class="planning-block-label">Zonas de visita</span>
                     <div class="planning-zones">
                         <span class="planning-zone-tag">Principal</span>
@@ -1489,7 +1630,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
             </div>
             <?php if ($observacionesAsign !== ''): ?>
             <div class="planning-row">
-                <div class="planning-block" style="grid-column: 1 / -1;">
+                <div class="planning-block planning-block-full">
                     <span class="planning-block-label">Observaciones</span>
                     <div class="planning-block-value planning-block-value-soft"><?= htmlspecialchars($observacionesAsign) ?></div>
                 </div>
@@ -1500,12 +1641,12 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
     <?php endif; ?>
 
     <?php
-    // Contactos: ver quÃ© campos tienen algÃºn dato
+    // Contactos: ver qué campos tienen algún dato
     $campos = [
         'nombre'           => 'Nombre',
         'cargo'            => 'Cargo',
-        'telefono'         => 'TelÃ©fono',
-        'telefono_movil'   => 'MÃ³vil',
+        'telefono'         => 'Teléfono',
+        'telefono_movil'   => 'Móvil',
         'e_mail'           => 'Email',
         'observaciones'    => 'Observaciones'
     ];
@@ -1573,30 +1714,30 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         <h2>Actividad comercial</h2>
         <p class="section-intro">Evoluci&oacute;n reciente y distribuci&oacute;n de ventas del cliente.</p>
         <div class="chart-toolbar">
-            <label for="yearsWindow" style="font-weight:600;">A&ntilde;os:</label>
-            <select id="yearsWindow" class="form-select form-select-sm" style="width:auto;">
-                <option value="2" selected>Ãšltimos 2</option>
-                <option value="3">Ãšltimos 3</option>
-                <option value="4">Ãšltimos 4</option>
+            <label for="yearsWindow">A&ntilde;os:</label>
+            <select id="yearsWindow" class="form-select form-select-sm">
+                <option value="2" selected>Últimos 2</option>
+                <option value="3">Últimos 3</option>
+                <option value="4">Últimos 4</option>
                 <option value="all">Todos</option>
             </select>
         </div>
-        <div style="position:relative;height:420px;">
+        <div class="chart-stage">
             <canvas id="graficoLineas"></canvas>
         </div>
         <div class="row chart-grid">
             <div class="col-12 col-md-4 chart-col">
-                <h4 style="text-align:center;"><br></h4>
+                <h4 class="chart-title-spacer"><br></h4>
                 <canvas id="graficoFamilia" width="300" height="300"></canvas>
             </div>
 
             <div class="col-12 col-md-4 chart-col">
-                <h4 style="text-align:center;"><br></h4>
+                <h4 class="chart-title-spacer"><br></h4>
                 <canvas id="graficoMarca" width="300" height="300"></canvas>
             </div>
 
             <div class="col-12 col-md-4 chart-col">
-                <h4 style="text-align:center;"><br></h4>
+                <h4 class="chart-title-spacer"><br></h4>
                 <canvas id="graficoArticulos" width="300" height="300"></canvas>
             </div>
         </div>
@@ -1609,8 +1750,10 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         </div>
     </div>
 
+    <div class="detail-actions-bar">
     <div class="button-container">
         <a href="clientes.php" class="back-button">&larr; Volver a la lista de clientes</a>
+    </div>
     </div>
 
     <!-- VISITAS y PEDIDOS (funcionalidad extra, con modales) -->
@@ -1619,14 +1762,14 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         <div class="visitas-header">
             <div>
                 <h2>Visitas del cliente</h2>
-                <p class="section-intro">HistÃ³rico de visitas comerciales y pedidos asociados a cada una.</p>
+                <p class="section-intro">Histórico de visitas comerciales y pedidos asociados a cada una.</p>
             </div>
             <span class="cliente-badge cliente-badge-soft visitas-counter"><?= (int)$totalVisitas ?> visitas</span>
         </div>
         <div class="visitas-container">
             <?php if ($totalVisitas > 0): ?>
                 <?php foreach ($visitasPaginadas as $visita): ?>
-                    <div class="visita-item" style="background-color: <?= htmlspecialchars((string)$visita['color']) ?>;" data-id-visita="<?= htmlspecialchars((string)$visita['id_visita']) ?>">
+                    <div class="visita-item" style="--visita-color: <?= htmlspecialchars((string)$visita['color']) ?>;" data-id-visita="<?= htmlspecialchars((string)$visita['id_visita']) ?>">
                         <div class="visita-linea">
                             <span class="visita-fecha">
                                 &#128197; <?= htmlspecialchars(date("d/m/Y", strtotime((string)$visita['fecha_visita']))) ?>
@@ -1661,7 +1804,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                                 <div class="modal-summary-item"><strong>Hora de inicio</strong><?= htmlspecialchars(date("H:i", strtotime((string)$visita['hora_inicio_visita']))) ?></div>
                                 <div class="modal-summary-item"><strong>Hora de fin</strong><?= htmlspecialchars(date("H:i", strtotime((string)$visita['hora_fin_visita']))) ?></div>
                                 <div class="modal-summary-item"><strong>Importe total</strong><?= number_format((float)$visita['importe_total'], 2, ',', '.') ?> &euro;</div>
-                                <div class="modal-summary-item"><strong>NÃºmero de lÃ­neas</strong><?= htmlspecialchars((string)$visita['numero_lineas_total']) ?></div>
+                                <div class="modal-summary-item"><strong>Número de líneas</strong><?= htmlspecialchars((string)$visita['numero_lineas_total']) ?></div>
                             </div>
                             <?php if (!empty($visita['observaciones'])): ?>
                                 <div class="modal-note"><?= htmlspecialchars((string)$visita['observaciones']) ?></div>
@@ -1727,7 +1870,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                                                         <?= htmlspecialchars((string)$linea['descripcion']) ?>
                                                     </td>
                                                     <td><?= number_format((float)$linea['cantidad'], 2, ',', '.') ?></td>
-                                                    <td style="<?= ((float)$linea['cantidad_servida'] != (float)$linea['cantidad']) ? 'color: red;' : '' ?>">
+                                                    <td class="<?= ((float)$linea['cantidad_servida'] != (float)$linea['cantidad']) ? 'detail-text-danger' : '' ?>">
                                                         <?= number_format((float)$linea['cantidad_servida'], 2, ',', '.') ?>
                                                     </td>
                                                     <td><?= number_format((float)$linea['precio'], 2, ',', '.') . " &euro;" ?></td>
@@ -1749,14 +1892,14 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                     <!-- Pedidos Asociados -->
                     <?php if (isset($visita['pedidos']) && count($visita['pedidos']) > 0): ?>
                         <?php foreach ($visita['pedidos'] as $pedido): ?>
-                            <div class="pedido-item" style="border-left: 8px solid <?= htmlspecialchars((string)determinarColorPedido($pedido['origen'])) ?>;" data-cod-pedido="<?= htmlspecialchars((string)$pedido['cod_pedido']) ?>">
+                            <div class="pedido-item" style="--pedido-color: <?= htmlspecialchars((string)determinarColorPedido($pedido['origen'])) ?>;" data-cod-pedido="<?= htmlspecialchars((string)$pedido['cod_pedido']) ?>">
                                 <div class="pedido-content">
                                     <div class="pedido-info">
                                         <div>
                                             <?= iconoDeOrigen((string)$pedido['origen']) ?>
                                             <?= htmlspecialchars((string)$pedido['cod_pedido']) ?>
                                             <?php if (((int)($pedido['pedido_eliminado'] ?? 0)) === 1): ?>
-                                                <span class="label label-warning" style="margin-left:8px;">Eliminado</span>
+                                                <span class="label label-warning label-spaced">Eliminado</span>
                                             <?php endif; ?>
                                         </div>
                                         <div>
@@ -1820,7 +1963,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                                         <div class="modal-summary-item"><strong>Fecha de venta</strong><?= htmlspecialchars(date("d/m/Y", strtotime((string)$pedido['fecha_venta']))) ?> (<?= obtenerDiaSemana((string)$pedido['fecha_venta']) ?>)</div>
                                         <div class="modal-summary-item"><strong>Hora de venta</strong><?= htmlspecialchars(date("H:i", strtotime((string)$pedido['hora_venta']))) ?></div>
                                         <div class="modal-summary-item"><strong>Importe</strong><?= number_format((float)$pedido['importe'], 2, ',', '.') . " &euro;" ?></div>
-                                        <div class="modal-summary-item"><strong>NÃºmero de lÃ­neas</strong><?= htmlspecialchars((string)$pedido['numero_lineas']) ?></div>
+                                        <div class="modal-summary-item"><strong>Número de líneas</strong><?= htmlspecialchars((string)$pedido['numero_lineas']) ?></div>
                                     </div>
                                     <?php if (!empty($pedido['observacion_interna'])): ?>
                                         <div class="modal-note"><?= htmlspecialchars((string)$pedido['observacion_interna']) ?></div>
@@ -1902,7 +2045,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                                                                 <?= htmlspecialchars((string)$linea['descripcion']) ?>
                                                             </td>
                                                             <td><?= number_format((float)$linea['cantidad'], 2, ',', '.') ?></td>
-                                                            <td style="<?= (!$pedidoEliminado && (float)$linea['cantidad_servida'] != (float)$linea['cantidad']) ? 'color: red;' : '' ?>">
+                                                            <td class="<?= (!$pedidoEliminado && (float)$linea['cantidad_servida'] != (float)$linea['cantidad']) ? 'detail-text-danger' : '' ?>">
                                                                 <?= $pedidoEliminado ? '-' : number_format((float)$linea['cantidad_servida'], 2, ',', '.') ?>
                                                             </td>
                                                             <td><?= number_format((float)$linea['precio'], 2, ',', '.') . " &euro;" ?></td>
@@ -1919,7 +2062,7 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                                         <p>No hay l&iacute;neas asociadas a este pedido.</p>
                                     <?php endif; ?>
                                     <?php if ($pedidoEliminado): ?>
-                                        <p style="margin-top:10px;color:#b91c1c;font-weight:600;">
+                                        <p class="detail-status-note">
                                             VENTA ELIMINADA
                                             <?= !empty($pedido['eliminado_por_usuario']) ? ' POR ' . htmlspecialchars((string)$pedido['eliminado_por_usuario']) : '' ?>
                                             <?= !empty($pedido['eliminado_por_equipo']) ? ' | EQUIPO: ' . htmlspecialchars((string)$pedido['eliminado_por_equipo']) : '' ?>
@@ -1940,13 +2083,13 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
                     ?>
                     <div class="page-nav">
                         <?php if ($paginaVisitas > 1): ?>
-                            <a class="back-button" style="margin-right:8px;" href="<?= htmlspecialchars($baseVisitas . '?' . http_build_query(array_merge($queryVisitas, ['pag_visitas' => $paginaVisitas - 1]))) ?>">&larr; Anterior</a>
+                            <a class="back-button" href="<?= htmlspecialchars($baseVisitas . '?' . http_build_query(array_merge($queryVisitas, ['pag_visitas' => $paginaVisitas - 1]))) ?>">&larr; Anterior</a>
                         <?php endif; ?>
                         <?php for ($p = 1; $p <= $totalPaginasVisitas; $p++): ?>
                             <?php if ($p === $paginaVisitas): ?>
-                                <span class="back-button" style="background:#6c757d;cursor:default;margin-right:8px;"><?= $p ?></span>
+                                <span class="back-button page-link-current"><?= $p ?></span>
                             <?php else: ?>
-                                <a class="back-button" style="margin-right:8px;" href="<?= htmlspecialchars($baseVisitas . '?' . http_build_query(array_merge($queryVisitas, ['pag_visitas' => $p]))) ?>"><?= $p ?></a>
+                                <a class="back-button" href="<?= htmlspecialchars($baseVisitas . '?' . http_build_query(array_merge($queryVisitas, ['pag_visitas' => $p]))) ?>"><?= $p ?></a>
                             <?php endif; ?>
                         <?php endfor; ?>
                         <?php if ($paginaVisitas < $totalPaginasVisitas): ?>
@@ -1964,11 +2107,13 @@ function actualizarOrigen(codPedido, nuevoOrigen, e) {
         </section>
     <?php endif; ?>
 </div>
+</div>
 
 <!-- Bootstrap 5 JS Bundle (includes Popper, local via Composer assets) -->
 <script src="<?= BASE_URL ?>/assets/js/app-ui.js"></script>
 </body>
 </html>
+
 
 
 
