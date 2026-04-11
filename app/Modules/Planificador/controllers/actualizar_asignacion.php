@@ -17,8 +17,6 @@ require_once BASE_PATH . '/bootstrap/auth.php';
 
 require_once BASE_PATH . '/app/Modules/Planificador/services/planificador_service.php';
 
-$conn = db();
-
 if (!isset($_POST['cod_cliente'], $_POST['cod_zona'], $_POST['cod_seccion'], $_POST['frecuencia_visita'], $_POST['tiempo_promedio_visita'], $_POST['preferencia_horaria'])) {
     appExitTextError('Error: Datos insuficientes para actualizar la asignacion.', 400);
 }
@@ -38,28 +36,21 @@ if (empty($frecuencia_visita)) {
     appExitTextError('Error: Datos invalidos para actualizar la asignacion.', 400);
 }
 
-$query = "
-    UPDATE cmf_comerciales_clientes_zona
-    SET
-        zona_secundaria = ?,
-        frecuencia_visita = ?,
-        tiempo_promedio_visita = ?,
-        preferencia_horaria = ?,
-        observaciones = ?
-    WHERE cod_cliente = ?
-    AND zona_principal = ?
-    AND cod_seccion " . ($cod_seccion !== null ? "= ?" : "IS NULL");
-
-$params = [$zona_secundaria, $frecuencia_visita, $tiempo_promedio_visita, $preferencia_horaria, $observaciones, $cod_cliente, $cod_zona];
-if ($cod_seccion !== null) {
-    $params[] = $cod_seccion;
-}
-
-$stmt = odbc_prepare($conn, $query);
-$resultado = $stmt ? odbc_execute($stmt, $params) : false;
+$errorMessage = null;
+$resultado = actualizarAsignacion(
+    $cod_cliente,
+    $cod_zona,
+    $cod_seccion,
+    $zona_secundaria,
+    $tiempo_promedio_visita,
+    $preferencia_horaria,
+    $frecuencia_visita,
+    $observaciones,
+    $errorMessage
+);
 
 if (!$resultado) {
-    appExitTextError('No se pudo actualizar la asignacion.', 500, 'actualizar_asignacion', odbc_errormsg($conn));
+    appExitTextError('No se pudo actualizar la asignacion.', 500, 'actualizar_asignacion', $errorMessage);
 }
 
 header("Location: zonas_clientes.php?cod_zona=$cod_zona");

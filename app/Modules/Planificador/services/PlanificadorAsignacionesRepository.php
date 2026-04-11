@@ -90,36 +90,51 @@ if (!function_exists('planificadorRepoObtenerAsignacion')) {
 }
 
 if (!function_exists('planificadorRepoActualizarAsignacion')) {
-    function planificadorRepoActualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones): bool
+    function planificadorRepoActualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones, ?string &$errorMessage = null): bool
     {
         $conn = db();
 
         $cod_cliente = intval($cod_cliente);
         $cod_zona = intval($cod_zona);
-        $condicionCodSeccion = is_null($cod_seccion) ? 'IS NULL' : '= ' . intval($cod_seccion);
-        $zona_secundaria = is_null($zona_secundaria) ? 'NULL' : intval($zona_secundaria);
-        $tiempo_promedio_visita = is_null($tiempo_promedio_visita) ? 'NULL' : floatval($tiempo_promedio_visita);
-        $preferencia_horaria = is_null($preferencia_horaria) ? 'NULL' : "'" . addslashes($preferencia_horaria) . "'";
-        $frecuencia_visita = is_null($frecuencia_visita) ? 'NULL' : "'" . addslashes($frecuencia_visita) . "'";
-        $observaciones = is_null($observaciones) ? 'NULL' : "'" . addslashes($observaciones) . "'";
+        $cod_seccion = is_null($cod_seccion) ? null : intval($cod_seccion);
+        $zona_secundaria = is_null($zona_secundaria) ? null : intval($zona_secundaria);
+        $tiempo_promedio_visita = is_null($tiempo_promedio_visita) ? null : floatval($tiempo_promedio_visita);
+        $preferencia_horaria = is_null($preferencia_horaria) ? null : (string)$preferencia_horaria;
+        $frecuencia_visita = is_null($frecuencia_visita) ? null : (string)$frecuencia_visita;
+        $observaciones = is_null($observaciones) ? null : (string)$observaciones;
 
         $query = "
             UPDATE cmf_comerciales_clientes_zona
             SET
-                zona_secundaria = $zona_secundaria,
-                tiempo_promedio_visita = $tiempo_promedio_visita,
-                preferencia_horaria = $preferencia_horaria,
-                frecuencia_visita = $frecuencia_visita,
-                observaciones = $observaciones
+                zona_secundaria = ?,
+                tiempo_promedio_visita = ?,
+                preferencia_horaria = ?,
+                frecuencia_visita = ?,
+                observaciones = ?
             WHERE
-                cod_cliente = $cod_cliente
-                AND zona_principal = $cod_zona
-                AND cod_seccion $condicionCodSeccion
+                cod_cliente = ?
+                AND zona_principal = ?
+                AND cod_seccion " . ($cod_seccion === null ? 'IS NULL' : '= ?') . "
         ";
 
-        $resultado = odbc_exec($conn, $query);
+        $params = [
+            $zona_secundaria,
+            $tiempo_promedio_visita,
+            $preferencia_horaria,
+            $frecuencia_visita,
+            $observaciones,
+            $cod_cliente,
+            $cod_zona,
+        ];
+        if ($cod_seccion !== null) {
+            $params[] = $cod_seccion;
+        }
+
+        $stmt = odbc_prepare($conn, $query);
+        $resultado = $stmt ? odbc_execute($stmt, $params) : false;
         if (!$resultado) {
-            error_log('Error al actualizar la asignación: ' . odbc_errormsg($conn));
+            $errorMessage = odbc_errormsg($conn);
+            error_log('Error al actualizar la asignacion: ' . $errorMessage);
             return false;
         }
 

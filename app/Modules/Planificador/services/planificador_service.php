@@ -264,8 +264,8 @@ function obtenerAsignacion($cod_cliente, $cod_zona, $cod_seccion = null) {
  * @return bool True si la actualizaciÃ³n fue exitosa, false en caso contrario.
  */
 
-function actualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones) {
-    return planificadorRepoActualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones);
+function actualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones, ?string &$errorMessage = null) {
+    return planificadorRepoActualizarAsignacion($cod_cliente, $cod_zona, $cod_seccion, $zona_secundaria, $tiempo_promedio_visita, $preferencia_horaria, $frecuencia_visita, $observaciones, $errorMessage);
 }
 
 function seccionDisponibleParaAsignacion($cod_cliente, $cod_seccion): ?bool {
