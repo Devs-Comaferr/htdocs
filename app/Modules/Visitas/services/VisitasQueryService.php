@@ -16,6 +16,95 @@ function visitasServicePrepareExecute($conn, string $sql, array $params = [])
     return $stmt;
 }
 
+function obtenerDatosVisitaPedido(int $codigoVendedor, string $fechaMinima = '2025-01-01'): array
+{
+    $conn = db();
+
+    $sqlPedidos = "
+        SELECT
+            h.tipo_venta,
+            h.cod_empresa,
+            h.cod_caja,
+            h.cod_venta,
+            h.cod_cliente,
+            h.cod_seccion,
+            c.nombre_comercial,
+            h.nombre_seccion,
+            h.fecha_venta,
+            h.hora_venta,
+            h.importe,
+            a.observacion_interna,
+            h.cod_pedido_web,
+            h.cod_vendedor,
+            h.nombre_vendedor,
+            h.cod_comisionista,
+            cazc.tiempo_promedio_visita
+        FROM hist_ventas_cabecera h
+        JOIN clientes c ON h.cod_cliente = c.cod_cliente
+        LEFT JOIN anexo_ventas_cabecera a ON h.cod_anexo = a.cod_anexo
+        LEFT JOIN cmf_comerciales_visitas_pedidos vp ON h.cod_venta = vp.cod_venta
+        LEFT JOIN cmf_comerciales_clientes_zona cazc
+            ON h.cod_cliente = cazc.cod_cliente AND h.cod_seccion = cazc.cod_seccion
+        WHERE vp.cod_venta IS NULL
+          AND h.cod_comisionista = ?
+          AND h.tipo_venta = 1
+          AND h.fecha_venta >= ?
+        ORDER BY
+            h.fecha_venta ASC,
+            h.hora_venta ASC
+    ";
+
+    $stmtPedidos = visitasServicePrepareExecute($conn, $sqlPedidos, [$codigoVendedor, $fechaMinima]);
+    if (!$stmtPedidos) {
+        error_log('Error al ejecutar la consulta de pedidos: ' . (odbc_errormsg($conn) ?: odbc_errormsg()));
+        throw new RuntimeException('Error interno');
+    }
+
+    $pedidos = [];
+    $codVentas = [];
+
+    while ($row = odbc_fetch_array($stmtPedidos)) {
+        $row['tiempo_promedio_min'] = empty($row['tiempo_promedio_visita'])
+            ? 60
+            : floatval($row['tiempo_promedio_visita']) * 60;
+
+        $pedidos[] = $row;
+        $codVentas[] = (int)($row['cod_venta'] ?? 0);
+    }
+
+    odbc_free_result($stmtPedidos);
+
+    $numeroLineasMap = [];
+    if (count($codVentas) > 0) {
+        $codVentasSql = implode(',', array_map('intval', $codVentas));
+
+        $sqlLineas = "
+            SELECT cod_venta, COUNT(*) AS numero_lineas
+            FROM hist_ventas_linea
+            WHERE tipo_venta = 1
+              AND cod_venta IN ($codVentasSql)
+            GROUP BY cod_venta
+        ";
+
+        $resLineas = odbc_exec($conn, $sqlLineas);
+        if (!$resLineas) {
+            error_log('Error al ejecutar la consulta de lineas: ' . (odbc_errormsg($conn) ?: odbc_errormsg()));
+            throw new RuntimeException('Error interno');
+        }
+
+        while ($row = odbc_fetch_array($resLineas)) {
+            $numeroLineasMap[$row['cod_venta']] = $row['numero_lineas'];
+        }
+
+        odbc_free_result($resLineas);
+    }
+
+    return [
+        'pedidos' => $pedidos,
+        'numero_lineas_map' => $numeroLineasMap,
+    ];
+}
+
 function obtenerDetalleVisitaPorId(int $id_visita): ?array
 {
     $conn = db();
